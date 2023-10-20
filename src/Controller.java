@@ -55,9 +55,7 @@ public class Controller<T, R> {
 			return ;
 		}
 		for(String key : actions.keySet())
-		{
 			System.out.println(key);
-		}
 	}
 
 	public R InvokeAction(String id, T args) throws Exception
@@ -72,6 +70,24 @@ public class Controller<T, R> {
 		}
 		action = actions.get(id);
 		return (action.apply(args));
+	}
+
+	public List<R> InvokeAction(String id, List<T> args) throws Exception
+	{
+		Function<T, R>	action;
+		List<R> result;
+
+		if ( !MapHasAction(id) )
+		{
+			//error, we dont have this action in our map
+			System.out.println("Error");
+			return (null);
+		}
+		result = new LinkedList<R>();
+		action = actions.get(id);
+		for (T element : args)
+			result.add(action.apply(element));
+		return (result);
 	}
 
 	public void RemoveAction(String id)
