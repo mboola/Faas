@@ -2,30 +2,38 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
-public class Controller<T, R> {
-	private List<Invoker> invokers = new LinkedList<Invoker>();
-	private Map<String, Function<T, R>> actions = new HashMap<String, Function<T, R>>();
+public class Controller {
+	private List<Invoker> invokers;
+	private Map<String, Object> actions;
+
+	private ExecutorService executor 
+      = Executors.newFixedThreadPool(3);
     
 	public static Controller instantiate()
 	{
 		if (unicInstance == null)
-			unicInstance = new Controller<>();
+			unicInstance = new Controller();
 		return (unicInstance);
 	}
 	protected Controller() {
+		invokers = new LinkedList<Invoker>();
+		actions = new HashMap<String, Object>();
 	}
 	private static Controller unicInstance = null;
 
 	/* Here we will call a function from the proxy */
-	private String GetId(Action<T, R> action)
+	private String GetId(Action<Object, Object> action)
 	{
 		return ("hola:)");
 	}
 
 	/* Used to search if we already have this action in our map */
-	private boolean MapHasAction(String id)
+	private boolean hasMapAction(String id)
 	{
 		if ( actions.isEmpty() )
 			return (false);
@@ -34,12 +42,12 @@ public class Controller<T, R> {
 		return (true);
 	}
 
-	public void RegisterAction(String id, Function<T, R> f)
+	public void registerAction(String id, Object f)
 	{
 		//String	id;
 
 		//id = GetId(action);
-		if ( !MapHasAction(id) )
+		if ( !hasMapAction(id) )
 		{
 			actions.put(id, f);
 			return ;
@@ -47,7 +55,7 @@ public class Controller<T, R> {
 		//throw error. already exists
 	}
 
-	public void	ListActions()
+	public void	listActions()
 	{
 		if ( actions.isEmpty())
 		{
@@ -58,41 +66,51 @@ public class Controller<T, R> {
 			System.out.println(key);
 	}
 
-	public R InvokeAction(String id, T args) throws Exception
+	public <T, R> R invokeAction(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
 
-		if ( !MapHasAction(id) )
+		if ( !hasMapAction(id) )
 		{
 			//error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
-		action = actions.get(id);
+		action = (Function<T, R>)actions.get(id);
 		return (action.apply(args));
 	}
 
-	public List<R> InvokeAction(String id, List<T> args) throws Exception
+	public <T, R> List<R> invokeListActions(String id, List<T> args) throws Exception
 	{
 		Function<T, R>	action;
-		List<R> result;
+		List<R> 		result;
 
-		if ( !MapHasAction(id) )
+		if ( !hasMapAction(id) )
 		{
 			//error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
 		result = new LinkedList<R>();
-		action = actions.get(id);
+		action = (Function<T, R>)actions.get(id);
 		for (T element : args)
 			result.add(action.apply(element));
 		return (result);
 	}
 
-	public void RemoveAction(String id)
+	public <T, R> Future<R> invokeAsyncAction(String id, T args)
 	{
-		if ( !MapHasAction(id) )
+		Function<T, R>	action;
+
+		action = (Function<T, R>)actions.get(id);
+		return executor.submit( () -> {
+			return (action.apply(args));
+		});
+	}
+
+	public void removeAction(String id)
+	{
+		if ( !hasMapAction(id) )
 		{
 			//error, we dont have this action in our map
 			return ;
