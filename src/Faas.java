@@ -11,8 +11,11 @@ public class Faas {
         Controller		controller;
 		Integer			result;
 		List<Object>	resultList;
+		Invoker			invoker1;
 
 		controller = Controller.instantiate();
+		invoker1 = new Invoker(3);
+		controller.registerInvoker(invoker1);
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		controller.registerAction("test", f);
 
@@ -49,6 +52,7 @@ public class Faas {
 				throw new RuntimeException(e);
 			}
 		};
+
 
 		controller.registerAction("sleepAction", sleep);
 		Future<String> fut1 = controller.invokeAsyncAction("sleepAction", 5);

@@ -2,8 +2,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
@@ -11,9 +9,6 @@ public class Controller {
 	private List<Invoker> invokers;
 	private Map<String, Object> actions;
 
-	private ExecutorService executor 
-      = Executors.newFixedThreadPool(3);
-    
 	public static Controller instantiate()
 	{
 		if (unicInstance == null)
@@ -27,9 +22,22 @@ public class Controller {
 	private static Controller unicInstance = null;
 
 	/* Here we will call a function from the proxy */
-	private String GetId(Action<Object, Object> action)
+	private String GetId(Function<Object, Object> action)
 	{
-		return ("hola:)");
+		//TODO: implement this
+		return (action.toString());
+	}
+
+	public void registerInvoker(Invoker invoker)
+	{
+		//TODO: if invoker is already at list throw error
+		invokers.add(invoker);
+	}
+
+	public void deleteInvoker(Invoker invoker)
+	{
+		//TODO: if invoker is not in the list throw error
+		invokers.remove(invoker);
 	}
 
 	/* Used to search if we already have this action in our map */
@@ -42,6 +50,14 @@ public class Controller {
 		return (true);
 	}
 
+	private Invoker selectInvoker()
+	{
+		Invoker invoker;
+
+		invoker = invokers.get(0);
+		return (invoker);
+	}
+
 	public void registerAction(String id, Object f)
 	{
 		//String	id;
@@ -52,16 +68,14 @@ public class Controller {
 			actions.put(id, f);
 			return ;
 		}
-		//throw error. already exists
+		//TODO: throw error. already exists
 	}
 
 	public void	listActions()
 	{
+		//TODO: is this all the info I wanna show?
 		if ( actions.isEmpty())
-		{
-			//nothing to show
 			return ;
-		}
 		for(String key : actions.keySet())
 			System.out.println(key);
 	}
@@ -69,15 +83,17 @@ public class Controller {
 	public <T, R> R invokeAction(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
+		Invoker			invoker;
 
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
 		action = (Function<T, R>)actions.get(id);
-		return (action.apply(args));
+		invoker = selectInvoker();
+		return (invoker.invoke(action, args));
 	}
 
 	public <T, R> List<R> invokeListActions(String id, List<T> args) throws Exception
@@ -87,7 +103,7 @@ public class Controller {
 
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
@@ -98,21 +114,21 @@ public class Controller {
 		return (result);
 	}
 
-	public <T, R> Future<R> invokeAsyncAction(String id, T args)
+	public <T, R> Future<R> invokeAsyncAction(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
+		Invoker			invoker;
 
 		action = (Function<T, R>)actions.get(id);
-		return executor.submit( () -> {
-			return (action.apply(args));
-		});
+		invoker = selectInvoker();
+		return (invoker.invokeAsync(action, args));
 	}
 
 	public void removeAction(String id)
 	{
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			return ;
 		}
 		actions.remove(id);
