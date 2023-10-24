@@ -19,16 +19,8 @@ public class Invoker {
 		return (action.apply(args));
 	}
 
-	/**
-	 * This function tries to execute the function passed by parameter.
-	 * If there is no space in the pool, it waits and then it gets invoked.
-	 * @param <T>
-	 * @param <R>
-	 * @param action
-	 * @param args
-	 * @return
-	 * @throws Exception
-	 */
+	// This function tries to execute the function passed by parameter.
+	// If there is no space in the pool, it waits and then it gets invoked.
 	public <T, R> Future<R> invokeAsync(Function<T, R> action, T args) throws Exception
 	{
 		return executor.submit( 

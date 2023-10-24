@@ -50,15 +50,6 @@ public class Controller {
 		return (true);
 	}
 
-	//this will be police manager
-	private Invoker selectInvoker()
-	{
-		Invoker invoker;
-
-		invoker = invokers.get(0);
-		return (invoker);
-	}
-
 	public void registerAction(String id, Object f)
 	{
 		//String	id;
@@ -81,10 +72,24 @@ public class Controller {
 			System.out.println(key);
 	}
 
+	//this will be police manager
+	private Invoker selectInvoker()
+	{
+		Invoker invoker;
+
+		invoker = invokers.get(0);
+		//policeManager.getInvoker(invokers);
+		return (invoker);
+	}
+
+	private <T, R> R getResult(Function<T, R> action, T args) throws Exception
+	{
+		return (selectInvoker().invoke(action, args));
+	}
+
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
-		Invoker			invoker;
 
 		if ( !hasMapAction(id) )
 		{
@@ -93,15 +98,13 @@ public class Controller {
 			return (null);
 		}
 		action = (Function<T, R>)actions.get(id);
-		invoker = selectInvoker();
-		return (invoker.invoke(action, args));
+		return (getResult(action, args));
 	}
 
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
 	{
 		Function<T, R>	action;
 		List<R> 		result;
-		Invoker			invoker;
 
 		if ( !hasMapAction(id) )
 		{
@@ -112,21 +115,16 @@ public class Controller {
 		result = new LinkedList<R>();
 		action = (Function<T, R>)actions.get(id);
 		for (T element : args)
-		{
-			invoker = selectInvoker();
-			result.add(invoker.invoke(action, element));
-		}
+			result.add(getResult(action, element));
 		return (result);
 	}
 
 	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
-		Invoker			invoker;
 
 		action = (Function<T, R>)actions.get(id);
-		invoker = selectInvoker();
-		return (invoker.invokeAsync(action, args));
+		return (selectInvoker().invokeAsync(action, args));
 	}
 
 	public void removeAction(String id)
