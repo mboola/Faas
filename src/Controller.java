@@ -50,6 +50,7 @@ public class Controller {
 		return (true);
 	}
 
+	//this will be police manager
 	private Invoker selectInvoker()
 	{
 		Invoker invoker;
@@ -80,7 +81,7 @@ public class Controller {
 			System.out.println(key);
 	}
 
-	public <T, R> R invokeAction(String id, T args) throws Exception
+	public <T, R> R invoke(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
 		Invoker			invoker;
@@ -96,10 +97,11 @@ public class Controller {
 		return (invoker.invoke(action, args));
 	}
 
-	public <T, R> List<R> invokeListActions(String id, List<T> args) throws Exception
+	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
 	{
 		Function<T, R>	action;
 		List<R> 		result;
+		Invoker			invoker;
 
 		if ( !hasMapAction(id) )
 		{
@@ -110,11 +112,14 @@ public class Controller {
 		result = new LinkedList<R>();
 		action = (Function<T, R>)actions.get(id);
 		for (T element : args)
-			result.add(action.apply(element));
+		{
+			invoker = selectInvoker();
+			result.add(invoker.invoke(action, element));
+		}
 		return (result);
 	}
 
-	public <T, R> Future<R> invokeAsyncAction(String id, T args) throws Exception
+	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
 		Function<T, R>	action;
 		Invoker			invoker;
@@ -132,5 +137,12 @@ public class Controller {
 			return ;
 		}
 		actions.remove(id);
+	}
+
+	public void shutdownAllInvokers()
+	{
+		for (Invoker invoker:invokers) {
+			invoker.shutdownInvoker();
+		}
 	}
 }
