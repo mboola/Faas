@@ -11,10 +11,13 @@ public class Faas {
 		Integer			result;
 		List<Object>	resultList;
 		Invoker			invoker1;
+		PolicyManager	policyManager;
 
 		controller = Controller.instantiate();
 		invoker1 = new Invoker(3);
 		controller.registerInvoker(invoker1);
+		policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub", f1, 1);
 

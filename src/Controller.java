@@ -6,8 +6,9 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public class Controller {
-	private List<Invoker> invokers;
-	private Map<String, Action<Integer, Object>> actions;
+	private Map<String, Action<Integer, Object>>	actions;
+	private List<Invoker>							invokers;
+	private PolicyManager							policyManager;
 
 	public static Controller instantiate()
 	{
@@ -72,15 +73,15 @@ public class Controller {
 		for(String key : actions.keySet())
 			System.out.println(key);
 	}
+	
+	public void	addPolicyManager(PolicyManager policyManager)
+	{
+		this.policyManager = policyManager;
+	}
 
-	//this will be police manager
 	private Invoker selectInvoker(int ram)
 	{
-		Invoker invoker;
-
-		invoker = invokers.get(0);
-		//policeManager.getInvoker(invokers);
-		return (invoker);
+		return (policyManager.getInvoker(invokers, ram));
 	}
 
 	private <T, R> R getResult(Action<Integer, Object> action, T args) throws Exception
