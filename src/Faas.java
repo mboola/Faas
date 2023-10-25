@@ -16,7 +16,7 @@ public class Faas {
 		invoker1 = new Invoker(3);
 		controller.registerInvoker(invoker1);
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
-		controller.registerAction("sub", f1);
+		controller.registerAction("sub", f1, 1);
 
 		result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
 		System.out.println(result);
@@ -43,7 +43,7 @@ public class Faas {
 			}
 		};
 
-		controller.registerAction("sleepAction", sleep);
+		controller.registerAction("sleepAction", sleep, 1);
 		long currentTimeMillis = System.currentTimeMillis();
 		Future<String> fut1 = controller.invoke_async("sleepAction", 5);
 		Future<String> fut2 = controller.invoke_async("sleepAction", 5);

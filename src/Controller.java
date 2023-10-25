@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 public class Controller {
 	private List<Invoker> invokers;
-	private Map<String, Object> actions;
+	private Map<String, Action<Integer, Object>> actions;
 
 	public static Controller instantiate()
 	{
@@ -17,7 +17,7 @@ public class Controller {
 	}
 	protected Controller() {
 		invokers = new LinkedList<Invoker>();
-		actions = new HashMap<String, Object>();
+		actions = new HashMap<String, Action<Integer, Object>>();
 	}
 	private static Controller unicInstance = null;
 
@@ -50,14 +50,15 @@ public class Controller {
 		return (true);
 	}
 
-	public void registerAction(String id, Object f)
+	//used the register an Action in the controller. Ram must be inputed in MegaBytes
+	public void registerAction(String id, Object f, int ram)
 	{
 		//String	id;
 
 		//id = GetId(action);
 		if ( !hasMapAction(id) )
 		{
-			actions.put(id, f);
+			actions.put(id, new Action<Integer, Object>(ram, f));
 			return ;
 		}
 		//TODO: throw error. already exists
@@ -73,7 +74,7 @@ public class Controller {
 	}
 
 	//this will be police manager
-	private Invoker selectInvoker()
+	private Invoker selectInvoker(int ram)
 	{
 		Invoker invoker;
 
@@ -82,14 +83,14 @@ public class Controller {
 		return (invoker);
 	}
 
-	private <T, R> R getResult(Function<T, R> action, T args) throws Exception
+	private <T, R> R getResult(Action<Integer, Object> action, T args) throws Exception
 	{
-		return (selectInvoker().invoke(action, args));
+		return (selectInvoker(action.getRam()).invoke(action, args));
 	}
 
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
-		Function<T, R>	action;
+		Action<Integer, Object>	action;
 
 		if ( !hasMapAction(id) )
 		{
@@ -97,14 +98,14 @@ public class Controller {
 			System.out.println("Error");
 			return (null);
 		}
-		action = (Function<T, R>)actions.get(id);
+		action = actions.get(id);
 		return (getResult(action, args));
 	}
 
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
 	{
-		Function<T, R>	action;
-		List<R> 		result;
+		Action<Integer, Object>	action;
+		List<R> 				result;
 
 		if ( !hasMapAction(id) )
 		{
@@ -113,7 +114,7 @@ public class Controller {
 			return (null);
 		}
 		result = new LinkedList<R>();
-		action = (Function<T, R>)actions.get(id);
+		action = actions.get(id);
 		for (T element : args)
 			result.add(getResult(action, element));
 		return (result);
@@ -121,10 +122,10 @@ public class Controller {
 
 	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
-		Function<T, R>	action;
+		Action<Integer, Object>	action;
 
-		action = (Function<T, R>)actions.get(id);
-		return (selectInvoker().invokeAsync(action, args));
+		action = actions.get(id);
+		return (selectInvoker(action.getRam()).invokeAsync(action, args));
 	}
 
 	public void removeAction(String id)
