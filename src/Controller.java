@@ -2,18 +2,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public class Controller {
 	private List<Invoker> invokers;
-	private Map<String, Object> actions;
+	private Map<String, Action<Integer, Object>> actions;
 
-	private ExecutorService executor 
-      = Executors.newFixedThreadPool(3);
-    
 	public static Controller instantiate()
 	{
 		if (unicInstance == null)
@@ -22,14 +17,27 @@ public class Controller {
 	}
 	protected Controller() {
 		invokers = new LinkedList<Invoker>();
-		actions = new HashMap<String, Object>();
+		actions = new HashMap<String, Action<Integer, Object>>();
 	}
 	private static Controller unicInstance = null;
 
 	/* Here we will call a function from the proxy */
-	private String GetId(Action<Object, Object> action)
+	private String GetId(Function<Object, Object> action)
 	{
-		return ("hola:)");
+		//TODO: implement this
+		return (action.toString());
+	}
+
+	public void registerInvoker(Invoker invoker)
+	{
+		//TODO: if invoker is already at list throw error
+		invokers.add(invoker);
+	}
+
+	public void deleteInvoker(Invoker invoker)
+	{
+		//TODO: if invoker is not in the list throw error
+		invokers.remove(invoker);
 	}
 
 	/* Used to search if we already have this action in our map */
@@ -42,79 +50,98 @@ public class Controller {
 		return (true);
 	}
 
-	public void registerAction(String id, Object f)
+	//used the register an Action in the controller. Ram must be inputed in MegaBytes
+	public void registerAction(String id, Object f, int ram)
 	{
 		//String	id;
 
 		//id = GetId(action);
 		if ( !hasMapAction(id) )
 		{
-			actions.put(id, f);
+			actions.put(id, new Action<Integer, Object>(ram, f));
 			return ;
 		}
-		//throw error. already exists
+		//TODO: throw error. already exists
 	}
 
 	public void	listActions()
 	{
+		//TODO: is this all the info I wanna show?
 		if ( actions.isEmpty())
-		{
-			//nothing to show
 			return ;
-		}
 		for(String key : actions.keySet())
 			System.out.println(key);
 	}
 
-	public <T, R> R invokeAction(String id, T args) throws Exception
+	//this will be police manager
+	private Invoker selectInvoker(int ram)
 	{
-		Function<T, R>	action;
+		Invoker invoker;
+
+		invoker = invokers.get(0);
+		//policeManager.getInvoker(invokers);
+		return (invoker);
+	}
+
+	private <T, R> R getResult(Action<Integer, Object> action, T args) throws Exception
+	{
+		return (selectInvoker(action.getRam()).invoke(action, args));
+	}
+
+	public <T, R> R invoke(String id, T args) throws Exception
+	{
+		Action<Integer, Object>	action;
 
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
-		action = (Function<T, R>)actions.get(id);
-		return (action.apply(args));
+		action = actions.get(id);
+		return (getResult(action, args));
 	}
 
-	public <T, R> List<R> invokeListActions(String id, List<T> args) throws Exception
+	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
 	{
-		Function<T, R>	action;
-		List<R> 		result;
+		Action<Integer, Object>	action;
+		List<R> 				result;
 
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			System.out.println("Error");
 			return (null);
 		}
 		result = new LinkedList<R>();
-		action = (Function<T, R>)actions.get(id);
+		action = actions.get(id);
 		for (T element : args)
-			result.add(action.apply(element));
+			result.add(getResult(action, element));
 		return (result);
 	}
 
-	public <T, R> Future<R> invokeAsyncAction(String id, T args)
+	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
-		Function<T, R>	action;
+		Action<Integer, Object>	action;
 
-		action = (Function<T, R>)actions.get(id);
-		return executor.submit( () -> {
-			return (action.apply(args));
-		});
+		action = actions.get(id);
+		return (selectInvoker(action.getRam()).invokeAsync(action, args));
 	}
 
 	public void removeAction(String id)
 	{
 		if ( !hasMapAction(id) )
 		{
-			//error, we dont have this action in our map
+			//TODO: throw error, we dont have this action in our map
 			return ;
 		}
 		actions.remove(id);
+	}
+
+	public void shutdownAllInvokers()
+	{
+		for (Invoker invoker:invokers) {
+			invoker.shutdownInvoker();
+		}
 	}
 }
