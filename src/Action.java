@@ -1,5 +1,20 @@
-import java.util.function.Function;
+public class Action<Integer, Object> {
 
-public interface Action<T, R> extends Function<T, R> {
-    R run(T arg) throws Exception;
+	private int		ram;
+	private Object	function;
+
+	public Action(int ram, Object function) {
+		this.ram = ram;
+		this.function = function;
+	}
+
+	public int getRam()
+	{
+		return (this.ram);
+	}
+
+	public Object getFunction()
+	{
+		return (this.function);
+	}
 }

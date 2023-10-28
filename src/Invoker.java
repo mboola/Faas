@@ -5,12 +5,24 @@ import java.util.function.Function;
 
 public class Invoker {
 	private static final int MAX_THREADS = 8;
-	private int ram;
+	private long	maxRam;
+	private long	ramUsed;
 	private ExecutorService executor;
 
-	public Invoker(int ram) {
-		this.ram = ram;
+	public Invoker(long ram) {
+		this.maxRam = ram;
+		ramUsed = 0;
 		executor = Executors.newFixedThreadPool(MAX_THREADS);
+	}
+
+	public long	getAvaiableRam()
+	{
+		return (maxRam - ramUsed);
+	}
+
+	public long	getMaxRam()
+	{
+		return (maxRam);
 	}
 
 	public <T, R> R invoke(Action<Integer, Object> action, T args) throws Exception

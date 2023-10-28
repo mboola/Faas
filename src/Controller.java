@@ -10,8 +10,7 @@ public class Controller {
 	private List<Invoker>							invokers;
 	private PolicyManager							policyManager;
 
-	public static Controller instantiate()
-	{
+	public static Controller instantiate() {
 		if (unicInstance == null)
 			unicInstance = new Controller();
 		return (unicInstance);
@@ -86,7 +85,13 @@ public class Controller {
 
 	private <T, R> R getResult(Action<Integer, Object> action, T args) throws Exception
 	{
-		return (selectInvoker(action.getRam()).invoke(action, args));
+		Invoker	invoker;
+
+		invoker = selectInvoker(action.getRam());
+		if (invoker == null)
+			throw new NoInvokerAvaiable("No Invoker Avaiable with " + action.getRam() + " RAM.");
+		else
+			return (selectInvoker(action.getRam()).invoke(action, args));
 	}
 
 	public <T, R> R invoke(String id, T args) throws Exception
