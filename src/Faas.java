@@ -14,15 +14,20 @@ public class Faas {
 		PolicyManager	policyManager;
 
 		controller = Controller.instantiate();
-		invoker1 = new Invoker(1);
+		invoker1 = new Invoker(2);
 		controller.registerInvoker(invoker1);
 		policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub", f1, 2);
-
-		result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
-		System.out.println(result);
+		
+		try {
+			result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
+			System.out.println(result);
+		}
+		catch (NoInvokerAvaiable e1) {
+			System.out.println(e1.getMessage());
+		}
 		controller.listActions();
 
 		List<Object> input = Arrays.asList(
@@ -31,9 +36,14 @@ public class Faas {
 			Map.of("x", 8, "y", 8)
 		);
 
-		resultList = controller.invoke("sub", input);
-		for (Object res : resultList) {
-			System.out.println((Integer)res);
+		try {
+			resultList = controller.invoke("sub", input);
+			for (Object res : resultList) {
+				System.out.println((Integer)res);
+			}
+		}
+		catch (NoInvokerAvaiable e1) {
+			System.out.println(e1.getMessage());
 		}
 
 		//test async
