@@ -1,5 +1,6 @@
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -10,12 +11,14 @@ public class Faas {
         Controller		controller;
 		Integer			result;
 		List<Object>	resultList;
-		Invoker			invoker1;
+		Invoker			invoker1, invoker2;
 		PolicyManager	policyManager;
 
 		controller = Controller.instantiate();
-		invoker1 = new Invoker(2);
+		invoker1 = new Invoker(1);
+		invoker2 = new Invoker(1);
 		controller.registerInvoker(invoker1);
+		controller.registerInvoker(invoker2);
 		policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
@@ -57,15 +60,28 @@ public class Faas {
 		};
 
 		controller.registerAction("sleepAction", sleep, 1);
-		long currentTimeMillis = System.currentTimeMillis();
-		Future<String> fut1 = controller.invoke_async("sleepAction", 5);
-		Future<String> fut2 = controller.invoke_async("sleepAction", 5);
-		Future<String> fut3 = controller.invoke_async("sleepAction", 5);
-		String s1 = fut1.get();
-		String s2 = fut2.get();
-		String s3 = fut3.get();
-		long finalimeMillis = System.currentTimeMillis();
-		System.out.println(s1 + s2 + s3 + " Seconds:" + (finalimeMillis - currentTimeMillis));
+		try {
+			long currentTimeMillis = System.currentTimeMillis();
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 6; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 5);
+				resList.add(fut);
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+			for (String str : stringsResult) {
+				System.out.println(str);
+			}
+			long finalimeMillis = System.currentTimeMillis();
+			System.out.println(" Seconds:" + (finalimeMillis - currentTimeMillis));
+		}
+		catch (NoInvokerAvaiable e1) {
+			System.out.println(e1.getMessage());
+		}
 
 		controller.shutdownAllInvokers();
     }

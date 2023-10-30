@@ -7,6 +7,11 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class Invoker {
+	//TODO: delete this!! used to debug whats happening. Not final, must delete:
+	private static int	numInvokers = 0;
+	private String 		id;
+
+	//all good here
 	private static final int MAX_THREADS = 8;
 	private long			maxRam;
 	private long			ramUsed;
@@ -23,6 +28,10 @@ public class Invoker {
 		ramUsed = 0;
 
 		executor = Executors.newFixedThreadPool(MAX_THREADS);
+
+		//TODO: delete this:
+		id = ((Integer)numInvokers).toString();
+		numInvokers++;
 	}
 
 	public long	getAvaiableRam()
@@ -56,7 +65,7 @@ public class Invoker {
 
 			asyncLock.lock();
 			try {
-				System.out.println("Ram used: " + ramUsed + " of " + maxRam);
+				System.out.println("Ram used: " + ramUsed + " of " + maxRam + " in invoker " + id);
 				while (getAvaiableRam() - action.getRam() < 0)
 					allRamUsed.await();
 				ramUsed += action.getRam();

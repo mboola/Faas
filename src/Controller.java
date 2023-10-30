@@ -78,7 +78,7 @@ public class Controller {
 		this.policyManager = policyManager;
 	}
 
-	private Invoker selectInvoker(int ram)
+	private Invoker selectInvoker(int ram) throws Exception
 	{
 		return (policyManager.getInvoker(invokers, ram));
 	}
@@ -88,10 +88,7 @@ public class Controller {
 		Invoker	invoker;
 
 		invoker = selectInvoker(action.getRam());
-		if (invoker == null)
-			throw new NoInvokerAvaiable("No Invoker Avaiable with " + action.getRam() + " RAM.");
-		else
-			return (selectInvoker(action.getRam()).invoke(action, args));
+		return (selectInvoker(action.getRam()).invoke(action, args));
 	}
 
 	public <T, R> R invoke(String id, T args) throws Exception

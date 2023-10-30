@@ -2,11 +2,11 @@ import java.util.List;
 
 public class RoundRobin implements PolicyManager{
 
-	private int	lastPosInvoker;
+	private int	lastInvokerAssigned;
 
 	public RoundRobin () {
 		super();
-		lastPosInvoker = 0;
+		lastInvokerAssigned = 0;
 	}
 
 	private int updatePos(int pos, int len)
@@ -17,24 +17,29 @@ public class RoundRobin implements PolicyManager{
 			return (0);
 	}
 
+	//TODO: change this implementation to one more robust!!!!!! what happens if--
+	//TODO: --not all methods used in this invocation have the same time or if --
+	//TODO: --a invoker is removed from the list
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) {
+	public Invoker getInvoker(List<Invoker> invokers, int ram) throws Exception{
 		Invoker invoker;
-		int	firstElement;
+		int	lastInvokerUsed;
 		int	len;
-		
-		firstElement = lastPosInvoker;
+
+		if (invokers.isEmpty())
+			throw new NoInvokerAvaiable("No Invokers in list.");
+		lastInvokerUsed = lastInvokerAssigned;
 		len = invokers.size() - 1;
-		lastPosInvoker = updatePos(lastPosInvoker, len);
-		while (firstElement != lastPosInvoker) {
-			if (invokers.get(lastPosInvoker).getMaxRam() >= ram)
+		lastInvokerAssigned = updatePos(lastInvokerAssigned, len);
+		while (lastInvokerUsed != lastInvokerAssigned) {
+			if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
 				break;
-			lastPosInvoker = updatePos(lastPosInvoker, len);
+			lastInvokerAssigned = updatePos(lastInvokerAssigned, len);
 		}
-		invoker = invokers.get(lastPosInvoker);
+		invoker = invokers.get(lastInvokerAssigned);
 		if (invoker.getMaxRam() >= ram)
 			return (invoker);
-		return (null);
+		throw new NoInvokerAvaiable("No Invoker Avaiable with at least " + ram + " RAM.");
 	}
     
 }
