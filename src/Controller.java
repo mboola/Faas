@@ -6,9 +6,10 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public class Controller {
-	private Map<String, Action<Integer, Object>>	actions;
-	private List<Invoker>							invokers;
-	private PolicyManager							policyManager;
+	private Map<String, Action<Integer, Object>>		actions;
+	private	Map<String, List<Metric<Object, Object>>>	metricsCollected;
+	private List<Invoker>								invokers;
+	private PolicyManager								policyManager;
 
 	public static Controller instantiate() {
 		if (unicInstance == null)
@@ -18,8 +19,29 @@ public class Controller {
 	protected Controller() {
 		invokers = new LinkedList<Invoker>();
 		actions = new HashMap<String, Action<Integer, Object>>();
+		metricsCollected = new HashMap<String, List<Metric<Object, Object>>>();
 	}
 	private static Controller unicInstance = null;
+
+	public <T, R> void addNewMetric(Metric <T, R> metric)
+	{
+		List<Metric<Object, Object>> resultsList;
+
+		resultsList = metricsCollected.get(metric.getId());
+		if ( resultsList == null )
+		{
+			resultsList = new LinkedList<Metric<Object, Object>>();
+			metricsCollected.put(metric.getId(), resultsList);
+		}
+		resultsList.add((Metric<Object, Object>)metric);
+	}
+
+	public void showTime(String id)
+	{
+		for (Metric<Object, Object> metric : metricsCollected.get(id)) {
+			System.out.println("" + metric.getTime());
+		}
+	}
 
 	/* Here we will call a function from the proxy */
 	private String GetId(Function<Object, Object> action)
@@ -83,12 +105,12 @@ public class Controller {
 		return (policyManager.getInvoker(invokers, ram));
 	}
 
-	private <T, R> R getResult(Action<Integer, Object> action, T args) throws Exception
+	private <T, R> R getResult(Action<Integer, Object> action, T args, String id) throws Exception
 	{
 		Invoker	invoker;
 
 		invoker = selectInvoker(action.getRam());
-		return (selectInvoker(action.getRam()).invoke(action, args));
+		return (selectInvoker(action.getRam()).invoke(action, args, id));
 	}
 
 	public <T, R> R invoke(String id, T args) throws Exception
@@ -102,7 +124,7 @@ public class Controller {
 			return (null);
 		}
 		action = actions.get(id);
-		return (getResult(action, args));
+		return (getResult(action, args, id));
 	}
 
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
@@ -119,7 +141,7 @@ public class Controller {
 		result = new LinkedList<R>();
 		action = actions.get(id);
 		for (T element : args)
-			result.add(getResult(action, element));
+			result.add(getResult(action, element, id));
 		return (result);
 	}
 

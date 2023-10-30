@@ -15,8 +15,11 @@ public class Faas {
 		PolicyManager	policyManager;
 
 		controller = Controller.instantiate();
-		invoker1 = new Invoker(1);
-		invoker2 = new Invoker(1);
+		Invoker.addObserver(new TimerObserver());
+		Invoker.setController(controller);
+		
+		invoker1 = new Invoker(2);
+		invoker2 = new Invoker(2);
 		controller.registerInvoker(invoker1);
 		controller.registerInvoker(invoker2);
 		policyManager = new RoundRobin();
@@ -36,7 +39,12 @@ public class Faas {
 		List<Object> input = Arrays.asList(
 			Map.of("x", 2, "y", 3),
 			Map.of("x", 9, "y", 1),
-			Map.of("x", 8, "y", 8)
+			Map.of("x", 8, "y", 8),
+			Map.of("x", 100000000, "y", -10),
+			Map.of("x", 1, "y", 8123),
+			Map.of("x", 2, "y", 4418),
+			Map.of("x", 85, "y", 312348),
+			Map.of("x", 812312312, "y", -4444128)
 		);
 
 		try {
@@ -48,6 +56,9 @@ public class Faas {
 		catch (NoInvokerAvaiable e1) {
 			System.out.println(e1.getMessage());
 		}
+		System.out.println("Start of time.");
+		controller.showTime("sub");
+		System.out.println("End of time.");
 
 		//test async
 		Function<Integer, String> sleep = s -> {
