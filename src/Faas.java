@@ -94,6 +94,8 @@ public class Faas {
 			System.out.println(e1.getMessage());
 		}
 
+		Invoker.printCache();
+
 		controller.shutdownAllInvokers();
     }
 }

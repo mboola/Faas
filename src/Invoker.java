@@ -33,6 +33,16 @@ public class Invoker {
 		throw new NoResultAvaiable("");
 	}
 
+	public static void printCache()
+	{
+		for (String key : Invoker.cacheDecorator.keySet()) {
+			System.out.println("Function: " + key);
+			for (PairValues pair : Invoker.cacheDecorator.get(key)) {
+				System.out.println("Arg: " + pair.getArgs() + ". Ret: " + pair.getResult());
+			}
+		}
+	}
+
 	public static<T, R> void storeResult(String id, T args, R result)
 	{
 		//TODO maybe check if it exists?
@@ -89,15 +99,28 @@ public class Invoker {
 		return (maxRam);
 	}
 
+	private <T, R> Function<T, R> applyDecorators(Function<T, R> function, String id)
+	{
+		Function<T, R>	timerDecorator;
+		Function<T, R>	cacheDecorator;
+
+		cacheDecorator = new CacheDecorator<>(function, id);
+		timerDecorator = new TimerDecorator<>(function);
+
+		return (timerDecorator);
+	}
+
 	public <T, R> R invoke(Action<Integer, Object> action, T args, String id) throws Exception
 	{
 		Function<T, R>	function;
+		Function<T, R>	functionDecorated;
 		R				result;
 		Metric			metric;
 
 		metric = new Metric<T, R>(id, args);
 		function = (Function<T, R>) action.getFunction();
-		result = function.apply(args);
+		functionDecorated = applyDecorators(function, id);
+		result = functionDecorated.apply(args);
 		notifyAllObservers(metric);
 		return (result);
 	}
