@@ -11,10 +11,10 @@ public class TimerDecorator<T, R> extends Decorator<T, R>{
 		long	timeExecution;
 		R		result;
 
-		timeExecution = System.currentTimeMillis();
+		timeExecution = System.nanoTime();
 		result = getFunction().apply(t);
-		timeExecution = System.currentTimeMillis() - timeExecution;
-		System.out.println("Time of execution is " + timeExecution);
+		timeExecution = System.nanoTime() - timeExecution;
+		System.out.println("Time of execution is " + timeExecution + " ns.");
 		return (result);
 	}
 

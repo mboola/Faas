@@ -1,18 +1,11 @@
-public class Metric<T, R> {
+public class Metric<T> {
 	private String	id;
-	private T		args;
-	private long 	timeExecution;
+	private T		dataType;
 
-	public Metric(String id, T args)
+	public Metric(String id, T dataType)
 	{
 		this.id = id;
-		this.args = args;
-		this.timeExecution = System.currentTimeMillis();
-	}
-
-	public void updateTime(long time)
-	{
-		timeExecution = time - timeExecution;
+		this.dataType = dataType;
 	}
 
 	public String getId()
@@ -20,8 +13,13 @@ public class Metric<T, R> {
 		return (id);
 	}
 
-	public long getTime()
+	public T getDataType()
 	{
-		return (timeExecution);
+		return (dataType);
+	}
+
+	public void setDataType(T dataType)
+	{
+		this.dataType = dataType;
 	}
 }

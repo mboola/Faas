@@ -20,6 +20,14 @@ public class Invoker {
 	private static Controller		controller;
 	private static Map<String, List<PairValues>> cacheDecorator = new HashMap<String, List<PairValues>>();
 
+	/**
+	 * Used to search the cache used by the cacheDecorator to see if there is
+	 * a result stored in there
+	 * @param args Data passed as an argument. Used to search result.
+	 * @param id Identifier of the function used to 
+	 * @return 
+	 * @throws NoResultAvaiable
+	 */
 	public static<T, R> R getResult(String id, T args) throws NoResultAvaiable
 	{
 		List<PairValues> list = Invoker.cacheDecorator.get(id);
@@ -105,32 +113,49 @@ public class Invoker {
 		Function<T, R>	cacheDecorator;
 
 		cacheDecorator = new CacheDecorator<>(function, id);
-		timerDecorator = new TimerDecorator<>(function);
+		timerDecorator = new TimerDecorator<>(cacheDecorator);
 
 		return (timerDecorator);
 	}
 
-	public <T, R> R invoke(Action<Integer, Object> action, T args, String id) throws Exception
+	private List<Metric<Object>> initializeAllObservers(String id) 
 	{
-		Function<T, R>	function;
-		Function<T, R>	functionDecorated;
-		R				result;
-		Metric			metric;
+		List<Metric<Object>> metrics = new LinkedList<Metric<Object>>();
 
-		metric = new Metric<T, R>(id, args);
-		function = (Function<T, R>) action.getFunction();
-		functionDecorated = applyDecorators(function, id);
-		result = functionDecorated.apply(args);
-		notifyAllObservers(metric);
-		return (result);
+		for (Observer observer : observers) {
+			metrics.add(observer.initialize(id, Invoker.controller));
+		}
+		return (metrics);
 	}
 
-	private <T, R> void notifyAllObservers(Metric<T, R> metric)
+	private void notifyAllObservers(List<Metric<Object>> metrics)
 	{
+		int	metricIndex = 0;
+
+		//if (metrics.count() != observers.count())
+		//throw error or something
+
 		for (Observer observer : observers) {
-			observer.update(metric);
+			observer.update(metrics.get(metricIndex));
+			metricIndex++;
 		}
-		Invoker.controller.addNewMetric(metric);
+	}
+
+	public <T, R> R invoke(Action<Integer, Object> action, T args, String id) throws Exception
+	{
+		Function<T, R>			function;
+		Function<T, R>			functionDecorated;
+		R						result;
+		List<Metric<Object>>	metricsList;
+
+		metricsList = initializeAllObservers(id);
+		function = (Function<T, R>) action.getFunction();
+
+		functionDecorated = applyDecorators(function, id);
+
+		result = functionDecorated.apply(args);
+		notifyAllObservers(metricsList);
+		return (result);
 	}
 
 	// This function tries to execute the function passed by parameter.

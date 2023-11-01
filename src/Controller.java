@@ -6,10 +6,10 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 public class Controller {
-	private Map<String, Action<Integer, Object>>		actions;
-	private	Map<String, List<Metric<Object, Object>>>	metricsCollected;
-	private List<Invoker>								invokers;
-	private PolicyManager								policyManager;
+	private Map<String, Action<Integer, Object>>	actions;
+	public MetricSet								metrics;
+	private List<Invoker>							invokers;
+	private PolicyManager							policyManager;
 
 	public static Controller instantiate() {
 		if (unicInstance == null)
@@ -19,29 +19,9 @@ public class Controller {
 	protected Controller() {
 		invokers = new LinkedList<Invoker>();
 		actions = new HashMap<String, Action<Integer, Object>>();
-		metricsCollected = new HashMap<String, List<Metric<Object, Object>>>();
+		metrics = new MetricSet();
 	}
 	private static Controller unicInstance = null;
-
-	public <T, R> void addNewMetric(Metric <T, R> metric)
-	{
-		List<Metric<Object, Object>> resultsList;
-
-		resultsList = metricsCollected.get(metric.getId());
-		if ( resultsList == null )
-		{
-			resultsList = new LinkedList<Metric<Object, Object>>();
-			metricsCollected.put(metric.getId(), resultsList);
-		}
-		resultsList.add((Metric<Object, Object>)metric);
-	}
-
-	public void showTime(String id)
-	{
-		for (Metric<Object, Object> metric : metricsCollected.get(id)) {
-			System.out.println("" + metric.getTime());
-		}
-	}
 
 	/* Here we will call a function from the proxy */
 	private String GetId(Function<Object, Object> action)

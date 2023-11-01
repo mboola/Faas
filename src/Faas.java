@@ -57,7 +57,7 @@ public class Faas {
 			System.out.println(e1.getMessage());
 		}
 		System.out.println("Start of time.");
-		controller.showTime("sub");
+		controller.metrics.showTime("sub");
 		System.out.println("End of time.");
 
 		//test async
