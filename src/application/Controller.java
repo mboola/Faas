@@ -81,7 +81,7 @@ public class Controller {
 		this.policyManager = policyManager;
 	}
 
-	private Invoker selectInvoker(int ram) throws Exception
+	private Invoker selectInvoker(int ram) throws NoInvokerAvaiable
 	{
 		return (policyManager.getInvoker(invokers, ram));
 	}
@@ -91,7 +91,7 @@ public class Controller {
 		Invoker	invoker;
 
 		invoker = selectInvoker(action.getRam());
-		return (selectInvoker(action.getRam()).invoke(action, args, id));
+		return (invoker.invoke(action, args, id));
 	}
 
 	public <T, R> R invoke(String id, T args) throws Exception
@@ -99,11 +99,7 @@ public class Controller {
 		Action<Integer, Object>	action;
 
 		if ( !hasMapAction(id) )
-		{
-			//TODO: throw error, we dont have this action in our map
-			System.out.println("Error");
-			return (null);
-		}
+			throw new NoResultAvaiable("Function" + id + "not registered.");
 		action = actions.get(id);
 		return (getResult(action, args, id));
 	}
@@ -131,7 +127,7 @@ public class Controller {
 		Action<Integer, Object>	action;
 
 		action = actions.get(id);
-		return (selectInvoker(action.getRam()).invokeAsync(action, args));
+		return (selectInvoker(action.getRam()).invokeAsync(action, args, id));
 	}
 
 	public void removeAction(String id)

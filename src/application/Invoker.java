@@ -244,14 +244,21 @@ public class Invoker {
 		return (result);
 	}
 
+	//TODO: javadoc this
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
-	public <T, R> Future<R> invokeAsync(Action<Integer, Object> action, T args) throws Exception
+	@SuppressWarnings({"unchecked"})
+	public <T, R> Future<R> invokeAsync(Action<Integer, Object> action, T args, String id) throws Exception
 	{
-		Function<T, R>	function;
-		
-		function = (Function<T, R>) action.getFunction();
-		return (executor.submit( 
+		Function<T, R>						functionDecorated;
+		HashMap<Observer, Metric<Object>>	metricsList;
+		Future<R>							futureResult;
+
+		metricsList = initializeAllObservers(id);
+
+		functionDecorated = applyDecorators((Function<T, R>) action.getFunction(), id);
+
+		futureResult = executor.submit( 
 			() -> {
 				R	result;
 
@@ -267,7 +274,7 @@ public class Invoker {
 					}
 					ramUsed += action.getRam();
 				}
-				result = function.apply(args);
+				result = functionDecorated.apply(args);
 				synchronized (this)
 				{
 					ramUsed -= action.getRam();
@@ -275,9 +282,16 @@ public class Invoker {
 				}
 				return (result);
 			}
-		));
+		);
+
+		notifyAllObservers(metricsList);
+
+		return (futureResult);
 	}
 
+	/**
+	 * This shuts down the executor of the Invoker. Must be called when the application finishes.
+	 */
 	public void shutdownInvoker()
 	{
 		executor.shutdown();

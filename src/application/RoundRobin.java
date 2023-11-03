@@ -22,7 +22,8 @@ public class RoundRobin implements PolicyManager{
 	//TODO: --not all methods used in this invocation have the same time or if --
 	//TODO: --a invoker is removed from the list
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws Exception{
+	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvaiable
+	{
 		Invoker invoker;
 		int	lastInvokerUsed;
 		int	len;

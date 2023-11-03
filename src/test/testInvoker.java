@@ -35,7 +35,7 @@ public class testInvoker {
 	@Test
 	public void    invokerErasedCorrectly()
 	{
-
-    }
+		
+	}
 
 }
