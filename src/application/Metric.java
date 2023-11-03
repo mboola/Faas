@@ -1,3 +1,5 @@
+package application;
+
 public class Metric<T> {
 	private String	id;
 	private T		dataType;

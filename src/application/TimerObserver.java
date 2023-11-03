@@ -1,3 +1,5 @@
+package application;
+
 public class TimerObserver implements Observer{
 
 	private Controller	controller;

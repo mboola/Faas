@@ -1,3 +1,4 @@
+package application;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -5,9 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class Invoker {
@@ -70,8 +68,39 @@ public class Invoker {
 	private long				ramUsed;
 	private ExecutorService 	executor;
 
-	private final Lock			asyncLock;
-	private final Condition		allRamUsed;
+	
+	/**
+	 * This method creates an Invoker.
+	 * 
+	 * @param ram The max ram of the Invoker.
+	 * @return The Invoker created, or null if ram is lesser or equal to zero.
+	 */
+	public static Invoker createInvoker(long ram)
+	{
+		if (ram <= 0)
+			return (null);
+		else
+			return (new Invoker(ram));
+	}
+
+	/**
+	 * Constructs a new instance of Invoker.
+	 * 
+	 * @param ram The max ram of the Invoker.
+	 * 
+	 * <p><strong>Note:</strong> Constuctor will only be called from 'createInvoker' to ensure no Invokers with invalid parameters are created.</p>
+	 */
+	private Invoker(long ram)
+	{
+		this.maxRam = ram;
+		ramUsed = 0;
+
+		executor = Executors.newFixedThreadPool(MAX_THREADS);
+
+		//TODO: delete this:
+		id = ((Integer)numInvokers).toString();
+		numInvokers++;
+	}
 
 	public static void setController(Controller controller)
 	{
@@ -83,18 +112,9 @@ public class Invoker {
 		Invoker.observers.add(observer);
 	}
 
-	public Invoker(long ram) {
-		this.maxRam = ram;
-
-		asyncLock = new ReentrantLock();
-		allRamUsed = asyncLock.newCondition();
-		ramUsed = 0;
-
-		executor = Executors.newFixedThreadPool(MAX_THREADS);
-
-		//TODO: delete this:
-		id = ((Integer)numInvokers).toString();
-		numInvokers++;
+	public long	getRamUsed()
+	{
+		return (ramUsed);
 	}
 
 	public long	getAvaiableRam()
@@ -165,21 +185,27 @@ public class Invoker {
 		Function<T, R>	function;
 		
 		function = (Function<T, R>) action.getFunction();
-		return (executor.submit( () -> {
-			R	result;
+		return (executor.submit( 
+			() -> {
+				R	result;
 
-			asyncLock.lock();
-			try {
-				while (getAvaiableRam() - action.getRam() < 0)
-					allRamUsed.await();
-				ramUsed += action.getRam();
-				asyncLock.unlock();
+				synchronized (this)
+				{
+					while (getAvaiableRam() - action.getRam() < 0)
+					{
+						try {
+							wait();
+						} catch (InterruptedException e) {
+							Thread.currentThread().interrupt();
+						}
+					}
+					ramUsed += action.getRam();
+				}
 				result = function.apply(args);
-				} finally {
-					asyncLock.lock();
+				synchronized (this)
+				{
 					ramUsed -= action.getRam();
-					allRamUsed.signal();
-					asyncLock.unlock();
+					notify();
 				}
 				return (result);
 			}

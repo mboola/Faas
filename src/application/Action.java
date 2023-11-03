@@ -1,3 +1,5 @@
+package application;
+
 public class Action<Integer, Object> {
 
 	private int		ram;

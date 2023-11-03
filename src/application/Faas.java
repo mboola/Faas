@@ -1,3 +1,4 @@
+package application;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -18,8 +19,8 @@ public class Faas {
 		Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
 		
-		invoker1 = new Invoker(2);
-		invoker2 = new Invoker(2);
+		invoker1 = Invoker.createInvoker(2);
+		invoker2 = Invoker.createInvoker(2);
 		controller.registerInvoker(invoker1);
 		controller.registerInvoker(invoker2);
 		policyManager = new RoundRobin();
@@ -27,7 +28,8 @@ public class Faas {
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub", f1, 2);
 		
-		try {
+		/*
+		 * try {
 			result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
 			System.out.println(result);
 		}
@@ -59,6 +61,8 @@ public class Faas {
 		System.out.println("Start of time.");
 		controller.metrics.showTime("sub");
 		System.out.println("End of time.");
+		 * 
+		 */
 
 		//test async
 		Function<Integer, String> sleep = s -> {
@@ -75,7 +79,7 @@ public class Faas {
 			long currentTimeMillis = System.currentTimeMillis();
 			Future<String> fut;
 			List<Future<String>> resList = new LinkedList<Future<String>>();
-			for(int i = 0; i < 6; i++)
+			for(int i = 0; i < 5; i++)
 			{
 				fut = controller.invoke_async("sleepAction", 5);
 				resList.add(fut);

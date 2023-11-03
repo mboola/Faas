@@ -1,3 +1,4 @@
+package application;
 import java.util.function.Function;
 
 public class Decorator<T, R> implements Function<T, R> {

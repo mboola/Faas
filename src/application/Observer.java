@@ -1,3 +1,5 @@
+package application;
+
 public interface Observer {
 	
 	public <T> Metric<T> initialize(String id, Controller controller);

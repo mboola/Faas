@@ -1,3 +1,4 @@
+package application;
 import java.util.function.Function;
 
 public class CacheDecorator<T, R> extends Decorator<T, R>{

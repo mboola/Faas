@@ -1,3 +1,5 @@
+package application;
+
 public class PairValues {
 
 	private Object args;
