@@ -14,8 +14,6 @@ public class Invoker {
 	private String 		id;
 
 	//not really sure but:
-	private static List<Observer>	observers = new LinkedList<Observer>();
-	private static Controller		controller;
 	private static Map<String, List<PairValues>> cacheDecorator = new HashMap<String, List<PairValues>>();
 
 	/**
@@ -62,12 +60,16 @@ public class Invoker {
 		list.add(inputOutput);
 	}
 
+	//TODO: wtf is that above me???????????????
 	//all good here
-	private static final int 	MAX_THREADS = 8;
-	private long				maxRam;
-	private long				ramUsed;
-	private ExecutorService 	executor;
+	private static final int 		MAX_THREADS = 8;
 
+	private long					maxRam;
+	private long					ramUsed;
+	private ExecutorService 		executor;
+
+	private static List<Observer>	observers = new LinkedList<Observer>();
+	private static Controller		controller = null;
 	
 	/**
 	 * This method creates an Invoker.
@@ -102,31 +104,69 @@ public class Invoker {
 		numInvokers++;
 	}
 
+	/**
+	 * Assigns a Controller to the static variable controller of this class.
+	 * 
+	 * @param controller The Controller to be used by all the invokers.
+	 */
 	public static void setController(Controller controller)
 	{
 		Invoker.controller = controller;
 	}
 
+	/**
+	 * Adds an observer to the list of observers to be used by all invokers.
+	 * 
+	 * @param observer Observer that will be notified when a function is invoked.
+	 */
 	public static void addObserver(Observer observer)
 	{
+		//TODO: check if the observer is already added
 		Invoker.observers.add(observer);
 	}
 
+	/**
+	 * Removes an observer to the list of observers to be used by all invokers.
+	 * 
+	 * @param observer Observer that won't be notified when a function is invoked.
+	 */
+	public static void removeObserver(Observer observer)
+	{
+		//TODO: check of the observer is on the list
+		Invoker.observers.remove(observer);
+	}
+
+	/**
+	 * Getter of the ram being used.
+	 * 
+	 * @return Ram being used.
+	 */
 	public long	getRamUsed()
 	{
 		return (ramUsed);
 	}
 
+	/**
+	 * Getter of the ram avaiable to use.
+	 * 
+	 * @return Ram avaiable to use.
+	 */
 	public long	getAvaiableRam()
 	{
 		return (maxRam - ramUsed);
 	}
-
+	
+	/**
+	 * Getter of the max ram of the Invoker.
+	 * 
+	 * @return Max ram to be used by this invoker.
+	 */
 	public long	getMaxRam()
 	{
 		return (maxRam);
 	}
 
+	//TODO: javadocs
 	private <T, R> Function<T, R> applyDecorators(Function<T, R> function, String id)
 	{
 		Function<T, R>	timerDecorator;
@@ -138,42 +178,68 @@ public class Invoker {
 		return (timerDecorator);
 	}
 
-	private List<Metric<Object>> initializeAllObservers(String id) 
+	/**
+	 * This initializes the value of all the observers being used in the invocation.
+	 * 
+	 * @param id Id of the function. Needed by the observers to update the content of a dictionary in the controller.
+	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
+	 */
+	private HashMap<Observer, Metric<Object>> initializeAllObservers(String id) 
 	{
-		List<Metric<Object>> metrics = new LinkedList<Metric<Object>>();
+		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
 
 		for (Observer observer : observers) {
-			metrics.add(observer.initialize(id, Invoker.controller));
+			metrics.put(observer, observer.initialize(id, Invoker.controller));
 		}
 		return (metrics);
 	}
 
-	private void notifyAllObservers(List<Metric<Object>> metrics)
+	/**
+	 * This modifies all the values of the metrics created by 'initializeAllObservers'
+	 * 
+	 * @param metrics Map of all the metrics to be updated by the observers
+	 * 
+	 * <p><strong>Note:</strong> If the list of observers changed between initialization and this method,
+	 * two things can happen:
+	 * <ul>
+	 * 		<li> If observers were added, the new observers will not be notified.</li>
+	 * 		<li> If observers were removed, the removed observers will not be notified.</li>
+	 * </ul>
+	 * This is to ensure a correct funcionality of the observers.
+	 * </p>
+	 */
+	private void notifyAllObservers(HashMap<Observer, Metric<Object>> metrics)
 	{
-		int	metricIndex = 0;
-
-		//if (metrics.count() != observers.count())
-		//throw error or something
+		Metric<Object>	metric;
 
 		for (Observer observer : observers) {
-			observer.update(metrics.get(metricIndex));
-			metricIndex++;
+			metric = metrics.get(observer);
+			if (metric != null)
+				observer.update(metric);
 		}
 	}
 
+	/**
+	 * This method is called to execute a sync function passed by reference, applying all the observers and decorators.
+	 * 
+	 * @param action Function to be executed and the ram it consumes.
+	 * @param args Arguments needed by the function, of type T
+	 * @param id Identifier of the function. Needed by the observers and decorators to store data correctly.
+	 * @return The result of the function invoked, of type R
+	 * @throws Exception //TODO: i dont remember
+	 */
+	@SuppressWarnings({"unchecked"})
 	public <T, R> R invoke(Action<Integer, Object> action, T args, String id) throws Exception
 	{
-		Function<T, R>			function;
-		Function<T, R>			functionDecorated;
-		R						result;
-		List<Metric<Object>>	metricsList;
+		Function<T, R>						functionDecorated;
+		R									result;
+		HashMap<Observer, Metric<Object>>	metricsList;
 
 		metricsList = initializeAllObservers(id);
-		function = (Function<T, R>) action.getFunction();
 
-		functionDecorated = applyDecorators(function, id);
-
+		functionDecorated = applyDecorators((Function<T, R>) action.getFunction(), id);
 		result = functionDecorated.apply(args);
+
 		notifyAllObservers(metricsList);
 		return (result);
 	}
