@@ -167,6 +167,7 @@ public class Invoker {
 	}
 
 	//TODO: javadocs
+	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
 	private <T, R> Function<T, R> applyDecorators(Function<T, R> function, String id)
 	{
 		Function<T, R>	timerDecorator;

@@ -2,7 +2,11 @@ package test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.junit.Test;
@@ -19,11 +23,11 @@ public class testController {
 	@Test
 	public void	controllerCreatedCorrectly()
 	{
+		int isNUll = 0;
 		Controller controller1 = Controller.instantiate();
-		if (controller1 == null) //if it returns null then error
-			assertEquals(1, 2);	//TODO: change this way of showing the tests
-		else
-			assertEquals(1, 1);
+		if (controller1 == null)
+			isNUll = 1;
+		assertEquals(isNUll, 0);
 		Controller controller2 = Controller.instantiate();
 		assertEquals(controller1, controller2);
  	}
@@ -115,5 +119,60 @@ public class testController {
 		}
 		assertEquals(result, 0);
 		assertEquals(err, 1);
+
+		//TODO test async function
+	}
+
+	@Test
+	public void	asyncFunctionTests()
+	{
+		Controller controller = Controller.instantiate();
+		Invoker.setController(controller);
+		Invoker invoker = Invoker.createInvoker(1);
+		controller.registerInvoker(invoker);
+		PolicyManager policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
+
+		Function<Integer, String> sleep = s -> {
+			try {
+				Thread.sleep(Duration.ofSeconds(s).toMillis());
+				return "Done!";
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		controller.registerAction("sleepAction", sleep, 1);
+
+		long currentTimeMillis = System.currentTimeMillis();
+		try {
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 2; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 2);
+				resList.add(fut);
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+		}
+		catch (NoInvokerAvaiable e1) {
+			System.out.println(e1.getMessage());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		long finalimeMillis = System.currentTimeMillis();
+		long totalTime = finalimeMillis - currentTimeMillis;
+
+		System.out.println(" Seconds:" + totalTime);
+		int result;
+		if (totalTime > 4500 || totalTime < 4000)
+			result = 0;
+		else
+			result = 1;
+		//IMPORTANT: do not use cache decorator or this test will fail
+		assertEquals(result, 1);
 	}
 }

@@ -19,10 +19,10 @@ public class Faas {
 		Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
 		
-		invoker1 = Invoker.createInvoker(2);
-		invoker2 = Invoker.createInvoker(2);
+		invoker1 = Invoker.createInvoker(1);
+		//invoker2 = Invoker.createInvoker(2);
 		controller.registerInvoker(invoker1);
-		controller.registerInvoker(invoker2);
+		//controller.registerInvoker(invoker2);
 		policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
@@ -79,9 +79,9 @@ public class Faas {
 			long currentTimeMillis = System.currentTimeMillis();
 			Future<String> fut;
 			List<Future<String>> resList = new LinkedList<Future<String>>();
-			for(int i = 0; i < 5; i++)
+			for(int i = 0; i < 2; i++)
 			{
-				fut = controller.invoke_async("sleepAction", 5);
+				fut = controller.invoke_async("sleepAction", 2);
 				resList.add(fut);
 			}
 			List<String> stringsResult = new LinkedList<String>();
