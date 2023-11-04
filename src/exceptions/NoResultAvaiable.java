@@ -1,4 +1,4 @@
-package application;
+package exceptions;
 
 public class NoResultAvaiable extends Exception {
 

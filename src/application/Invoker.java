@@ -8,6 +8,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import decorator.CacheDecorator;
+import decorator.TimerDecorator;
+import exceptions.NoResultAvaiable;
+import observer.Observer;
+
 public class Invoker {
 	//TODO: delete this!! used to debug whats happening. Not final, must delete:
 	private static int	numInvokers = 0;

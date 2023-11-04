@@ -1,4 +1,7 @@
-package application;
+package observer;
+
+import application.Controller;
+import application.Metric;
 
 public interface Observer {
 	

@@ -13,10 +13,10 @@ import org.junit.Test;
 
 import application.Controller;
 import application.Invoker;
-import application.NoInvokerAvaiable;
-import application.NoResultAvaiable;
-import application.PolicyManager;
-import application.RoundRobin;
+import exceptions.NoInvokerAvaiable;
+import exceptions.NoResultAvaiable;
+import policy_manager.PolicyManager;
+import policy_manager.RoundRobin;
 
 public class testController {
 

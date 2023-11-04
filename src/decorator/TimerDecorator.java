@@ -1,4 +1,4 @@
-package application;
+package decorator;
 import java.util.function.Function;
 
 public class TimerDecorator<T, R> extends Decorator<T, R>{
