@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import exceptions.NoInvokerAvaiable;
-import exceptions.NoResultAvaiable;
+import dynamic_proxy.ActionProxy;
+import faas_exceptions.NoActionRegistered;
+import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoResultAvaiable;
 import policy_manager.PolicyManager;
 
-public class Controller {
+public class Controller implements ActionProxy{
 	private Map<String, Action<Integer, Object>>	actions;
 	public MetricSet								metrics;
 	private List<Invoker>							invokers;
@@ -28,13 +30,6 @@ public class Controller {
 	}
 	private static Controller unicInstance = null;
 
-	/* Here we will call a function from the proxy */
-	private String GetId(Function<Object, Object> action)
-	{
-		//TODO: implement this
-		return (action.toString());
-	}
-
 	public void registerInvoker(Invoker invoker)
 	{
 		//TODO: if invoker is already at list throw error
@@ -48,7 +43,7 @@ public class Controller {
 	}
 
 	/* Used to search if we already have this action in our map */
-	private boolean hasMapAction(String id)
+	public boolean hasMapAction(String id)
 	{
 		if ( actions.isEmpty() )
 			return (false);
@@ -60,9 +55,6 @@ public class Controller {
 	//used the register an Action in the controller. Ram must be inputed in MegaBytes
 	public void registerAction(String id, Object f, int ram)
 	{
-		//String	id;
-
-		//id = GetId(action);
 		if ( !hasMapAction(id) )
 		{
 			actions.put(id, new Action<Integer, Object>(ram, f));
@@ -131,6 +123,8 @@ public class Controller {
 		Action<Integer, Object>	action;
 
 		action = actions.get(id);
+		if (action == null)
+			throw new NoActionRegistered("There are no actions with that id");
 		return (selectInvoker(action.getRam()).invokeAsync(action, args, id));
 	}
 

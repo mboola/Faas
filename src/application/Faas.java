@@ -1,13 +1,12 @@
 package application;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvaiable;
 import observer.TimerObserver;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
@@ -30,8 +29,8 @@ public class Faas {
 		//controller.registerInvoker(invoker2);
 		policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
-		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
-		controller.registerAction("sub", f1, 2);
+		//Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
+		//controller.registerAction("sub", f1, 2);
 		
 		/*
 		 * try {

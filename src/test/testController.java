@@ -13,8 +13,8 @@ import org.junit.Test;
 
 import application.Controller;
 import application.Invoker;
-import exceptions.NoInvokerAvaiable;
-import exceptions.NoResultAvaiable;
+import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoResultAvaiable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 

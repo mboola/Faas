@@ -2,7 +2,7 @@ package policy_manager;
 import java.util.List;
 
 import application.Invoker;
-import exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvaiable;
 
 public interface PolicyManager {
 

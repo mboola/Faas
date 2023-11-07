@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import decorator.CacheDecorator;
 import decorator.TimerDecorator;
-import exceptions.NoResultAvaiable;
+import faas_exceptions.NoResultAvaiable;
 import observer.Observer;
 
 public class Invoker {

@@ -1,4 +1,4 @@
-package exceptions;
+package faas_exceptions;
 
 public class NoResultAvaiable extends Exception {
 
