@@ -1,20 +1,18 @@
-package dynamic_proxy;
+//THIS IS A CONCEPTUAL VERSION, NOT A FUNCTIONAL ONE
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import application.Controller;
 
 public class DynamicProxy implements InvocationHandler {
 
+    //the methods will be intercepted from this class.
     private Object target = null;
     
-	public static Object newInstance(Object target){
-        Class targetClass = target.getClass();
-        Class interfaces[] = targetClass.getInterfaces();
+    //we get a Proxy that will intercept all the calls from target
+	public static Object instantiate(Object target){
+        Class<?> targetClass = target.getClass();
+        Class<?> interfaces[] = targetClass.getInterfaces();
         return Proxy.newProxyInstance(targetClass.getClassLoader(),
                 interfaces, new DynamicProxy(target));
     }
@@ -24,12 +22,13 @@ public class DynamicProxy implements InvocationHandler {
         this.target = target;
     }
 
+    //interception of calls
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Exception
 	{
-        Object	invocationResult = null;
-		Class	targetClass = proxy.getClass();
-		String	actionName = method.getName();
+        Object	    invocationResult = null;
+		Class<?>	targetClass = proxy.getClass();
+		String	    actionName = method.getName();
 
         if (Arrays.asList(targetClass.getMethods()).stream().map(m -> m.toString()).collect(Collectors.toList()).contains(actionName))
 				invocationResult = method.invoke(this.target, args);
