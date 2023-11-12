@@ -7,61 +7,50 @@ import java.util.function.Function;
 public class Client {
     public static void main(String[] args) throws Exception {
 
-        //this is clear
+        // this is clear
         Controller controller = Controller.instantiate();
 
-        //this is the application client will call
+        // this is the application client will call
 		ActionProxy actionProxy = (ActionProxy) DynamicProxy.instantiate(controller);
 
-        //** here actionProxy doesn't have the method suma and only has the interface ActionProxy */
-        //Interfaces of Proxy:
-        /*
-        for (Class<?> interf : actionProxy.getClass().getInterfaces()) {
-            System.out.println(interf.getName());
-        }
-        */
-        //System.out.println("Acciones disponibles: " + actionProxy.actions());
+        // here actionProxy only has the interface ActionProxy
+        actionProxy.showInterfaces();
+        // here actionProxy only has the public methods in Controller
+        actionProxy.showMethods();
 
-        //we register two actions. each time an action is added, actionProxy should be recompiled
+        // we register two actions. each time an action is added, actionProxy should be recompiled
         Function<Map<String, Integer>, Integer> suma = x -> x.get("x") + x.get("y");
         actionProxy.registerAction("suma", suma, 1);
 
-        //** here actionProxy has the method suma and the interface ActionProxy and suma */
-        //Interfaces of Proxy:
-        /*
-        for (Class<?> interf : actionProxy.getClass().getInterfaces()) {
-            System.out.println(interf.getName());
-        }
-        */
-        //System.out.println("Acciones disponibles: " + actionProxy.actions());
+        // here actionProxy has the interface ActionProxy and Suma
+        actionProxy.showInterfaces();
+        // here actionProxy has the public methods in Controller and suma method
+        actionProxy.showMethods();
 
-        //testing of behaviour (?)
-        try {
-            // Aquí obtenemos el metodo "suma" mediante reflexión
-            Method sumaMethod = actionProxy.getClass().getMethod("suma");
-            // Aquí lo invocamos mediente reflexión
-            int resultadoSuma = (int) sumaMethod.invoke(actionProxy, 2, 3);
-            System.out.println("Resultado de la suma: " + resultadoSuma);
-            // ¿Esto no iría un poco  en contra de lo que queríamos conseguir? En principio, deberíamos poder llamar a actionProxy.suma();
-            // ¿El problema? Creo que daría un error de compilación, ya que suma no está definida en la interfaz por defecto
-            // CONSULTAR
+        // how the program should behave:
+        // We are pretty sure this won't compile ever, but it is what we think it should do
+        // based on the subject
+        int result = (int)actionProxy.suma(Map.of("x", 1, "y", 2));
 
-            Method restaMethod = actionProxy.getClass().getMethod("resta");
-            int resultadoResta = (int) restaMethod.invoke(actionProxy, 5, 2);
-            System.out.println("Resultado de la resta: " + resultadoResta);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        // Eliminamos la suma de la lista
+        // and this will work 100%
+        //Method sumaMethod = actionProxy.getClass().getMethod("suma");
+        //int result = (int) sumaMethod.invoke(actionProxy, Map.of("x", 1, "y", 2));
+
+        System.out.println("Resultado de la suma: " + result);
+
+        // we erase the action we added
         actionProxy.removeAction("suma");
-        // Esto debería dar error
+
+        // This should throw an error
         try {
-             Method sumaMethod = actionProxy.getClass().getMethod("suma");
-            int resultadoSuma = (int) sumaMethod.invoke(actionProxy, 2, 3);
-            System.out.println("Resultado de la suma: " + resultadoSuma);
+            result = (int)actionProxy.suma(Map.of("x", 1, "y", 2));
+
+            // and this wouldn't either
+            //Method sumaMethod = actionProxy.getClass().getMethod("suma");
+            //result = (int) sumaMethod.invoke(actionProxy, Map.of("x", 1, "y", 2));
+            System.out.println("Resultado de la suma: " + result);
         } catch (Exception e) {
             e.printStackTrace();
         }
-		
     }
 }

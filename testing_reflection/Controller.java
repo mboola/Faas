@@ -1,5 +1,6 @@
 //THIS IS A CONCEPTUAL VERSION, NOT A FUNCTIONAL ONE
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.Future;
 
@@ -38,11 +39,22 @@ public class Controller implements ActionProxy{
 			System.out.println(key);
 	}
 
-	@Override
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
 		//invoke action from the invokers
 		Action<Integer, Object> action = actions.get(id);
 		return (action.apply(args));
+	}
+
+	public void showInterfaces() {
+		for (Class<?> interf : this.getClass().getInterfaces()) {
+            System.out.println(interf.getName());
+        }
+	}
+
+	public void showMethods() {
+		for (Method method : this.getClass().getMethods()) {
+            System.out.println(method.getName());
+        }
 	}
 }
