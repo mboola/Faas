@@ -10,6 +10,7 @@ import org.junit.Test;
 import application.Controller;
 import application.Invoker;
 import dynamic_proxy.ActionProxy;
+import dynamic_proxy.Calculator;
 import dynamic_proxy.DynamicProxy;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
@@ -28,17 +29,18 @@ public class testDynamicProxy {
 
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
 		controller.registerAction("suma", f1, 2);
+		controller.registerAction("calculator", new Calculator(), 1);
 
 		int result = 0;
 		int	err = 0;
 		try {
-			Calculator calc = controller.getAction("suma");
-			result = (int)calc.suma(Map.of("x", 5, "y", 2));
+			Calculator calc = (Calculator)controller.getAction("calculator");
+			result = (int)calc.suma(Map.of("x", 1, "y", 2));
 		}
 		catch (Exception e) {
 			err = 1;
 		}
-		assertEquals(result, 3);
 		assertEquals(err, 0);
+		assertEquals(result, 3);
 	}
 }

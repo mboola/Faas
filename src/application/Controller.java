@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import dynamic_proxy.DynamicProxy;
 import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvaiable;
 import policy_manager.PolicyManager;
@@ -125,6 +126,14 @@ public class Controller {
 			throw new NoActionRegistered("There are no actions with the id" + id);
 		else
 			actions.remove(id);
+	}
+
+	public Object getAction(String id) throws Exception
+	{
+		Action action = hasMapAction(id);
+		if ( action == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
+		return (DynamicProxy.instantiate(action));
 	}
 
 	public void shutdownAllInvokers()

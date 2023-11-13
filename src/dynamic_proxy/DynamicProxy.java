@@ -44,7 +44,7 @@ public class DynamicProxy implements InvocationHandler {
 
 		controller = Controller.instantiate();
 
-		Future<Object> result = controller.invoke_async(id, args);
+		Object result = controller.invoke(id, args);
 		return result;
 	}
 }

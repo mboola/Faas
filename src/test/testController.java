@@ -13,6 +13,7 @@ import org.junit.Test;
 
 import application.Controller;
 import application.Invoker;
+import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvaiable;
 import faas_exceptions.NoResultAvaiable;
 import policy_manager.PolicyManager;
@@ -78,7 +79,7 @@ public class testController {
 			result = (Integer) controller.invoke("hi", Map.of("x", 2, "y", 1));
 		} catch (NoInvokerAvaiable e1) {
 			err = 1;
-		} catch (NoResultAvaiable e2) {
+		} catch (NoActionRegistered e2) {
 			err = 2;
 		} catch (Exception e3) {
 			err = 3;
