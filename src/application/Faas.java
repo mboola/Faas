@@ -1,5 +1,7 @@
 package application;
+
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -7,34 +9,27 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import faas_exceptions.NoInvokerAvaiable;
-import observer.TimerObserver;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
 public class Faas {
     public static void main(String[] args) throws Exception {
-        Controller		controller;
-		Integer			result;
-		List<Object>	resultList;
-		Invoker			invoker1, invoker2;
-		PolicyManager	policyManager;
 
-		controller = Controller.instantiate();
-		Invoker.addObserver(new TimerObserver());
+		Controller controller = Controller.instantiate();
+		//Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
-		
-		invoker1 = Invoker.createInvoker(1);
-		//invoker2 = Invoker.createInvoker(2);
-		controller.registerInvoker(invoker1);
+		Invoker invoker = Invoker.createInvoker(1);
+		controller.registerInvoker(invoker);
+		//Invoker invoker2 = Invoker.createInvoker(2);
 		//controller.registerInvoker(invoker2);
-		policyManager = new RoundRobin();
+		PolicyManager policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
-		//Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
-		//controller.registerAction("sub", f1, 2);
-		
-		/*
-		 * try {
-			result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
+
+		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
+		controller.registerAction("suma", f1, 2);
+
+		try {
+			int result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
 			System.out.println(result);
 		}
 		catch (NoInvokerAvaiable e1) {
@@ -54,7 +49,7 @@ public class Faas {
 		);
 
 		try {
-			resultList = controller.invoke("sub", input);
+			List<Integer> resultList = controller.invoke("sub", input);
 			for (Object res : resultList) {
 				System.out.println((Integer)res);
 			}
@@ -65,8 +60,6 @@ public class Faas {
 		System.out.println("Start of time.");
 		controller.metrics.showTime("sub");
 		System.out.println("End of time.");
-		 * 
-		 */
 
 		//test async
 		Function<Integer, String> sleep = s -> {

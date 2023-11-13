@@ -4,19 +4,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
-import java.util.function.Function;
 
-import dynamic_proxy.ActionProxy;
 import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvaiable;
-import faas_exceptions.NoResultAvaiable;
 import policy_manager.PolicyManager;
 
-public class Controller implements ActionProxy{
-	private Map<String, Action<Integer, Object>>	actions;
-	public MetricSet								metrics;
-	private List<Invoker>							invokers;
-	private PolicyManager							policyManager;
+public class Controller {
+	private Map<String, Action>	actions;
+	public MetricSet			metrics;
+	private List<Invoker>		invokers;
+	private PolicyManager		policyManager;
 
 	public static Controller instantiate() {
 		if (unicInstance == null)
@@ -25,7 +22,7 @@ public class Controller implements ActionProxy{
 	}
 	protected Controller() {
 		invokers = new LinkedList<Invoker>();
-		actions = new HashMap<String, Action<Integer, Object>>();
+		actions = new HashMap<String, Action>();
 		metrics = new MetricSet();
 	}
 	private static Controller unicInstance = null;
@@ -43,21 +40,19 @@ public class Controller implements ActionProxy{
 	}
 
 	/* Used to search if we already have this action in our map */
-	public boolean hasMapAction(String id)
+	public Action hasMapAction(String id)
 	{
 		if ( actions.isEmpty() )
-			return (false);
-		if ( actions.get(id) == null )
-			return (false);
-		return (true);
+			return (null);
+		return (actions.get(id));
 	}
 
 	//used the register an Action in the controller. Ram must be inputed in MegaBytes
 	public void registerAction(String id, Object f, int ram)
 	{
-		if ( !hasMapAction(id) )
+		if ( hasMapAction(id) == null)
 		{
-			actions.put(id, new Action<Integer, Object>(ram, f));
+			actions.put(id, new Action(ram, f));
 			return ;
 		}
 		//TODO: throw error. already exists
@@ -82,7 +77,7 @@ public class Controller implements ActionProxy{
 		return (policyManager.getInvoker(invokers, ram));
 	}
 
-	private <T, R> R getResult(Action<Integer, Object> action, T args, String id) throws Exception
+	private <T, R> R getResult(Action action, T args, String id) throws Exception
 	{
 		Invoker	invoker;
 
@@ -92,27 +87,23 @@ public class Controller implements ActionProxy{
 
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
-		Action<Integer, Object>	action;
+		Action	action;
 
-		if ( !hasMapAction(id) )
-			throw new NoResultAvaiable("Function" + id + "not registered.");
-		action = actions.get(id);
+		action = hasMapAction(id);
+		if ( action == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
 		return (getResult(action, args, id));
 	}
 
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
 	{
-		Action<Integer, Object>	action;
-		List<R> 				result;
+		Action	action;
+		List<R> result;
 
-		if ( !hasMapAction(id) )
-		{
-			//TODO: throw error, we dont have this action in our map
-			System.out.println("Error");
-			return (null);
-		}
+		action = hasMapAction(id);
+		if ( action == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
 		result = new LinkedList<R>();
-		action = actions.get(id);
 		for (T element : args)
 			result.add(getResult(action, element, id));
 		return (result);
@@ -120,22 +111,20 @@ public class Controller implements ActionProxy{
 
 	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
-		Action<Integer, Object>	action;
+		Action	action;
 
-		action = actions.get(id);
-		if (action == null)
-			throw new NoActionRegistered("There are no actions with that id");
+		action = hasMapAction(id);
+		if ( action == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
 		return (selectInvoker(action.getRam()).invokeAsync(action, args, id));
 	}
 
-	public void removeAction(String id)
+	public void removeAction(String id) throws Exception
 	{
-		if ( !hasMapAction(id) )
-		{
-			//TODO: throw error, we dont have this action in our map
-			return ;
-		}
-		actions.remove(id);
+		if ( hasMapAction(id) == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
+		else
+			actions.remove(id);
 	}
 
 	public void shutdownAllInvokers()

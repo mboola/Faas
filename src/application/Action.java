@@ -1,6 +1,8 @@
 package application;
 
-public class Action<Integer, Object> {
+import java.util.function.Function;
+
+public class Action{
 
 	private int		ram;
 	private Object	function;
@@ -18,5 +20,11 @@ public class Action<Integer, Object> {
 	public Object getFunction()
 	{
 		return (this.function);
+	}
+
+	public <T, R> R apply(T args)
+	{
+		Function<T, R>	func = (Function<T, R>) function;
+		return (func.apply(args));
 	}
 }

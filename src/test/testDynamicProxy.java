@@ -20,27 +20,25 @@ public class testDynamicProxy {
 	public void	dynamicProxyTest()
 	{
 		Controller controller = Controller.instantiate();
-		ActionProxy actionProxy = (ActionProxy) DynamicProxy.newInstance(controller);
-		Invoker.setController((Controller) controller);
+		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
 		controller.registerInvoker(invoker);
 		PolicyManager policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
 
-		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") - x.get("y");
-		actionProxy.registerAction("sub", f1, 2);
-		/*
-		 * int result = 0;
+		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
+		controller.registerAction("suma", f1, 2);
+
+		int result = 0;
 		int	err = 0;
 		try {
-			result = actionProxy.sub(Map.of("x", 5, "y", 2));
+			Calculator calc = controller.getAction("suma");
+			result = (int)calc.suma(Map.of("x", 5, "y", 2));
 		}
 		catch (Exception e) {
 			err = 1;
 		}
 		assertEquals(result, 3);
 		assertEquals(err, 0);
-		 */
 	}
-
 }

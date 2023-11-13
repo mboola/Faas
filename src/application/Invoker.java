@@ -235,7 +235,7 @@ public class Invoker {
 	 * @throws Exception //TODO: i dont remember
 	 */
 	@SuppressWarnings({"unchecked"})
-	public <T, R> R invoke(Action<Integer, Object> action, T args, String id) throws Exception
+	public <T, R> R invoke(Action action, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
 		R									result;
@@ -254,7 +254,7 @@ public class Invoker {
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
 	@SuppressWarnings({"unchecked"})
-	public <T, R> Future<R> invokeAsync(Action<Integer, Object> action, T args, String id) throws Exception
+	public <T, R> Future<R> invokeAsync(Action action, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
 		HashMap<Observer, Metric<Object>>	metricsList;
