@@ -41,10 +41,8 @@ public class DynamicProxy implements InvocationHandler {
 	{
 		String	id = method.getName();
 		Controller	controller;
-
 		controller = Controller.instantiate();
-
-		Object result = controller.invoke(id, args);
+		Object result = controller.invoke(id, args[0]);
 		return result;
 	}
 }

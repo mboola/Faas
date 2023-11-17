@@ -89,7 +89,7 @@ public class Controller {
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
 		Action	action;
-
+		
 		action = hasMapAction(id);
 		if ( action == null )
 			throw new NoActionRegistered("There are no actions with the id" + id);
@@ -133,7 +133,7 @@ public class Controller {
 		Action action = hasMapAction(id);
 		if ( action == null )
 			throw new NoActionRegistered("There are no actions with the id" + id);
-		return (DynamicProxy.instantiate(action));
+		return (DynamicProxy.instantiate(action.getFunction()));
 	}
 
 	public void shutdownAllInvokers()

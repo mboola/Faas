@@ -243,7 +243,10 @@ public class Invoker {
 
 		metricsList = initializeAllObservers(id);
 
-		functionDecorated = applyDecorators((Function<T, R>) action.getFunction(), id);
+		functionDecorated = (Function<T, R>) action.getFunction();//applyDecorators((Function<T, R>) action.getFunction(), id);
+
+		//This breaks for some reason
+		//System.out.println(functionDecorated.toString());
 		result = functionDecorated.apply(args);
 
 		notifyAllObservers(metricsList);

@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import dynamic_proxy.Calculator;
+import dynamic_proxy.Operation;
+import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvaiable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
@@ -15,7 +18,8 @@ import policy_manager.RoundRobin;
 public class Faas {
     public static void main(String[] args) throws Exception {
 
-		Controller controller = Controller.instantiate();
+		/*
+		 * Controller controller = Controller.instantiate();
 		//Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
@@ -97,6 +101,31 @@ public class Faas {
 
 		Invoker.printCache();
 
+		controller.shutdownAllInvokers();
+		 */
+
+		Controller controller = Controller.instantiate();
+		Invoker.setController(controller);
+		Invoker invoker = Invoker.createInvoker(2);
+		controller.registerInvoker(invoker);
+		PolicyManager policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
+
+		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
+		controller.registerAction("suma", f1, 1);
+		controller.registerAction("calculator", new Calculator(), 1);
+
+		try {
+			Operation calc = (Operation)controller.getAction("calculator");
+			int result = calc.suma(Map.of("x", 1, "y", 2));
+			System.out.println("Result: "+result);
+		}
+		catch (NoActionRegistered e1) {
+			System.out.println("No action");
+		}
+		catch (Exception e) {
+			System.out.println("Error");
+		}
 		controller.shutdownAllInvokers();
     }
 }
