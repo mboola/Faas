@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.junit.Test;
@@ -39,7 +40,8 @@ public class testDynamicProxy {
 		int	err = 0;
 		try {
 			CalculatorProxy calc = (CalculatorProxy)controller.getAction("calculator");
-			result = calc.suma(Map.of("x", 1, "y", 2));
+			Future<Integer> res = calc.suma(Map.of("x", 1, "y", 2));
+			result = res.get();
 		}
 		catch (NoActionRegistered e1) {
 			err = 1;
@@ -50,10 +52,11 @@ public class testDynamicProxy {
 		catch (Exception e) {
 			err = 3;
 		}
-		assertEquals(result, 3);
 		assertEquals(err, 0);
+		assertEquals(result, 3);
 	}
 
+	@Test
 	public void	testDynamicProxyAsyncFunction()
 	{
 		Controller controller = Controller.instantiate();
@@ -79,7 +82,10 @@ public class testDynamicProxy {
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
 			TimerProxy timer = (TimerProxy)controller.getAction("timer");
-			timer.sleep(4);
+			Future<String> res1 = timer.sleep(4);
+			Future<String> res2 = timer.sleep(4);
+			String str1 = res1.get();
+			String str2 = res2.get();
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 			if (totalTime > 4500 || totalTime < 4000)
 				result = 0;

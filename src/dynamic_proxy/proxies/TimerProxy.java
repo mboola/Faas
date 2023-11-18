@@ -1,7 +1,9 @@
 package dynamic_proxy.proxies;
 
+import java.util.concurrent.Future;
+
 public interface TimerProxy {
 
-	public void sleep(int time);
+	public Future<String> sleep(int time);
 
 }
