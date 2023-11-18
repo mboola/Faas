@@ -1,8 +1,8 @@
-package dynamic_proxy;
+package dynamic_proxy.proxies;
 
 import java.util.Map;
 
-public class Calculator implements Operation{
+public class Calculator implements CalculatorProxy{
 
 	public Calculator() {
 	}

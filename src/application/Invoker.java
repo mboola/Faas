@@ -27,7 +27,7 @@ public class Invoker {
 	 * @param args Data passed as an argument. Used to search result.
 	 * @param id Identifier of the function used to 
 	 * @return 
-	 * @throws NoResultAvaiable
+	 * @throws NoResultAvailable
 	 */
 	public static<T, R> R getResult(String id, T args) throws NoResultAvaiable
 	{
