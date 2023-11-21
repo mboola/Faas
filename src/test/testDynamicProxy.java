@@ -16,7 +16,7 @@ import dynamic_proxy.proxies.CalculatorProxy;
 import dynamic_proxy.proxies.Timer;
 import dynamic_proxy.proxies.TimerProxy;
 import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvailable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -46,7 +46,7 @@ public class testDynamicProxy {
 		catch (NoActionRegistered e1) {
 			err = 1;
 		}
-		catch (NoInvokerAvaiable e2) {
+		catch (NoInvokerAvailable e2) {
 			err = 2;
 		}
 		catch (Exception e) {

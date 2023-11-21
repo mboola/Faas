@@ -2,7 +2,7 @@ package decorator;
 import java.util.function.Function;
 
 import application.Invoker;
-import faas_exceptions.NoResultAvaiable;
+import faas_exceptions.NoResultAvailable;
 
 public class CacheDecorator<T, R> extends Decorator<T, R>{
 
@@ -20,7 +20,7 @@ public class CacheDecorator<T, R> extends Decorator<T, R>{
 		try {
 			result = Invoker.getResult(id, t);
 		} //I do this in case a function is suposed to return null as a valid result
-		catch (NoResultAvaiable e1) {
+		catch (NoResultAvailable e1) {
 			result = getFunction().apply(t);
 			Invoker.storeResult(id, t, result);
 		}

@@ -2,7 +2,7 @@ package policy_manager;
 import java.util.List;
 
 import application.Invoker;
-import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvailable;
 
 public class RoundRobin implements PolicyManager{
 
@@ -25,14 +25,14 @@ public class RoundRobin implements PolicyManager{
 	//TODO: --not all methods used in this invocation have the same time or if --
 	//TODO: --a invoker is removed from the list
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvaiable
+	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable
 	{
 		Invoker invoker;
 		int	lastInvokerUsed;
 		int	len;
 
 		if (invokers.isEmpty())
-			throw new NoInvokerAvaiable("No Invokers in list.");
+			throw new NoInvokerAvailable("No Invokers in list.");
 		lastInvokerUsed = lastInvokerAssigned;
 		len = invokers.size() - 1;
 		lastInvokerAssigned = updatePos(lastInvokerAssigned, len);
@@ -44,7 +44,7 @@ public class RoundRobin implements PolicyManager{
 		invoker = invokers.get(lastInvokerAssigned);
 		if (invoker.getMaxRam() >= ram)
 			return (invoker);
-		throw new NoInvokerAvaiable("No Invoker Avaiable with at least " + ram + " RAM.");
+		throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
 	}
     
 }

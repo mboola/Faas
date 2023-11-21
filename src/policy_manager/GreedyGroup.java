@@ -3,7 +3,7 @@ package policy_manager;
 import java.util.List;
 
 import application.Invoker;
-import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvailable;
 
 public class GreedyGroup implements PolicyManager{
 
@@ -30,7 +30,7 @@ public class GreedyGroup implements PolicyManager{
 	}
 
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvaiable {
+	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable {
 		//conceptualment, aquest metode ha de omplir al maxim un invoker abans d-avan\ar al seguent
 		//pero la llista d'invokers pot variar. o pot ser que tingui una referencia a un invoker
 		//que esta omplint pero encara li queda i un altre que ja ha omplert es buida i te la mida
@@ -46,7 +46,7 @@ public class GreedyGroup implements PolicyManager{
 		int		i;
 
 		if (invokers.isEmpty())
-			throw new NoInvokerAvaiable("List of invokers empty.");
+			throw new NoInvokerAvailable("List of invokers empty.");
 		posLessRam = -1;
 		lessRam = Long.MAX_VALUE;
 		i = 0;
@@ -68,7 +68,7 @@ public class GreedyGroup implements PolicyManager{
 		if (posLessRam == -1 && hasEnoughRam == 1)
 			return (getNextInvokerList(invokers));
 		if (posLessRam == -1)
-			throw new NoInvokerAvaiable("No Invoker Avaiable with at least " + ram + " RAM.");
+			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
 		return (invokers.get(posLessRam));
 	}
 		

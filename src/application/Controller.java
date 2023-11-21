@@ -7,7 +7,7 @@ import java.util.concurrent.Future;
 
 import dynamic_proxy.DynamicProxy;
 import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvaiable;
+import faas_exceptions.NoInvokerAvailable;
 import policy_manager.PolicyManager;
 
 public class Controller {
@@ -73,7 +73,7 @@ public class Controller {
 		this.policyManager = policyManager;
 	}
 
-	private Invoker selectInvoker(int ram) throws NoInvokerAvaiable
+	private Invoker selectInvoker(int ram) throws NoInvokerAvailable
 	{
 		return (policyManager.getInvoker(invokers, ram));
 	}

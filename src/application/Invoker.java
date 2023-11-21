@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import decorator.CacheDecorator;
 import decorator.TimerDecorator;
-import faas_exceptions.NoResultAvaiable;
+import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
 public class Invoker {
@@ -29,17 +29,17 @@ public class Invoker {
 	 * @return 
 	 * @throws NoResultAvailable
 	 */
-	public static<T, R> R getResult(String id, T args) throws NoResultAvaiable
+	public static<T, R> R getResult(String id, T args) throws NoResultAvailable
 	{
 		List<PairValues> list = Invoker.cacheDecorator.get(id);
 		if (list == null)
-			throw new NoResultAvaiable("");
+			throw new NoResultAvailable("");
 		for (PairValues inputOutput : list) {
 			//not sure this comparation is correct. I think this compares mem ref
 			if (inputOutput.getArgs() == args)
 				return ((R)inputOutput.getResult());
 		}
-		throw new NoResultAvaiable("");
+		throw new NoResultAvailable("");
 	}
 
 	public static void printCache()

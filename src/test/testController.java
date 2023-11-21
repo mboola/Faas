@@ -14,8 +14,8 @@ import org.junit.Test;
 import application.Controller;
 import application.Invoker;
 import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvaiable;
-import faas_exceptions.NoResultAvaiable;
+import faas_exceptions.NoInvokerAvailable;
+import faas_exceptions.NoResultAvailable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -62,9 +62,9 @@ public class testController {
 		Integer	err = 0;
 		try {
 			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvaiable e1) {
+		} catch (NoInvokerAvailable e1) {
 			err = 1;
-		} catch (NoResultAvaiable e2) {
+		} catch (NoResultAvailable e2) {
 			err = 2;
 		} catch (Exception e3) {
 			err = 3;
@@ -77,7 +77,7 @@ public class testController {
 		err = 0;
 		try {
 			result = (Integer) controller.invoke("hi", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvaiable e1) {
+		} catch (NoInvokerAvailable e1) {
 			err = 1;
 		} catch (NoActionRegistered e2) {
 			err = 2;
@@ -92,9 +92,9 @@ public class testController {
 		err = 0;
 		try {
 			result = (Integer) controller.invoke("sub", 2);
-		} catch (NoInvokerAvaiable e1) {
+		} catch (NoInvokerAvailable e1) {
 			err = 1;
-		} catch (NoResultAvaiable e2) {
+		} catch (NoResultAvailable e2) {
 			err = 2;
 		} catch (Exception e3) {
 			err = 3;
@@ -111,9 +111,9 @@ public class testController {
 		err = 0;
 		try {
 			result = (Integer) controller.invoke("sub2", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvaiable e1) {
+		} catch (NoInvokerAvailable e1) {
 			err = 1;
-		} catch (NoResultAvaiable e2) {
+		} catch (NoResultAvailable e2) {
 			err = 2;
 		} catch (Exception e3) {
 			err = 3;
@@ -158,7 +158,7 @@ public class testController {
 				stringsResult.add(future.get());
 			}
 		}
-		catch (NoInvokerAvaiable e1) {
+		catch (NoInvokerAvailable e1) {
 			System.out.println(e1.getMessage());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

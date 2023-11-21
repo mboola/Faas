@@ -11,8 +11,8 @@ import java.util.function.Function;
 import decorator.CacheDecorator;
 import decorator.TimerDecorator;
 import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvaiable;
-import faas_exceptions.NoResultAvaiable;
+import faas_exceptions.NoInvokerAvailable;
+import faas_exceptions.NoResultAvailable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -77,7 +77,7 @@ public class Faas {
 			int result = (Integer) controller.invoke("suma", Map.of("x", 1, "y", 2));
 			System.out.println(result);
 		}
-		catch (NoInvokerAvaiable e1) {
+		catch (NoInvokerAvailable e1) {
 			System.out.println(e1.getMessage());
 		}
 		catch (Exception e2) {
@@ -102,7 +102,7 @@ public class Faas {
 				System.out.println((Integer)res);
 			}
 		}
-		catch (NoInvokerAvaiable e1) {
+		catch (NoInvokerAvailable e1) {
 			System.out.println(e1.getMessage());
 		}
 		catch (Exception e2) {
@@ -142,7 +142,7 @@ public class Faas {
 			long finalimeMillis = System.currentTimeMillis();
 			System.out.println(" Seconds:" + (finalimeMillis - currentTimeMillis));
 		}
-		catch (NoInvokerAvaiable e1) {
+		catch (NoInvokerAvailable e1) {
 			System.out.println(e1.getMessage());
 		}
 		catch (Exception e2) {
