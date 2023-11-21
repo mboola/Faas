@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import decorator.CacheDecorator;
+import decorator.TimerDecorator;
 import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvaiable;
 import faas_exceptions.NoResultAvaiable;
@@ -16,7 +18,8 @@ import policy_manager.RoundRobin;
 
 public class Faas {
 	public static void main(String[] args) {
-		Controller controller = Controller.instantiate();
+		/*
+		 * Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
 		controller.registerInvoker(invoker);
@@ -25,7 +28,7 @@ public class Faas {
 		Function<Map<String, Integer>, Integer> f2 = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub2", f2, 2);
 
-		/* Invoking a function with not enough RAM */
+		 Invoking a function with not enough RAM 
 		int result = 0;
 		int err = 0;
 		try {
@@ -39,26 +42,46 @@ public class Faas {
 		}
 		System.out.println("Result: " + result);
 		System.out.println("Err: " + err);
-		/*
+		 */
+		
 		Controller controller = Controller.instantiate();
 		//Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
 		controller.registerInvoker(invoker);
+		Function<Action, Function<Object,Object>> decoratorInitializer = 
+			(action) -> {
+				Function<Object, Object>	timerDecorator;
+				Function<Object, Object>	cacheDecorator;
+				String						id;
+				Function<Object, Object>	function;
+
+				function = (Function<Object, Object>)action.getFunction();
+				id = action.getId();
+				cacheDecorator = new CacheDecorator<>(function, id);
+				timerDecorator = new TimerDecorator<>(cacheDecorator);
+
+				return (timerDecorator);
+			}
+		;
+		Invoker.setDecoratorInitializer(decoratorInitializer);
 		//Invoker invoker2 = Invoker.createInvoker(2);
 		//controller.registerInvoker(invoker2);
 		PolicyManager policyManager = new RoundRobin();
 		controller.addPolicyManager(policyManager);
 
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
-		controller.registerAction("suma", f1, 2);
+		controller.registerAction("suma", f1, 1);
 
 		try {
-			int result = (Integer) controller.invoke("sub", Map.of("x", 1, "y", 2));
+			int result = (Integer) controller.invoke("suma", Map.of("x", 1, "y", 2));
 			System.out.println(result);
 		}
 		catch (NoInvokerAvaiable e1) {
 			System.out.println(e1.getMessage());
+		}
+		catch (Exception e2) {
+			System.out.println(e2.getMessage());
 		}
 		controller.listActions();
 
@@ -82,8 +105,11 @@ public class Faas {
 		catch (NoInvokerAvaiable e1) {
 			System.out.println(e1.getMessage());
 		}
+		catch (Exception e2) {
+			System.out.println(e2.getMessage());
+		}
 		System.out.println("Start of time.");
-		controller.metrics.showTime("sub");
+		//controller.metrics.showTime("sub");
 		System.out.println("End of time.");
 
 		//test async
@@ -119,7 +145,9 @@ public class Faas {
 		catch (NoInvokerAvaiable e1) {
 			System.out.println(e1.getMessage());
 		}
-		*/
+		catch (Exception e2) {
+			System.out.println(e2.getMessage());
+		}
 
 		Invoker.printCache();
 

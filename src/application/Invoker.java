@@ -73,8 +73,9 @@ public class Invoker {
 	private long					ramUsed;
 	private ExecutorService 		executor;
 
-	private static List<Observer>	observers = new LinkedList<Observer>();
-	private static Controller		controller = null;
+	private static List<Observer>								observers = new LinkedList<Observer>();
+	private static Function<Action, Function<Object, Object>>	decoratorInitializer = null;
+	private static Controller									controller = null;
 	
 	/**
 	 * This method creates an Invoker.
@@ -142,6 +143,16 @@ public class Invoker {
 	}
 
 	/**
+	 * Adds an observer to the list of observers to be used by all invokers.
+	 * 
+	 * @param observer Observer that will be notified when a function is invoked.
+	 */
+	public static void setDecoratorInitializer(Function<Action, Function<Object, Object>> decoratorInitializer)
+	{
+		Invoker.decoratorInitializer = decoratorInitializer;
+	}
+
+	/**
 	 * Getter of the ram being used.
 	 * 
 	 * @return Ram being used.
@@ -173,15 +184,11 @@ public class Invoker {
 
 	//TODO: javadocs
 	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
-	private <T, R> Function<T, R> applyDecorators(Function<T, R> function, String id)
+	private <T, R> Function<T, R> applyDecorators(Action action)
 	{
-		Function<T, R>	timerDecorator;
-		Function<T, R>	cacheDecorator;
-
-		cacheDecorator = new CacheDecorator<>(function, id);
-		timerDecorator = new TimerDecorator<>(cacheDecorator);
-
-		return (timerDecorator);
+		if (Invoker.decoratorInitializer == null)
+			return ((Function<T, R>)action.getFunction());
+		return ((Function<T, R>)Invoker.decoratorInitializer.apply(action));
 	}
 
 	/**
@@ -243,7 +250,7 @@ public class Invoker {
 
 		metricsList = initializeAllObservers(id);
 
-		functionDecorated = (Function<T, R>) action.getFunction();//applyDecorators((Function<T, R>) action.getFunction(), id);
+		functionDecorated = applyDecorators(action);
 
 		//This breaks for some reason
 		//System.out.println(functionDecorated.toString());
@@ -265,7 +272,7 @@ public class Invoker {
 
 		metricsList = initializeAllObservers(id);
 
-		functionDecorated = applyDecorators((Function<T, R>) action.getFunction(), id);
+		functionDecorated = applyDecorators(action);
 
 		futureResult = executor.submit( 
 			() -> {

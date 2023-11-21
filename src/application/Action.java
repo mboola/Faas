@@ -6,10 +6,12 @@ public class Action{
 
 	private int		ram;
 	private Object	function;
+	private	String	id;
 
-	public Action(int ram, Object function) {
+	public Action(int ram, Object function, String id) {
 		this.ram = ram;
 		this.function = function;
+		this.id	= id;
 	}
 
 	public int getRam()
@@ -20,6 +22,11 @@ public class Action{
 	public Object getFunction()
 	{
 		return (this.function);
+	}
+
+	public String getId()
+	{
+		return (id);
 	}
 
 	public <T, R> R apply(T args)

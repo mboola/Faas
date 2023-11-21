@@ -53,7 +53,7 @@ public class Controller {
 	{
 		if ( hasMapAction(id) == null)
 		{
-			actions.put(id, new Action(ram, f));
+			actions.put(id, new Action(ram, f, id));
 			return ;
 		}
 		//TODO: throw error. already exists

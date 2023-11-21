@@ -1,9 +1,9 @@
 package decorator;
 import java.util.function.Function;
 
-public class Decorator<T, R> implements Function<T, R> {
+public abstract class Decorator<T, R> implements Function<T, R> {
 
-	private Function<T, R> function;
+	protected Function<T, R> function;
 
 	public Decorator(Function<T, R> function) {
 		super();
