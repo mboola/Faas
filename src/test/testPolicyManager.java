@@ -109,5 +109,95 @@ public class testPolicyManager {
 			result = 1;
 		assertEquals(result, 1);
 		assertEquals(err, 0);
+
+		// Now we will test with an odd number of threads: 5. The expected time should be 6 sec
+		currentTimeMillis = System.currentTimeMillis();
+		try {
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 5; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 2);
+				resList.add(fut);
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+		} catch (NoInvokerAvailable e1) {
+			err = 1;
+		} catch (Exception e) {
+			err = 2;
+		}
+		totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+		if (totalTime > 6500 || totalTime < 6000)
+			result = 0;
+		else
+			result = 1;
+		assertEquals(result, 1);
+		assertEquals(err, 0);
+
+		// Now we will test with an odd number of invokers and an even number of threads
+		// The execution time expected is of 4 seconds.
+		Invoker invoker3 = Invoker.createInvoker(1);
+		controller.registerInvoker(invoker3);
+
+		currentTimeMillis = System.currentTimeMillis();
+		try {
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 4; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 2);
+				resList.add(fut);
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+		} catch (NoInvokerAvailable e1) {
+			err = 1;
+		} catch (Exception e) {
+			err = 2;
+		}
+		totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+		if (totalTime > 4500 || totalTime < 4000)
+			result = 0;
+		else
+			result = 1;
+		assertEquals(result, 1);
+		assertEquals(err, 0);
+
+		// Now we will test with an odd number of invokers and an odd number of threads
+		// The execution time expected is of 2 seconds.
+
+		currentTimeMillis = System.currentTimeMillis();
+		try {
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 3; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 2);
+				resList.add(fut);
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+		} catch (NoInvokerAvailable e1) {
+			err = 1;
+		} catch (Exception e) {
+			err = 2;
+		}
+		totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+		if (totalTime > 2500 || totalTime < 2000)
+			result = 0;
+		else
+			result = 1;
+		assertEquals(result, 1);
+		assertEquals(err, 0);
 	}
 }
