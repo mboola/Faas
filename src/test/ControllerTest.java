@@ -19,7 +19,7 @@ import faas_exceptions.NoResultAvailable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
-public class testController {
+public class ControllerTest {
 
 	@Test
 	public void	controllerCreatedCorrectly()

@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import application.Invoker;
 
-public class testInvoker {
+public class InvokerTest {
 	@Test
 	public void	invokerCreatedCorrectly()
 	{

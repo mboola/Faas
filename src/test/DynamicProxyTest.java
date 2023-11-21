@@ -20,7 +20,7 @@ import faas_exceptions.NoInvokerAvailable;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
-public class testDynamicProxy {
+public class DynamicProxyTest {
 
 	@Test
 	public void	testDynamicProxySyncFunction()

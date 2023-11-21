@@ -17,7 +17,7 @@ import policy_manager.GreedyGroup;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
-public class testPolicyManager {
+public class PolicyManagerTest {
 
 	@Test
 	public void	testRoundRobin()
