@@ -22,8 +22,8 @@ public class RoundRobin implements PolicyManager{
 	}
 
 	//TODO: change this implementation to one more robust!!!!!! what happens if--
-	//TODO: --not all methods used in this invocation have the same time or if --
-	//TODO: --a invoker is removed from the list
+	//TODO: --not all methods used in this invocation have the same time (i dont care) or if --
+	//TODO: --a invoker is removed from the list while executing
 	@Override
 	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable
 	{

@@ -10,9 +10,8 @@ import java.util.function.Function;
 
 import decorator.CacheDecorator;
 import decorator.TimerDecorator;
-import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.NoResultAvailable;
+import policy_manager.GreedyGroup;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -44,7 +43,7 @@ public class Faas {
 		System.out.println("Err: " + err);
 		 */
 		
-		Controller controller = Controller.instantiate();
+		/*Controller controller = Controller.instantiate();
 		//Invoker.addObserver(new TimerObserver());
 		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
@@ -151,6 +150,54 @@ public class Faas {
 
 		Invoker.printCache();
 
+		controller.shutdownAllInvokers();*/
+
+		Controller controller = Controller.instantiate();
+		Invoker.setController(controller);
+		//Invoker invoker = Invoker.createInvoker(1);
+		//controller.registerInvoker(invoker);
+		PolicyManager policyManager = new GreedyGroup();
+		controller.addPolicyManager(policyManager);
+
+		Function<Integer, String> sleep = s -> {
+			try {
+				Thread.sleep(Duration.ofSeconds(s).toMillis());
+				return "Done!";
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		};
+		controller.registerAction("sleepAction", sleep, 1);
+
+		Invoker invoker3 = Invoker.createInvoker(2);
+		controller.registerInvoker(invoker3);
+		Invoker invoker4 = Invoker.createInvoker(2);
+		controller.registerInvoker(invoker4);
+
+		int err = 0;
+		long currentTimeMillis = System.currentTimeMillis();
+		try {
+			Future<String> fut;
+			List<Future<String>> resList = new LinkedList<Future<String>>();
+			for(int i = 0; i < 2; i++)
+			{
+				fut = controller.invoke_async("sleepAction", 2);
+				resList.add(fut);
+				controller.listInvokersRam();
+			}
+			List<String> stringsResult = new LinkedList<String>();
+			for (Future<String> future : resList) {
+				stringsResult.add(future.get());
+			}
+		} catch (NoInvokerAvailable e1) {
+			err = 1;
+		} catch (Exception e) {
+			err = 2;
+		}
+		long totalTime = System.currentTimeMillis() - currentTimeMillis;
+		System.out.println(totalTime);
+
 		controller.shutdownAllInvokers();
+
 	}
 }

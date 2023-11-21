@@ -136,6 +136,15 @@ public class Controller {
 		return (DynamicProxy.instantiate(action.getFunction()));
 	}
 
+	public void listInvokersRam()
+	{
+		int i = 1;
+		for (Invoker invoker:invokers) {
+			System.out.println("Invoker "+i+" ram: "+invoker.getAvailableRam());
+			i++;
+		}
+	}
+
 	public void shutdownAllInvokers()
 	{
 		for (Invoker invoker:invokers) {

@@ -8,8 +8,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import decorator.CacheDecorator;
-import decorator.TimerDecorator;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
