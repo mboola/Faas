@@ -55,7 +55,7 @@ public class GreedyGroup implements PolicyManager{
 			if (invoker.getMaxRam() >= ram)
 			{
 				hasEnoughRam = 1;
-				invRam = invoker.getAvaiableRam();
+				invRam = invoker.getAvailableRam();
 				if (invRam >= ram && invRam < lessRam)
 				{
 					lessRam = invRam;

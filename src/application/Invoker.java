@@ -167,7 +167,7 @@ public class Invoker {
 	 * 
 	 * @return Ram avaiable to use.
 	 */
-	public long	getAvaiableRam()
+	public long	getAvailableRam()
 	{
 		return (maxRam - ramUsed);
 	}
@@ -280,7 +280,7 @@ public class Invoker {
 
 				synchronized (this)
 				{
-					while (getAvaiableRam() - action.getRam() < 0)
+					while (getAvailableRam() - action.getRam() < 0)
 					{
 						try {
 							wait();
