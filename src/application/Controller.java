@@ -5,15 +5,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
+import RMI.InvokerInterface;
 import dynamic_proxy.DynamicProxy;
 import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvailable;
 import policy_manager.PolicyManager;
 
 public class Controller {
 	private Map<String, Action>	actions;
 	public MetricSet			metrics;
-	private List<Invoker>		invokers;
+	private List<InvokerInterface>		invokers;
 	private PolicyManager		policyManager;
 
 	public static Controller instantiate() {
@@ -22,13 +22,13 @@ public class Controller {
 		return (unicInstance);
 	}
 	protected Controller() {
-		invokers = new LinkedList<Invoker>();
+		invokers = new LinkedList<InvokerInterface>();
 		actions = new HashMap<String, Action>();
 		metrics = new MetricSet();
 	}
 	private static Controller unicInstance = null;
 
-	public void registerInvoker(Invoker invoker)
+	public void registerInvoker(InvokerInterface invoker)
 	{
 		//TODO: if invoker is already at list throw error
 		invokers.add(invoker);
@@ -73,14 +73,14 @@ public class Controller {
 		this.policyManager = policyManager;
 	}
 
-	private Invoker selectInvoker(int ram) throws NoInvokerAvailable
+	private InvokerInterface selectInvoker(int ram) throws Exception
 	{
 		return (policyManager.getInvoker(invokers, ram));
 	}
 
 	private <T, R> R getResult(Action action, T args, String id) throws Exception
 	{
-		Invoker	invoker;
+		InvokerInterface	invoker;
 
 		invoker = selectInvoker(action.getRam());
 		return (invoker.invoke(action, args, id));
@@ -136,18 +136,18 @@ public class Controller {
 		return (DynamicProxy.instantiate(action.getFunction()));
 	}
 
-	public void listInvokersRam()
+	public void listInvokersRam() throws Exception
 	{
 		int i = 1;
-		for (Invoker invoker:invokers) {
+		for (InvokerInterface invoker:invokers) {
 			System.out.println("Invoker "+i+" ram: "+invoker.getAvailableRam());
 			i++;
 		}
 	}
 
-	public void shutdownAllInvokers()
+	public void shutdownAllInvokers() throws Exception
 	{
-		for (Invoker invoker:invokers) {
+		for (InvokerInterface invoker:invokers) {
 			invoker.shutdownInvoker();
 		}
 	}

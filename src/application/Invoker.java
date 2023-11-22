@@ -8,13 +8,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import RMI.InvokerInterface;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
-public class Invoker {
-	//TODO: delete this!! used to debug whats happening. Not final, must delete:
-	private static int	numInvokers = 0;
-	private String 		id;
+public class Invoker implements InvokerInterface{
 
 	//not really sure but:
 	private static Map<String, List<PairValues>> cacheDecorator = new HashMap<String, List<PairValues>>();
@@ -66,7 +64,9 @@ public class Invoker {
 	//TODO: wtf is that above me???????????????
 	//all good here
 	private static final int 		MAX_THREADS = 8;
+	private static long				numInvokers = 0;
 
+	private String 					id;
 	private long					maxRam;
 	private long					ramUsed;
 	private ExecutorService 		executor;
@@ -103,8 +103,7 @@ public class Invoker {
 
 		executor = Executors.newFixedThreadPool(MAX_THREADS);
 
-		//TODO: delete this:
-		id = ((Integer)numInvokers).toString();
+		id = ((Long)numInvokers).toString();
 		numInvokers++;
 	}
 
@@ -148,6 +147,11 @@ public class Invoker {
 	public static void setDecoratorInitializer(Function<Action, Function<Object, Object>> decoratorInitializer)
 	{
 		Invoker.decoratorInitializer = decoratorInitializer;
+	}
+
+	public String getId()
+	{
+		return (id);
 	}
 
 	/**

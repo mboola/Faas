@@ -1,6 +1,7 @@
 package policy_manager;
 import java.util.List;
 
+import RMI.InvokerInterface;
 import application.Invoker;
 import faas_exceptions.NoInvokerAvailable;
 
@@ -25,9 +26,9 @@ public class RoundRobin implements PolicyManager{
 	//TODO: --not all methods used in this invocation have the same time (i dont care) or if --
 	//TODO: --a invoker is removed from the list while executing
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception
 	{
-		Invoker invoker;
+		InvokerInterface invoker;
 		int	lastInvokerUsed;
 		int	len;
 

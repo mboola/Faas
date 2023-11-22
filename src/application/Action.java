@@ -1,8 +1,9 @@
 package application;
 
+import java.io.Serializable;
 import java.util.function.Function;
 
-public class Action{
+public class Action implements Serializable{
 
 	private int		ram;
 	private Object	function;

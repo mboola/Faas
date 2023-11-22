@@ -1,11 +1,10 @@
 package policy_manager;
 import java.util.List;
 
-import application.Invoker;
-import faas_exceptions.NoInvokerAvailable;
+import RMI.InvokerInterface;
 
 public interface PolicyManager {
 
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable;
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception;
 
 }

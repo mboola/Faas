@@ -1,6 +1,7 @@
 package policy_manager;
 import java.util.List;
 
+import RMI.InvokerInterface;
 import application.Invoker;
 import faas_exceptions.NoInvokerAvailable;
 
@@ -36,8 +37,8 @@ public class UniformGroup implements PolicyManager{
      * @throws NoInvokerAvailable If no suitable Invoker can be found within the specified retries.
      */
     @Override
-    public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable {
-        Invoker invoker = invokers.get(lastInvokerAssigned);
+    public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception {
+        InvokerInterface invoker = invokers.get(lastInvokerAssigned);
 
         if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
         

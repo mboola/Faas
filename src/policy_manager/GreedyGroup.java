@@ -2,7 +2,7 @@ package policy_manager;
 
 import java.util.List;
 
-import application.Invoker;
+import RMI.InvokerInterface;
 import faas_exceptions.NoInvokerAvailable;
 
 public class GreedyGroup implements PolicyManager{
@@ -22,7 +22,7 @@ public class GreedyGroup implements PolicyManager{
 			return (0);
 	}
 
-	private	Invoker getNextInvokerList(List<Invoker> invokers)
+	private	InvokerInterface getNextInvokerList(List<InvokerInterface> invokers)
 	{
 		lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
 		return (invokers.get(lastInvokerAssigned));
@@ -30,7 +30,7 @@ public class GreedyGroup implements PolicyManager{
 	}
 
 	@Override
-	public Invoker getInvoker(List<Invoker> invokers, int ram) throws NoInvokerAvailable {
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception {
 		//conceptualment, aquest metode ha de omplir al maxim un invoker abans d-avan\ar al seguent
 		//pero la llista d'invokers pot variar. o pot ser que tingui una referencia a un invoker
 		//que esta omplint pero encara li queda i un altre que ja ha omplert es buida i te la mida
@@ -51,7 +51,7 @@ public class GreedyGroup implements PolicyManager{
 		lessRam = Long.MAX_VALUE;
 		i = 0;
 		hasEnoughRam = 0;
-		for (Invoker invoker : invokers) {
+		for (InvokerInterface invoker : invokers) {
 			if (invoker.getMaxRam() >= ram)
 			{
 				hasEnoughRam = 1;
