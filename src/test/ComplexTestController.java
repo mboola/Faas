@@ -77,7 +77,13 @@ public class ComplexTestController {
 		}
 		assertSame(action, controller.getAction("addAction"));
 
-		//TODO: here check if it can be invoked correctly
+		Integer result = 0;
+		try {
+			result = (Integer) controller.invoke("addAction", Map.of("x", 2, "y", 1));
+		} catch (Exception e1) {
+			assertTrue(false);
+		}
+		assertEquals(result, 3);
 	}
 
 	@Test
