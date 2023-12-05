@@ -7,37 +7,88 @@ import java.util.concurrent.Future;
 
 import RMI.InvokerInterface;
 import dynamic_proxy.DynamicProxy;
+import faas_exceptions.InvokerNotValid;
 import faas_exceptions.NoActionRegistered;
 import policy_manager.PolicyManager;
 
 public class Controller {
 	private Map<String, Action>	actions;
 	public MetricSet			metrics;
-	private List<InvokerInterface>		invokers;
-	private PolicyManager		policyManager;
 
+	/**
+	 * List of invokers used for executing functions. This will be implementations of the interface InvokerInterface.
+	 * <p>The implementations of InvokerInterface can be:</p>
+	 * <ul>
+	 * 	<li>An Invoker that executes functions.</li>
+	 *	<li>An Invoker that executes functions and has invokers inside of him that executes functions.</li>
+	 *	<li>A ServerInvoker that executes functions remotly.</li>
+	 * </ul>
+	 */
+	private List<InvokerInterface>	invokers;
+
+	/**
+	 * Policy used to select an invoker from invokers to execute a function.
+	 */
+	private PolicyManager	policyManager;
+
+	/**
+	 * The instance used to limit the instantiation of Controller class.
+	 */
+	private static Controller	unicInstance = null;
+
+	/**
+	 * Checks if the instance is null, and creates one if it is.
+	 * 
+	 * @return The singleton instance of Controller. 
+	 */
 	public static Controller instantiate() {
 		if (unicInstance == null)
 			unicInstance = new Controller();
 		return (unicInstance);
 	}
-	protected Controller() {
+
+	/**
+	 * Constructs a new instance of Controller and instantiates all the structs it uses.
+	 */
+	private Controller() {
 		invokers = new LinkedList<InvokerInterface>();
 		actions = new HashMap<String, Action>();
 		metrics = new MetricSet();
 	}
-	private static Controller unicInstance = null;
 
-	public void registerInvoker(InvokerInterface invoker)
+	/**
+	 * Adds the implementation of InvokerInterface to the list of registered invokers.
+	 * 
+	 * @param invoker The InvokerInterface to be registered.
+	 * @throws InvokerNotValid if the invoker passed as a parameter is null or is already inside the list.
+	 */
+	public void registerInvoker(InvokerInterface invoker) throws InvokerNotValid
 	{
-		//TODO: if invoker is already at list throw error
+		if (invoker == null) throw new InvokerNotValid("Invoker to register cannot be null.");
+		if (invokers.contains(invoker)) throw new InvokerNotValid("Invoker is already registered.");
 		invokers.add(invoker);
 	}
 
-	public void deleteInvoker(Invoker invoker)
+	/**
+	 * Removes the implementation of InvokerInterface from the list of registered invokers.
+	 * 
+	 * @param invoker The InvokerInterface to be removed.
+	 * @throws InvokerNotValid if the invoker passed as a parameter is null or is not inside the list.
+	 */
+	public void deleteInvoker(InvokerInterface invoker) throws InvokerNotValid
 	{
-		//TODO: if invoker is not in the list throw error
+		if (invoker == null) throw new InvokerNotValid("Invoker to delete cannot be null.");
+		if (!invokers.contains(invoker)) throw new InvokerNotValid("Invoker is not registered.");
 		invokers.remove(invoker);
+	}
+
+	/**
+	 * Getter of the list of type InvokerInterface named invokers.
+	 * //TODO: name this differently.
+	 */
+	public List<InvokerInterface>	getInvokerInterfaces()
+	{
+		return (invokers);
 	}
 
 	/* Used to search if we already have this action in our map */

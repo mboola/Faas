@@ -21,7 +21,7 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	public static void main(String[] args) {
 		try {
 			ServerInvoker obj = new ServerInvoker();
-			Registry registry = LocateRegistry.createRegistry(1099);
+			Registry registry = LocateRegistry.createRegistry(Integer.valueOf(args[0]));
 			//registry.rebind("Invoker"+obj.invoker.getId(), obj);
 			registry.rebind("Invoker", obj);
 

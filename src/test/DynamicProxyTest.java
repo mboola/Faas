@@ -54,8 +54,6 @@ public class DynamicProxyTest {
 		}
 		assertEquals(err, 0);
 		assertEquals(result, 3);
-
-		CalculatorProxy calc = app.getProxy("");
 	}
 
 	@Test

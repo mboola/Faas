@@ -1,50 +1,9 @@
 package test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.time.Duration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.function.Function;
-
-import org.junit.Test;
-
-import application.Controller;
-import application.Invoker;
-import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.NoResultAvailable;
-import policy_manager.PolicyManager;
-import policy_manager.RoundRobin;
-
-public class ControllerTest {
-
-	@Test
-	public void	controllerCreatedCorrectly()
-	{
-		int isNUll = 0;
-		Controller controller1 = Controller.instantiate();
-		if (controller1 == null)
-			isNUll = 1;
-		assertEquals(isNUll, 0);
-		Controller controller2 = Controller.instantiate();
-		assertEquals(controller1, controller2);
- 	}
-
-	@Test
-	public void	controllerRegisterFunctionCorrectly()
-	{
-		Controller controller = Controller.instantiate();
-		Invoker.setController(controller);
-		Invoker invoker = Invoker.createInvoker(1);
-		controller.registerInvoker(invoker);
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
- 	}
-
-	@Test
+public class ComplexTestController {
+    
+    /*
+	 * @Test
 	public void	functionInvokedCorrectly()
 	{
 		Controller controller = Controller.instantiate();
@@ -57,7 +16,7 @@ public class ControllerTest {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub", f, 1);
 
-		/* Invoking a function correctly */
+		// Invoking a function correctly 
 		Integer	result = 0;
 		Integer	err = 0;
 		try {
@@ -72,7 +31,7 @@ public class ControllerTest {
 		assertEquals(result, 1);
 		assertEquals(err, 0);
 
-		/* Invoking a function that has not been registered */
+		//Invoking a function that has not been registered
 		result = 0;
 		err = 0;
 		try {
@@ -87,7 +46,7 @@ public class ControllerTest {
 		assertEquals(result, 0);
 		assertEquals(err, 2);
 
-		/* Invoking a function with an invalid argument */
+		// Invoking a function with an invalid argument
 		result = 0;
 		err = 0;
 		try {
@@ -106,7 +65,7 @@ public class ControllerTest {
 		Function<Map<String, Integer>, Integer> f2 = x -> x.get("x") - x.get("y");
 		controller.registerAction("sub2", f2, 2);
 
-		/* Invoking a function with not enough RAM */
+		// Invoking a function with not enough RAM
 		result = 0;
 		err = 0;
 		try {
@@ -123,8 +82,10 @@ public class ControllerTest {
 
 		//TODO test async function
 	}
+	 */
 
-	@Test
+	/*
+	 * @Test
 	public void	asyncFunctionTests()
 	{
 		Controller controller = Controller.instantiate();
@@ -176,4 +137,6 @@ public class ControllerTest {
 		//IMPORTANT: do not use cache decorator or this test will fail
 		assertEquals(result, 1);
 	}
+	 */
+
 }

@@ -12,6 +12,9 @@ import RMI.InvokerInterface;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
+
+//TODO: in order to comply with composite this should be an abstractClass
+//this class will not have 
 public class Invoker implements InvokerInterface{
 
 	//not really sure but:
@@ -25,6 +28,7 @@ public class Invoker implements InvokerInterface{
 	 * @return 
 	 * @throws NoResultAvailable
 	 */
+	//TODO: change list<PairValues> to Map<T, R>
 	public static<T, R> R getResult(String id, T args) throws NoResultAvailable
 	{
 		List<PairValues> list = Invoker.cacheDecorator.get(id);
@@ -70,6 +74,8 @@ public class Invoker implements InvokerInterface{
 	private long					maxRam;
 	private long					ramUsed;
 	private ExecutorService 		executor;
+
+	private List<InvokerInterface>	invokers;
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
 	private static Function<Action, Function<Object, Object>>	decoratorInitializer = null;
