@@ -2,9 +2,8 @@ package policy_manager;
 
 import java.util.List;
 
-import RMI.InvokerInterface;
-import application.Invoker;
 import faas_exceptions.NoInvokerAvailable;
+import invoker.InvokerInterface;
 
 public class BigGroup implements PolicyManager{
 
@@ -13,7 +12,7 @@ public class BigGroup implements PolicyManager{
     private int lastInvokerAssigned;
     private int count;
     private int retryCount;
-    private int totalRamConsumed; // Variable global que almacena la RAM consumida total del grupo anterior
+    private long totalRamConsumed; // Variable global que almacena la RAM consumida total del grupo anterior
 
     public BigGroup() {
         groupSize = 2;
@@ -24,7 +23,7 @@ public class BigGroup implements PolicyManager{
     }
     
     @Override
-    public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception {
+    public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception {
         InvokerInterface invoker = invokers.get(lastInvokerAssigned);
 
         if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");

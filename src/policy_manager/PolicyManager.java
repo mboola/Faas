@@ -1,10 +1,10 @@
 package policy_manager;
 import java.util.List;
 
-import RMI.InvokerInterface;
+import invoker.InvokerInterface;
 
 public interface PolicyManager {
 
-	public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception;
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception;
 
 }

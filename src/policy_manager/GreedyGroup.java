@@ -2,8 +2,8 @@ package policy_manager;
 
 import java.util.List;
 
-import RMI.InvokerInterface;
 import faas_exceptions.NoInvokerAvailable;
+import invoker.InvokerInterface;
 
 public class GreedyGroup implements PolicyManager{
 
@@ -30,7 +30,7 @@ public class GreedyGroup implements PolicyManager{
 	}
 
 	@Override
-	public InvokerInterface getInvoker(List<InvokerInterface> invokers, int ram) throws Exception {
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception {
 		//conceptualment, aquest metode ha de omplir al maxim un invoker abans d-avan\ar al seguent
 		//pero la llista d'invokers pot variar. o pot ser que tingui una referencia a un invoker
 		//que esta omplint pero encara li queda i un altre que ja ha omplert es buida i te la mida

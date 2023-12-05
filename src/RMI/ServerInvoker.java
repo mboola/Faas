@@ -7,7 +7,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Future;
 
 import application.Action;
-import application.Invoker;
+import invoker.Invoker;
+import invoker.InvokerInterface;
 
 public class ServerInvoker extends UnicastRemoteObject implements InvokerInterface {
 

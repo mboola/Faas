@@ -1,8 +1,8 @@
 package decorator;
 import java.util.function.Function;
 
-import application.Invoker;
 import faas_exceptions.NoResultAvailable;
+import invoker.Invoker;
 
 public class CacheDecorator<T, R> extends Decorator<T, R>{
 

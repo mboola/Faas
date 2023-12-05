@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import application.Invoker;
+import invoker.Invoker;
 
 public class InvokerTest {
 	@Test

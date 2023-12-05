@@ -10,13 +10,13 @@ import java.util.function.Function;
 import org.junit.Test;
 
 import application.Controller;
-import application.Invoker;
 import dynamic_proxy.proxies.Calculator;
 import dynamic_proxy.proxies.CalculatorProxy;
 import dynamic_proxy.proxies.Timer;
 import dynamic_proxy.proxies.TimerProxy;
 import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoInvokerAvailable;
+import invoker.Invoker;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 

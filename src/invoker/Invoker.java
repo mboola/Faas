@@ -1,4 +1,4 @@
-package application;
+package invoker;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,7 +8,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import RMI.InvokerInterface;
+import application.Action;
+import application.Controller;
+import application.Invokable;
+import application.Metric;
+import application.PairValues;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
@@ -75,10 +79,10 @@ public class Invoker implements InvokerInterface{
 	private long					ramUsed;
 	private ExecutorService 		executor;
 
-	private List<InvokerInterface>	invokers;
+	private List<InvokerInterface>	invokers; //???
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
-	private static Function<Action, Function<Object, Object>>	decoratorInitializer = null;
+	private static Function<Invokable, Function<Object, Object>>	decoratorInitializer = null;
 	private static Controller									controller = null;
 	
 	/**
@@ -150,7 +154,7 @@ public class Invoker implements InvokerInterface{
 	 * 
 	 * @param observer Observer that will be notified when a function is invoked.
 	 */
-	public static void setDecoratorInitializer(Function<Action, Function<Object, Object>> decoratorInitializer)
+	public static void setDecoratorInitializer(Function<Invokable, Function<Object, Object>> decoratorInitializer)
 	{
 		Invoker.decoratorInitializer = decoratorInitializer;
 	}
@@ -192,11 +196,11 @@ public class Invoker implements InvokerInterface{
 
 	//TODO: javadocs
 	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
-	private <T, R> Function<T, R> applyDecorators(Action action)
+	private <T, R> Function<T, R> applyDecorators(Invokable invokable)
 	{
 		if (Invoker.decoratorInitializer == null)
-			return ((Function<T, R>)action.getFunction());
-		return ((Function<T, R>)Invoker.decoratorInitializer.apply(action));
+			return ((Function<T, R>)invokable.getInvokable());
+		return ((Function<T, R>)Invoker.decoratorInitializer.apply(invokable));
 	}
 
 	/**
@@ -250,7 +254,7 @@ public class Invoker implements InvokerInterface{
 	 * @throws Exception //TODO: i dont remember
 	 */
 	@SuppressWarnings({"unchecked"})
-	public <T, R> R invoke(Action action, T args, String id) throws Exception
+	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
 		R									result;
@@ -258,7 +262,7 @@ public class Invoker implements InvokerInterface{
 
 		metricsList = initializeAllObservers(id);
 
-		functionDecorated = applyDecorators(action);
+		functionDecorated = applyDecorators(invokable);
 
 		//This breaks for some reason
 		//System.out.println(functionDecorated.toString());
@@ -272,7 +276,7 @@ public class Invoker implements InvokerInterface{
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
 	@SuppressWarnings({"unchecked"})
-	public <T, R> Future<R> invokeAsync(Action action, T args, String id) throws Exception
+	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
 		HashMap<Observer, Metric<Object>>	metricsList;
@@ -280,7 +284,7 @@ public class Invoker implements InvokerInterface{
 
 		metricsList = initializeAllObservers(id);
 
-		functionDecorated = applyDecorators(action);
+		functionDecorated = applyDecorators(invokable);
 
 		futureResult = executor.submit( 
 			() -> {
@@ -288,7 +292,7 @@ public class Invoker implements InvokerInterface{
 
 				synchronized (this)
 				{
-					while (getAvailableRam() - action.getRam() < 0)
+					while (getAvailableRam() - invokable.getRam() < 0)
 					{
 						try {
 							wait();
@@ -296,12 +300,12 @@ public class Invoker implements InvokerInterface{
 							Thread.currentThread().interrupt();
 						}
 					}
-					ramUsed += action.getRam();
+					ramUsed += invokable.getRam();
 				}
 				result = functionDecorated.apply(args);
 				synchronized (this)
 				{
-					ramUsed -= action.getRam();
+					ramUsed -= invokable.getRam();
 					notify();
 				}
 				return (result);

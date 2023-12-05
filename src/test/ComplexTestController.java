@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
@@ -13,9 +14,9 @@ import org.junit.Test;
 import action.Action;
 import action.AddAction;
 import application.Controller;
-import application.Invoker;
 import dynamic_proxy.proxies.Calculator;
 import faas_exceptions.OperationNotValid;
+import invoker.Invoker;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -91,7 +92,13 @@ public class ComplexTestController {
 		}
 		assertSame(f, controller.getAction("sub"));
 
-		//TODO: here check if it can be invoked correctly
+		Integer result = 0;
+		try {
+			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+		} catch (Exception e1) {
+			assertTrue(false);
+		}
+		assertEquals(result, 1);
 	}
 
 	@Test

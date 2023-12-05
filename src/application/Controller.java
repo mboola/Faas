@@ -5,10 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
 
-import RMI.InvokerInterface;
 import dynamic_proxy.DynamicProxy;
 import faas_exceptions.NoActionRegistered;
+import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.OperationNotValid;
+import invoker.InvokerInterface;
 import policy_manager.PolicyManager;
 
 public class Controller {
@@ -154,10 +155,95 @@ public class Controller {
 		invokables.remove(id);
 	}
 
+	/**
+	 * Gets the invokable stored with the id passed as a parameter.
+	 * 
+	 * @param id Id of the invokable to get.
+	 * @return The invokable or null if none was found.
+	 */
 	public Object getAction(String id)
 	{
 		if (id == null) return (null);
 		return (invokables.get(id).getInvokable());
+	}
+
+	/**
+	 * Method used to select a invoker to execute a function based on the ram it consumes and the policy we have assigned.
+	 * @param ram
+	 * @return
+	 * @throws Exception <p>The exception can be caused because:</p>
+	 * <ul>
+	 * 	<li>NoPolicyManagerRegistered: There is no policyManager registered.</li>
+	 * 	<li>NoInvokerAvailable: There is no invoker with enough max ram to execute the invokable.</li>
+	 *  <li>Exeption: something goes wrong with RMI.</li>
+	 * </ul>
+	 */
+	private InvokerInterface selectInvoker(long ram) throws Exception
+	{
+		if (policyManager == null) throw new NoPolicyManagerRegistered("There isn't a policy manager registered.");
+		return (policyManager.getInvoker(invokers, ram));
+	}
+
+	/**
+	 * Method used by invokations to get the invokable.
+	 * 
+	 * @param id Identifier of the invokable.
+	 * @return The invokable or null if none was found.
+	 */
+	private Invokable getInvokable(String id)
+	{
+		if ( invokables.isEmpty() )
+			return (null);
+		return (invokables.get(id));
+	}
+
+	/**
+	 * Method used by invokations to get an invoker to execute code and then execute it.
+	 * 
+	 * @param <T> Datatype of the parameters of the function to be invoked.
+	 * @param <R> Datatype of the return of the function to be invoked.
+	 * @param invokable Function to be invoked.
+	 * @param id Identifier of the invokable to be invoked.
+	 * @param args Parameters of the invokable.
+	 * @return Result of the invokation of the invokable.
+	 * @throws Exception <p>The exception can be caused because:</p>
+	 * <ul>
+	 * 	<li>There is no invoker with enough max ram to execute the invokable.</li>
+	 * 	<li>Something goes wrong when executing the invokable.</li>
+	 * </ul>
+	 */
+	private <T, R> R getResult(Invokable invokable, String id, T args) throws Exception
+	{
+		InvokerInterface	invoker;
+
+		invoker = selectInvoker(invokable.getRam());
+		return (invoker.invoke(invokable, args, id));
+	}
+
+	/**
+	 * Searches a invokable with the id passed as a parameter and invokes it with args as a parameters.
+	 * 
+	 * @param <T> Datatype of the parameters of the function to be invoked.
+	 * @param <R> Datatype of the return of the function to be invoked.
+	 * @param id Identifier of the invokable to be invoked.
+	 * @param args Parameters of the invokable.
+	 * @return Result of the invokation of the invokable.
+	 * @throws Exception <p>The exception can be caused because:</p>
+	 * <ul>
+	 *  <li>The id passed as a parameter is null.</li>
+	 *  <li>There is no invokable found with the id passed as a parameter.</li>
+	 * 	<li>There is no invoker with enough max ram to run execute the invokable.</li>
+	 * 	<li>Something goes wrong when executing the invokable.</li>
+	 * </ul>
+	 */
+	public <T, R> R invoke(String id, T args) throws Exception
+	{
+		Invokable	invokable;
+
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		invokable = getInvokable(id);
+		if (invokable == null) throw new OperationNotValid("There are no invokables registered with the id" + id);
+		return (getResult(invokable, id, args));
 	}
 
 	public Object getActionProxy(String id) throws Exception
@@ -201,29 +287,6 @@ public class Controller {
 	public void	addPolicyManager(PolicyManager policyManager)
 	{
 		this.policyManager = policyManager;
-	}
-
-	private InvokerInterface selectInvoker(int ram) throws Exception
-	{
-		return (policyManager.getInvoker(invokers, ram));
-	}
-
-	private <T, R> R getResult(Action action, T args, String id) throws Exception
-	{
-		InvokerInterface	invoker;
-
-		invoker = selectInvoker(action.getRam());
-		return (invoker.invoke(action, args, id));
-	}
-
-	public <T, R> R invoke(String id, T args) throws Exception
-	{
-		Action	action;
-
-		action = hasMapAction(id);
-		if ( action == null )
-			throw new NoActionRegistered("There are no actions with the id" + id);
-		return (getResult(action, args, id));
 	}
 
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception

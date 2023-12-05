@@ -1,10 +1,11 @@
-package RMI;
+package invoker;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.concurrent.Future;
 
 import application.Action;
+import application.Invokable;
 
 public interface InvokerInterface extends Remote {
 
@@ -40,12 +41,12 @@ public interface InvokerInterface extends Remote {
 	 * @return The result of the function invoked, of type R
 	 * @throws Exception //TODO: i dont remember
 	 */
-	public <T, R> R invoke(Action action, T args, String id) throws Exception;
+	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception;
 
 	//TODO: javadoc this
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
-	public <T, R> Future<R> invokeAsync(Action action, T args, String id) throws Exception;
+	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception;
 
 	/**
 	 * This shuts down the executor of the Invoker. Must be called when the application finishes.

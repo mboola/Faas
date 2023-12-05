@@ -11,8 +11,8 @@ import java.util.function.Function;
 import org.junit.Test;
 
 import application.Controller;
-import application.Invoker;
 import faas_exceptions.NoInvokerAvailable;
+import invoker.Invoker;
 import policy_manager.GreedyGroup;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;

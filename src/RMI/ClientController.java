@@ -9,8 +9,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 import application.Controller;
-import application.Invoker;
 import faas_exceptions.NoInvokerAvailable;
+import invoker.Invoker;
+import invoker.InvokerInterface;
 import policy_manager.GreedyGroup;
 import policy_manager.PolicyManager;
 

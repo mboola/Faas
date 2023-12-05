@@ -8,10 +8,10 @@ import org.junit.Test;
 
 import java.util.List;
 
-import RMI.InvokerInterface;
 import application.Controller;
-import application.Invoker;
 import faas_exceptions.OperationNotValid;
+import invoker.Invoker;
+import invoker.InvokerInterface;
 
 /**
  * The BasicTestController class contains basic test cases for the Controller class.

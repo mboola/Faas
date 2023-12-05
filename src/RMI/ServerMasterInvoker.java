@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
-import application.Invoker;
+import invoker.Invoker;
 
 /*
  * This class is different from ServerInvoker. ServerInvoker only creates an invoker but doesn't
