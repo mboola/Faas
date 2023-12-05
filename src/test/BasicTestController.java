@@ -11,8 +11,12 @@ import java.util.List;
 import RMI.InvokerInterface;
 import application.Controller;
 import application.Invoker;
-import faas_exceptions.InvokerNotValid;
+import faas_exceptions.OperationNotValid;
 
+/**
+ * The BasicTestController class contains basic test cases for the Controller class.
+ * Checks correct instantiation of Controller and registration of invokers.
+ */
 public class BasicTestController {
 
 	private Controller controller;
@@ -46,12 +50,12 @@ public class BasicTestController {
 	@Test
 	public void	testRegisterInvokerCorrecly()
 	{
-		assertThrows(InvokerNotValid.class, () -> controller.registerInvoker(null));
+		assertThrows(OperationNotValid.class, () -> controller.registerInvoker(null));
 		Invoker invoker = Invoker.createInvoker(1);
 		try {
 			controller.registerInvoker(invoker);
-			assertThrows(InvokerNotValid.class, () -> controller.registerInvoker(invoker));
-		} catch (InvokerNotValid e) {
+			assertThrows(OperationNotValid.class, () -> controller.registerInvoker(invoker));
+		} catch (OperationNotValid e) {
 		}
 		List<InvokerInterface> invokers = controller.getInvokerInterfaces();
 		assertTrue(invokers.contains(invoker));
@@ -64,13 +68,13 @@ public class BasicTestController {
 	@Test
 	public void	testDeleteInvokerCorrecly()
 	{
-		assertThrows(InvokerNotValid.class, () -> controller.deleteInvoker(null));
+		assertThrows(OperationNotValid.class, () -> controller.deleteInvoker(null));
 		Invoker invoker = Invoker.createInvoker(1);
-		assertThrows(InvokerNotValid.class, () -> controller.deleteInvoker(invoker));
+		assertThrows(OperationNotValid.class, () -> controller.deleteInvoker(invoker));
 		try {
 			controller.registerInvoker(invoker);
 			controller.deleteInvoker(invoker);
-		} catch (InvokerNotValid e) {
+		} catch (OperationNotValid e) {
 		}
 		List<InvokerInterface> invokers = controller.getInvokerInterfaces();
 		assertTrue(!invokers.contains(invoker));

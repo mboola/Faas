@@ -7,13 +7,18 @@ import java.util.concurrent.Future;
 
 import RMI.InvokerInterface;
 import dynamic_proxy.DynamicProxy;
-import faas_exceptions.InvokerNotValid;
 import faas_exceptions.NoActionRegistered;
+import faas_exceptions.OperationNotValid;
 import policy_manager.PolicyManager;
 
 public class Controller {
 	private Map<String, Action>	actions;
 	public MetricSet			metrics;
+
+	/**
+	 * List of invokables our controller has.	//TODO: extend this explanation
+	 */
+	private Map<String, Invokable>	invokables;
 
 	/**
 	 * List of invokers used for executing functions. This will be implementations of the interface InvokerInterface.
@@ -52,6 +57,7 @@ public class Controller {
 	 */
 	private Controller() {
 		invokers = new LinkedList<InvokerInterface>();
+		invokables = new HashMap<String, Invokable>();
 		actions = new HashMap<String, Action>();
 		metrics = new MetricSet();
 	}
@@ -60,12 +66,12 @@ public class Controller {
 	 * Adds the implementation of InvokerInterface to the list of registered invokers.
 	 * 
 	 * @param invoker The InvokerInterface to be registered.
-	 * @throws InvokerNotValid if the invoker passed as a parameter is null or is already inside the list.
+	 * @throws OperationNotValid If the invoker passed as a parameter is null or is already inside the list.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws InvokerNotValid
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid
 	{
-		if (invoker == null) throw new InvokerNotValid("Invoker to register cannot be null.");
-		if (invokers.contains(invoker)) throw new InvokerNotValid("Invoker is already registered.");
+		if (invoker == null) throw new OperationNotValid("Invoker to register cannot be null.");
+		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
 		invokers.add(invoker);
 	}
 
@@ -73,12 +79,12 @@ public class Controller {
 	 * Removes the implementation of InvokerInterface from the list of registered invokers.
 	 * 
 	 * @param invoker The InvokerInterface to be removed.
-	 * @throws InvokerNotValid if the invoker passed as a parameter is null or is not inside the list.
+	 * @throws OperationNotValid If the invoker passed as a parameter is null or is not inside the list.
 	 */
-	public void deleteInvoker(InvokerInterface invoker) throws InvokerNotValid
+	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid
 	{
-		if (invoker == null) throw new InvokerNotValid("Invoker to delete cannot be null.");
-		if (!invokers.contains(invoker)) throw new InvokerNotValid("Invoker is not registered.");
+		if (invoker == null) throw new OperationNotValid("Invoker to delete cannot be null.");
+		if (!invokers.contains(invoker)) throw new OperationNotValid("Invoker is not registered.");
 		invokers.remove(invoker);
 	}
 
@@ -90,6 +96,79 @@ public class Controller {
 	{
 		return (invokers);
 	}
+	
+	/**
+	 * Checks if the id of the object we are trying to register is already registered.
+	 * 
+	 * @param id The id of the object we are trying to register.
+	 * @return False if the map is empty or the id doesn't exists in it. True if it does.
+	 */
+	private boolean	isAlreadyRegistered(String id)
+	{
+		if (invokables.isEmpty())
+			return (false);
+		return (invokables.get(id) != null);
+	}
+
+	/**
+	 * Tries to register an action.
+	 * 
+	 * <p>The action to register can be:</p>
+	 * <ul>
+	 * 	<li>A Function<T, R>.</li>
+	 * 	<li>An implementation of the interface Action<T, R>.</li>
+	 * 	<li>A class with methods that will be used in reflection. TODO: change this case explanation</li>
+	 * </ul>
+	 * @param id The id of the object to be registered.
+	 * @param invokable The object that can be invoked.
+	 * @param ram The ram in MegaBytes this invokation will consume.
+	 * @throws OperationNotValid <p>The exception can be caused because:</p>
+	 * <ul>
+	 * 	<li>The object we are tring to register is null.</li>
+	 * 	<li>The id we are tring to register is null.</li>
+	 * 	<li>The id we are tring to register already exists.</li>
+	 * </ul>
+	 */
+	public void registerAction(String id, Object invokable, long ram) throws OperationNotValid
+	{
+		if (invokable == null) throw new OperationNotValid("Invokable registered cannot be null.");
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		if (isAlreadyRegistered(id)) throw new OperationNotValid("Invokable already registered.");
+		invokables.put(id, new Invokable(id, invokable, ram));
+	}
+
+	/**
+	 * Tries to delete an action.
+	 * 
+	 * @param id The id of the object to be deleted.
+	 * @throws OperationNotValid <p>The exception can be caused because:</p>
+	 * <ul>
+	 * 	<li>The id of the object we are tring to delete is null.</li>
+	 * 	<li>The id of the object we are tring to delete doesn't exists in the map.</li>
+	 * </ul>
+	 */
+	public void removeAction(String id) throws OperationNotValid
+	{
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		if (!isAlreadyRegistered(id)) throw new OperationNotValid("There are no actions with the id" + id);
+		invokables.remove(id);
+	}
+
+	public Object getAction(String id)
+	{
+		if (id == null) return (null);
+		return (invokables.get(id).getInvokable());
+	}
+
+	public Object getActionProxy(String id) throws Exception
+	{
+		Action action = hasMapAction(id);
+		if ( action == null )
+			throw new NoActionRegistered("There are no actions with the id" + id);
+		return (DynamicProxy.instantiate(action.getFunction()));
+	}
+
+	//TODO: javadoc all below this
 
 	/* Used to search if we already have this action in our map */
 	public Action hasMapAction(String id)
@@ -169,22 +248,6 @@ public class Controller {
 		if ( action == null )
 			throw new NoActionRegistered("There are no actions with the id" + id);
 		return (selectInvoker(action.getRam()).invokeAsync(action, args, id));
-	}
-
-	public void removeAction(String id) throws Exception
-	{
-		if ( hasMapAction(id) == null )
-			throw new NoActionRegistered("There are no actions with the id" + id);
-		else
-			actions.remove(id);
-	}
-
-	public Object getAction(String id) throws Exception
-	{
-		Action action = hasMapAction(id);
-		if ( action == null )
-			throw new NoActionRegistered("There are no actions with the id" + id);
-		return (DynamicProxy.instantiate(action.getFunction()));
 	}
 
 	public void listInvokersRam() throws Exception

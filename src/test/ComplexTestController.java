@@ -1,7 +1,112 @@
 package test;
 
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Map;
+import java.util.function.Function;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import action.Action;
+import action.AddAction;
+import application.Controller;
+import application.Invoker;
+import dynamic_proxy.proxies.Calculator;
+import faas_exceptions.OperationNotValid;
+import policy_manager.PolicyManager;
+import policy_manager.RoundRobin;
+
+/**
+ * The BasicTestController class contains more complex test cases for the Controller class.
+ * Checks correct registration and invokation of actions and functions.
+ * Also checks correct registration of classes.
+ */
 public class ComplexTestController {
     
+	private Controller controller;
+
+	/*
+	 * This gets called before each Test. 
+	 * We instantiate a controller with basic components so it can work.
+	 * (for some reason BeforeEach couldn't be used)
+	 */
+	@Before
+	public void	controllerInitialization()
+	{
+		controller = Controller.instantiate();
+		Invoker.setController(controller);
+		Invoker invoker = Invoker.createInvoker(1);
+		try {
+			controller.registerInvoker(invoker);
+		} catch (OperationNotValid e) {
+			assertTrue(false);
+		}
+		PolicyManager policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
+		System.out.println("Controller instantiated");
+	}
+
+	@Test
+	public void	testCheckThrows()
+	{
+		long ram = 1;
+		assertThrows(OperationNotValid.class, () -> controller.registerAction("id", null, ram));
+		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
+		assertThrows(OperationNotValid.class, () -> controller.registerAction(null, f, ram));
+		try {
+			controller.registerAction("test", f, ram);
+			assertThrows(OperationNotValid.class, () -> controller.registerAction("test", f, ram));
+		} catch (OperationNotValid e) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	public void testRegisterAction()
+	{
+		long ram = 1;
+		Action<Map<String, Integer>, Integer> action = new AddAction();
+		try {
+			controller.registerAction("addAction", action, ram);
+		} catch (OperationNotValid e) {
+			assertTrue(false);
+		}
+		assertSame(action, controller.getAction("addAction"));
+
+		//TODO: here check if it can be invoked correctly
+	}
+
+	@Test
+	public void testRegisterAndInvokeFunction()
+	{
+		long ram = 1;
+		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
+		try {
+			controller.registerAction("sub", f, ram);
+		} catch (OperationNotValid e) {
+			assertTrue(false);
+		}
+		assertSame(f, controller.getAction("sub"));
+
+		//TODO: here check if it can be invoked correctly
+	}
+
+	@Test
+	public void	testRegisterClass()
+	{
+		long ram = 1;
+		Calculator calculator = new Calculator();
+		try {
+			controller.registerAction("calculator", calculator, ram);
+		} catch (OperationNotValid e) {
+			assertTrue(false);
+		}
+		assertSame(calculator, controller.getAction("calculator"));
+	}
+	
     /*
 	 * @Test
 	public void	functionInvokedCorrectly()
