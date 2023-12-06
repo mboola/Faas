@@ -8,17 +8,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import application.Action;
 import application.Controller;
 import application.Invokable;
 import application.Metric;
 import application.PairValues;
+import faas_exceptions.NoInvokerAvailable;
+import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 
-
-//TODO: in order to comply with composite this should be an abstractClass
-//this class will not have 
 public class Invoker implements InvokerInterface{
 
 	//not really sure but:
@@ -106,7 +104,7 @@ public class Invoker implements InvokerInterface{
 	 * 
 	 * <p><strong>Note:</strong> Constuctor will only be called from 'createInvoker' to ensure no Invokers with invalid parameters are created.</p>
 	 */
-	private Invoker(long ram)
+	protected Invoker(long ram)
 	{
 		this.maxRam = ram;
 		ramUsed = 0;
@@ -162,6 +160,39 @@ public class Invoker implements InvokerInterface{
 	public String getId()
 	{
 		return (id);
+	}
+
+	/**
+	 * This selects an invoker to invoke a function.
+	 */
+	public Invoker getInvoker()
+	{
+		return (this);
+	}
+
+	/**
+	 * Method used to select a invoker to execute a function based on the ram it consumes and the policy we have assigned.
+	 * @param ram
+	 * @return
+	 * @throws Exception <p>The exception can be caused because:</p>
+	 * <ul>
+	 * 	<li>NoPolicyManagerRegistered: There is no policyManager registered.</li>
+	 * 	<li>NoInvokerAvailable: There is no invoker with enough max ram to execute the invokable.</li>
+	 *  <li>Exeption: something goes wrong with RMI.</li>
+	 * </ul>
+	 */
+	@Override
+	public InvokerInterface selectInvoker(long ram) throws Exception
+	{
+		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
+		return (this);
+	}
+
+	//TODO: javadoc this
+	public boolean	canExecute(long ram)
+	{
+		if (ram > getMaxRam()) return (false);
+		return (true);
 	}
 
 	/**

@@ -4,7 +4,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.concurrent.Future;
 
-import application.Action;
 import application.Invokable;
 
 public interface InvokerInterface extends Remote {
@@ -47,6 +46,19 @@ public interface InvokerInterface extends Remote {
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
 	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception;
+
+	/**
+	 * Selects a invoker that has enough ram to execute an invokable that consumes the number of ram
+	 * passed as a parameter.
+	 * 
+	 * @param ram The number of RAM in MegaBytes that will consume our invokable.
+	 * @return The invoker that will execute our function.
+	 * @throws Exception If there is not an invoker with enough max ram or RSI brokes.
+	 */
+	public InvokerInterface selectInvoker(long ram) throws Exception;
+
+	//TODO: javadoc this
+	public boolean	canExecute(long ram);
 
 	/**
 	 * This shuts down the executor of the Invoker. Must be called when the application finishes.

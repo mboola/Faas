@@ -220,6 +220,14 @@ public class Controller {
 		return (invoker.invoke(invokable, args, id));
 	}
 
+	private <T, R> Future<R> getResult_async(Invokable invokable, String id, T args) throws Exception
+	{
+		InvokerInterface	invoker;
+
+		invoker = selectInvoker(invokable.getRam());
+		return (invoker.invokeAsync(invokable, args, id));
+	}
+
 	/**
 	 * Searches a invokable with the id passed as a parameter and invokes it with args as a parameters.
 	 * 
@@ -244,6 +252,56 @@ public class Controller {
 		invokable = getInvokable(id);
 		if (invokable == null) throw new OperationNotValid("There are no invokables registered with the id" + id);
 		return (getResult(invokable, id, args));
+	}
+
+	/**
+	 * Searches a invokable with the id passed as a parameter and invokes it n times with each arg of list args as a parameters.
+	 * 
+	 * @param <T> Datatype of the parameters of the function to be invoked.
+	 * @param <R> Datatype of the return of the function to be invoked.
+	 * @param id Identifier of the invokable to be invoked.
+	 * @param args List of parameters of the invokable.
+	 * @return List of results of the invokation of the invokable.
+	 * @throws Exception <p>The exception can be caused because:</p>
+	 * <ul>
+	 *  <li>The id passed as a parameter is null.</li>
+	 *  <li>There is no invokable found with the id passed as a parameter.</li>
+	 * 	<li>There is no invoker with enough max ram to run execute the invokable.</li>
+	 * 	<li>Something goes wrong when executing the invokable.</li>
+	 * </ul>
+	 */
+	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
+	{
+		Invokable	invokable;
+		List<R> 	result;
+
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		invokable = getInvokable(id);
+		if (invokable == null) throw new OperationNotValid("There are no invokables registered with the id" + id);
+		result = new LinkedList<R>();
+		for (T element : args)
+			result.add(getResult(invokable, id, element));
+		return (result);
+	}
+
+	/**
+	 * Searches a invokable with the id passed as a parameter and invokes it n times with each arg of list args as a parameters.
+	 * 
+	 * @param <T>
+	 * @param <R>
+	 * @param id
+	 * @param args
+	 * @return
+	 * @throws Exception
+	 */
+	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
+	{
+		Invokable	invokable;
+
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		invokable = getInvokable(id);
+		if (invokable == null) throw new OperationNotValid("There are no invokables registered with the id" + id);
+		return (getResult_async(invokable, id, args));
 	}
 
 	public Object getActionProxy(String id) throws Exception
@@ -287,30 +345,6 @@ public class Controller {
 	public void	addPolicyManager(PolicyManager policyManager)
 	{
 		this.policyManager = policyManager;
-	}
-
-	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
-	{
-		Action	action;
-		List<R> result;
-
-		action = hasMapAction(id);
-		if ( action == null )
-			throw new NoActionRegistered("There are no actions with the id" + id);
-		result = new LinkedList<R>();
-		for (T element : args)
-			result.add(getResult(action, element, id));
-		return (result);
-	}
-
-	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
-	{
-		Action	action;
-
-		action = hasMapAction(id);
-		if ( action == null )
-			throw new NoActionRegistered("There are no actions with the id" + id);
-		return (selectInvoker(action.getRam()).invokeAsync(action, args, id));
 	}
 
 	public void listInvokersRam() throws Exception
