@@ -82,15 +82,4 @@ public class InvokerComposite extends Invoker {
 		return (invoker);
 	}
 
-	//TODO: javadoc this
-	@Override
-	public boolean	canExecute(long ram)
-	{
-		for (InvokerInterface invoker : invokers) {
-			if (invoker.canExecute(ram))
-				return (true);
-		}
-		return (false);
-	}
-
 }

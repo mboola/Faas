@@ -15,7 +15,7 @@ public class Metric<T> {
 		return (functionId);
 	}
 
-	public String printData()
+	public String getDataStr()
 	{
 		return (dataType.toString());
 	}

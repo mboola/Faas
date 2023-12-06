@@ -58,9 +58,6 @@ public interface InvokerInterface extends Remote {
 	 */
 	public InvokerInterface selectInvoker(long ram) throws Exception;
 
-	//TODO: javadoc this
-	public boolean	canExecute(long ram);
-
 	public void	setPolicyManager(PolicyManager policyManager);
 
 	/**

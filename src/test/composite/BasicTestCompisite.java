@@ -1,5 +1,6 @@
 package test.composite;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
@@ -12,6 +13,7 @@ import application.Controller;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerComposite;
+import observer.IdObserver;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
@@ -29,15 +31,16 @@ public class BasicTestCompisite {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
+		PolicyManager policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
 		Invoker.setController(controller);
 		invoker = InvokerComposite.createInvoker(1);
+		Invoker.addObserver(new IdObserver());
 		try {
 			controller.registerInvoker(invoker);
 		} catch (OperationNotValid e) {
 			assertTrue(false);
 		}
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
 	}
 
 	/**
@@ -63,6 +66,8 @@ public class BasicTestCompisite {
 			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
 			//get invoker used
 			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+			String str = controller.metrics.getData("IdController", "sub");
+			assertEquals(str, "1");
 		}
 		catch (Exception e){
 			assertTrue(false);

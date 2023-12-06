@@ -20,30 +20,31 @@ public class RoundRobin implements PolicyManager{
 			return (0);
 	}
 
-	//TODO: change this implementation to one more robust!!!!!! what happens if--
-	//TODO: --not all methods used in this invocation have the same time (i dont care) or if --
-	//TODO: --a invoker is removed from the list while executing
 	@Override
 	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception
 	{
 		InvokerInterface invoker;
-		int	lastInvokerUsed;
+		int	lastInvokerChecked;
 		int	len;
 
+		//if there are no invokers we cant select them
 		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
-		lastInvokerUsed = lastInvokerAssigned;
+		lastInvokerChecked = lastInvokerAssigned;
 		len = invokers.size() - 1;
-		lastInvokerAssigned = updatePos(lastInvokerAssigned, len);
-		while (lastInvokerUsed != lastInvokerAssigned) {
-			//if (invokers.get(lastInvokerAssigned).canExecute(ram))
-			if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
+		lastInvokerChecked = updatePos(lastInvokerChecked, len);
+		invoker = null;
+		while (lastInvokerAssigned != lastInvokerChecked) {
+			//this selects an invoker from this invoker that can execute the invokable
+			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+			if (invoker != null)
 				break;
-			lastInvokerAssigned = updatePos(lastInvokerAssigned, len);
+			lastInvokerChecked = updatePos(lastInvokerChecked, len);
 		}
-		invoker = invokers.get(lastInvokerAssigned);
-		if (invoker.getMaxRam() >= ram)
-			return (invoker);
-		throw new NoInvokerAvailable("No Invoker Available with at least " + ram + " RAM.");
+		lastInvokerAssigned = lastInvokerChecked;
+		if (invoker == null)
+			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+		if (invoker == null) throw new NoInvokerAvailable("No Invoker Available with at least " + ram + " RAM.");
+		return (invoker);
 	}
 
 	@Override

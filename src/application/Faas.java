@@ -1,5 +1,8 @@
 package application;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -11,13 +14,54 @@ import java.util.function.Function;
 import decorator.CacheDecorator;
 import decorator.TimerDecorator;
 import faas_exceptions.NoInvokerAvailable;
+import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
+import invoker.InvokerComposite;
+import observer.IdObserver;
 import policy_manager.GreedyGroup;
 import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
 public class Faas {
-	public static void main(String[] args) {
+	public static void main(String[] args) 
+	{
+		Controller controller = Controller.instantiate();
+		PolicyManager policyManager = new RoundRobin();
+		controller.addPolicyManager(policyManager);
+		Invoker.setController(controller);
+		InvokerComposite invoker = InvokerComposite.createInvoker(1);
+		Invoker invokerSimple0 = Invoker.createInvoker(1);
+		Invoker.addObserver(new IdObserver());
+		try {
+			controller.registerInvoker(invoker);
+			controller.registerInvoker(invokerSimple0);
+		} catch (OperationNotValid e) {
+			System.out.println("error registering.\n");
+		}
+
+		Invoker invokerSimple1 = Invoker.createInvoker(2);
+		Invoker invokerSimple2 = Invoker.createInvoker(3);
+		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
+		try
+		{
+			invoker.registerInvoker(invokerSimple1);
+			invoker.registerInvoker(invokerSimple2);
+			//controller.registerInvoker(invokerSimple1);
+			controller.registerAction("sub", f, 1);
+			Integer result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+			//get invoker used
+			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+			//get invoker used
+			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+			//get invoker used
+			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
+			String str = controller.metrics.getData("IdObserver", "sub");
+			System.out.println(str);
+		}
+		catch (Exception e){
+			System.out.println("error executing.\n");
+		}
+
 		/*
 		 * Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
@@ -153,7 +197,8 @@ public class Faas {
 
 		controller.shutdownAllInvokers();*/
 
-		Controller controller = Controller.instantiate();
+		/*
+		 * Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
 		//Invoker invoker = Invoker.createInvoker(1);
 		//controller.registerInvoker(invoker);
@@ -199,6 +244,7 @@ public class Faas {
 		System.out.println(totalTime);
 
 		controller.shutdownAllInvokers();
+		 */
 
 	}
 }

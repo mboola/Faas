@@ -188,13 +188,6 @@ public class Invoker implements InvokerInterface {
 	{
 	}
 
-	//TODO: javadoc this
-	public boolean	canExecute(long ram)
-	{
-		if (ram > getMaxRam()) return (false);
-		return (true);
-	}
-
 	/**
 	 * Getter of the ram being used.
 	 * 
@@ -286,7 +279,6 @@ public class Invoker implements InvokerInterface {
 	 * @return The result of the function invoked, of type R
 	 * @throws Exception //TODO: i dont remember
 	 */
-	@SuppressWarnings({"unchecked"})
 	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
@@ -308,7 +300,6 @@ public class Invoker implements InvokerInterface {
 	//TODO: javadoc this
 	// This function tries to execute the function passed by parameter.
 	// If there is no space in the pool, it waits and then it gets invoked.
-	@SuppressWarnings({"unchecked"})
 	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;

@@ -13,16 +13,18 @@ public class MetricSet {
 		dataCollected = new HashMap<String, Map<String, List<Metric<Object>>>>();
 	}
 
-	public void showData(String metricId, String functionId)
+	public String getData(String metricId, String functionId)
 	{
 		Map<String, List<Metric<Object>>> metricMap;
+		String	str = "";
 		
 		metricMap = dataCollected.get(metricId);
 		if (metricMap == null)
-			return ;
+			return (str);
 		for (Metric<Object> metric : metricMap.get(functionId)) {
-			System.out.println("" + metric.printData());
+			str += metric.getDataStr();
 		}
+		return (str);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package test.controller;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +42,7 @@ public class BasicTestController {
 	{
 		assertTrue(controller != null);
 		Controller controller2 = Controller.instantiate();
-		assertEquals(controller, controller2);
+		assertSame(controller, controller2);
  	}
 
 	/*
