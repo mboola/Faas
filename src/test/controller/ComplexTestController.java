@@ -1,4 +1,4 @@
-package test;
+package test.controller;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -10,7 +10,6 @@ import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 
 import action.Action;
 import action.AddAction;

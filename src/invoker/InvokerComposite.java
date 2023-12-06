@@ -7,23 +7,22 @@ import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.OperationNotValid;
 import policy_manager.PolicyManager;
 
-public class CompositeInvoker extends Invoker{
+public class InvokerComposite extends Invoker {
 
 	private List<InvokerInterface>	invokers;
 	private	PolicyManager			policyManager;
 
-	public static CompositeInvoker createInvoker(long ram, PolicyManager policyManager)
+	public static InvokerComposite createInvoker(long ram)
 	{
 		if (ram <= 0)
 			return (null);
 		else
-			return (new CompositeInvoker(ram, policyManager));
+			return (new InvokerComposite(ram));
 	}
 
-	private CompositeInvoker(long ram, PolicyManager policyManager) 
+	private InvokerComposite(long ram) 
 	{
 		super(ram);
-		this.policyManager = policyManager;
 		invokers = new LinkedList<InvokerInterface>();
 	}
 
@@ -38,6 +37,12 @@ public class CompositeInvoker extends Invoker{
 		if (invoker == null) throw new OperationNotValid("Invoker to register cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
 		invokers.add(invoker);
+		invoker.setPolicyManager(policyManager);
+	}
+
+	public void	setPolicyManager(PolicyManager policyManager)
+	{
+		this.policyManager = policyManager.copy();
 	}
 
 	/**

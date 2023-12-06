@@ -10,7 +10,6 @@ public class GreedyGroup implements PolicyManager{
 	int	lastInvokerAssigned;
 
 	public GreedyGroup () {
-		super();
 		lastInvokerAssigned = 0;
 	}
 
@@ -70,6 +69,11 @@ public class GreedyGroup implements PolicyManager{
 		if (posLessRam == -1)
 			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
 		return (invokers.get(posLessRam));
+	}
+
+	@Override
+	public PolicyManager copy() {
+		return (new GreedyGroup());
 	}
 		
 }

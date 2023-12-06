@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.Future;
 
 import application.Invokable;
+import policy_manager.PolicyManager;
 
 public interface InvokerInterface extends Remote {
 
@@ -59,6 +60,8 @@ public interface InvokerInterface extends Remote {
 
 	//TODO: javadoc this
 	public boolean	canExecute(long ram);
+
+	public void	setPolicyManager(PolicyManager policyManager);
 
 	/**
 	 * This shuts down the executor of the Invoker. Must be called when the application finishes.

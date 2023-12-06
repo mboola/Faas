@@ -1,18 +1,23 @@
 package application;
 
 public class Metric<T> {
-	private String	id;
+	private String	functionId;
 	private T		dataType;
 
-	public Metric(String id, T dataType)
+	public Metric(String functionId, T dataType)
 	{
-		this.id = id;
+		this.functionId = functionId;
 		this.dataType = dataType;
 	}
 
-	public String getId()
+	public String getFunctionId()
 	{
-		return (id);
+		return (functionId);
+	}
+
+	public String printData()
+	{
+		return (dataType.toString());
 	}
 
 	public T getDataType()

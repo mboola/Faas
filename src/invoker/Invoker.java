@@ -13,11 +13,11 @@ import application.Invokable;
 import application.Metric;
 import application.PairValues;
 import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
+import policy_manager.PolicyManager;
 
-public class Invoker implements InvokerInterface{
+public class Invoker implements InvokerInterface {
 
 	//not really sure but:
 	private static Map<String, List<PairValues>> cacheDecorator = new HashMap<String, List<PairValues>>();
@@ -147,11 +147,7 @@ public class Invoker implements InvokerInterface{
 		Invoker.observers.remove(observer);
 	}
 
-	/**
-	 * Adds an observer to the list of observers to be used by all invokers.
-	 * 
-	 * @param observer Observer that will be notified when a function is invoked.
-	 */
+	
 	public static void setDecoratorInitializer(Function<Invokable, Function<Object, Object>> decoratorInitializer)
 	{
 		Invoker.decoratorInitializer = decoratorInitializer;
@@ -186,6 +182,10 @@ public class Invoker implements InvokerInterface{
 	{
 		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
 		return (this);
+	}
+
+	public void	setPolicyManager(PolicyManager policyManager)
+	{
 	}
 
 	//TODO: javadoc this
@@ -227,6 +227,7 @@ public class Invoker implements InvokerInterface{
 
 	//TODO: javadocs
 	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
+	@SuppressWarnings({"unchecked"})
 	private <T, R> Function<T, R> applyDecorators(Invokable invokable)
 	{
 		if (Invoker.decoratorInitializer == null)
@@ -239,13 +240,14 @@ public class Invoker implements InvokerInterface{
 	 * 
 	 * @param id Id of the function. Needed by the observers to update the content of a dictionary in the controller.
 	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
+	 * @throws Exception
 	 */
-	private HashMap<Observer, Metric<Object>> initializeAllObservers(String id) 
+	private HashMap<Observer, Metric<Object>> initializeAllObservers(String id) throws Exception 
 	{
 		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
 
 		for (Observer observer : observers) {
-			metrics.put(observer, observer.initialize(id, Invoker.controller));
+			metrics.put(observer, observer.initialize(id, Invoker.controller, this));
 		}
 		return (metrics);
 	}
@@ -310,16 +312,14 @@ public class Invoker implements InvokerInterface{
 	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception
 	{
 		Function<T, R>						functionDecorated;
-		HashMap<Observer, Metric<Object>>	metricsList;
 		Future<R>							futureResult;
-
-		metricsList = initializeAllObservers(id);
 
 		functionDecorated = applyDecorators(invokable);
 
 		futureResult = executor.submit( 
 			() -> {
 				R	result;
+				HashMap<Observer, Metric<Object>>	metricsList;
 
 				synchronized (this)
 				{
@@ -333,17 +333,17 @@ public class Invoker implements InvokerInterface{
 					}
 					ramUsed += invokable.getRam();
 				}
+				metricsList = initializeAllObservers(id);
 				result = functionDecorated.apply(args);
 				synchronized (this)
 				{
 					ramUsed -= invokable.getRam();
 					notify();
 				}
+				notifyAllObservers(metricsList);
 				return (result);
 			}
 		);
-
-		notifyAllObservers(metricsList);
 
 		return (futureResult);
 	}

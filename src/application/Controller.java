@@ -13,7 +13,6 @@ import invoker.InvokerInterface;
 import policy_manager.PolicyManager;
 
 public class Controller {
-	private Map<String, Action>	actions;
 	public MetricSet			metrics;
 
 	/**
@@ -59,7 +58,6 @@ public class Controller {
 	private Controller() {
 		invokers = new LinkedList<InvokerInterface>();
 		invokables = new HashMap<String, Invokable>();
-		actions = new HashMap<String, Action>();
 		metrics = new MetricSet();
 	}
 
@@ -74,6 +72,7 @@ public class Controller {
 		if (invoker == null) throw new OperationNotValid("Invoker to register cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
 		invokers.add(invoker);
+		invoker.setPolicyManager(policyManager);
 	}
 
 	/**
@@ -304,6 +303,8 @@ public class Controller {
 		return (getResult_async(invokable, id, args));
 	}
 
+	//TODO: invoke_async list of args
+
 	public Object getActionProxy(String id) throws Exception
 	{
 		Action action = hasMapAction(id);
@@ -322,17 +323,6 @@ public class Controller {
 		return (actions.get(id));
 	}
 
-	//used the register an Action in the controller. Ram must be inputed in MegaBytes
-	public void registerAction(String id, Object f, int ram)
-	{
-		if ( hasMapAction(id) == null)
-		{
-			actions.put(id, new Action(ram, f, id));
-			return ;
-		}
-		//TODO: throw error. already exists
-	}
-
 	public void	listActions()
 	{
 		//TODO: is this all the info I wanna show?
@@ -345,6 +335,8 @@ public class Controller {
 	public void	addPolicyManager(PolicyManager policyManager)
 	{
 		this.policyManager = policyManager;
+		for (InvokerInterface invoker : invokers)
+			invoker.setPolicyManager(policyManager);
 	}
 
 	public void listInvokersRam() throws Exception
@@ -362,4 +354,5 @@ public class Controller {
 			invoker.shutdownInvoker();
 		}
 	}
+
 }

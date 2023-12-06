@@ -9,7 +9,6 @@ public class RoundRobin implements PolicyManager{
 	private int	lastInvokerAssigned;
 
 	public RoundRobin () {
-		super();
 		lastInvokerAssigned = 0;
 	}
 
@@ -45,6 +44,11 @@ public class RoundRobin implements PolicyManager{
 		if (invoker.getMaxRam() >= ram)
 			return (invoker);
 		throw new NoInvokerAvailable("No Invoker Available with at least " + ram + " RAM.");
+	}
+
+	@Override
+	public PolicyManager copy() {
+		return (new RoundRobin());
 	}
     
 }
