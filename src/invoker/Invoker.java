@@ -11,7 +11,6 @@ import java.util.function.Function;
 import application.Controller;
 import application.Invokable;
 import application.Metric;
-import application.PairValues;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.NoResultAvailable;
 import observer.Observer;
@@ -19,55 +18,39 @@ import policy_manager.PolicyManager;
 
 public class Invoker implements InvokerInterface {
 
-	//not really sure but:
-	private static Map<String, List<PairValues>> cacheDecorator = new HashMap<String, List<PairValues>>();
+	private static Map<String, Map<String, Object>> cacheDecorator = new HashMap<>();
 
-	/**
-	 * Used to search the cache used by the cacheDecorator to see if there is
-	 * a result stored in there
-	 * @param args Data passed as an argument. Used to search result.
-	 * @param id Identifier of the function used to 
-	 * @return 
-	 * @throws NoResultAvailable
-	 */
-	//TODO: change list<PairValues> to Map<T, R>
-	public static<T, R> R getCacheResult(String id, T args) throws NoResultAvailable
-	{
-		List<PairValues> list = Invoker.cacheDecorator.get(id);
-		if (list == null)
-			throw new NoResultAvailable("");
-		for (PairValues inputOutput : list) {
-			//not sure this comparation is correct. I think this compares mem ref
-			if (inputOutput.getArgs() == args)
-				return ((R)inputOutput.getResult());
-		}
-		throw new NoResultAvailable("");
-	}
+    public static void printCache() {
+        if (cacheDecorator.isEmpty()) {
+            System.out.println("Cache is empty.");
+            return;
+        }
+        for (String id : cacheDecorator.keySet()) {
+            System.out.println("Function: " + id);
+            Map<String, Object> innerMap = cacheDecorator.get(id);
+            for (Map.Entry<String, Object> entry : innerMap.entrySet()) {
+                System.out.println("Args: " + entry.getKey() + ". Ret: " + entry.getValue());
+            }
+        }
+    }
 
-	public static void printCache()
-	{
-		for (String key : Invoker.cacheDecorator.keySet()) {
-			System.out.println("Function: " + key);
-			for (PairValues pair : Invoker.cacheDecorator.get(key)) {
-				System.out.println("Arg: " + pair.getArgs() + ". Ret: " + pair.getResult());
-			}
-		}
-	}
+    public static <T, R> void cacheResult(String id, T args, R result) {
+        String key = args.toString();
+        Map<String, Object> innerMap = cacheDecorator.computeIfAbsent(id, k -> new HashMap<>());
+        if (!innerMap.containsKey(key)) {
+            innerMap.put(key, result);
+        }
+    }
 
-	public static<T, R> void cacheResult(String id, T args, R result)
-	{
-		//TODO maybe check if it exists?
-		List<PairValues> list = Invoker.cacheDecorator.get(id);
-		if (list == null)
-		{
-			list = new LinkedList<PairValues>();
-			Invoker.cacheDecorator.put(id, list);
-		}
-		PairValues inputOutput = new PairValues(args, result);
-		list.add(inputOutput);
-	}
+    public static <T, R> R getCacheResult(String id, T args) throws NoResultAvailable {
+        String key = args.toString();
+        Map<String, Object> innerMap = cacheDecorator.get(id);
+        if (innerMap == null || !innerMap.containsKey(key)) {
+            throw new NoResultAvailable("No matching arguments have been found");
+        }
+        return (R) innerMap.get(key);
+    }
 
-	//TODO: wtf is that above me???????????????
 	//all good here
 	private static final int 		MAX_THREADS = 8;
 	private static long				numInvokers = 0;
