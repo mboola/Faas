@@ -20,6 +20,11 @@ public class RoundRobin implements PolicyManager{
 			return (0);
 	}
 
+	/**
+	 * This policy will select uniformly the invokers that has resources availables. If one invoker
+	 * is full, it will jumpt to the next one.
+	 * If none of them have resources, they will get again selected uniformly.
+	 */
 	@Override
 	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception
 	{
@@ -37,14 +42,26 @@ public class RoundRobin implements PolicyManager{
 			//this selects an invoker from this invoker that can execute the invokable
 			try {
 				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-				break ;
+				//check if it has resources to run
+				if (invoker.getAvailableRam() - ram >= 0)
+					break ;
+				else
+					lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
 			catch (NoInvokerAvailable e) {
 				lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
 		}
-		lastInvokerAssigned = lastInvokerChecked;
-		if (invoker == null)
+		//if more than one invoker but all full
+		if (lastInvokerAssigned != lastInvokerChecked)
+			lastInvokerAssigned = lastInvokerChecked;
+		else if (lastInvokerAssigned == lastInvokerChecked && invoker != null)
+		{
+			lastInvokerAssigned = updatePos(lastInvokerChecked, len);
+			return (invokers.get(lastInvokerChecked).selectInvoker(ram));
+		}
+		//case only one invoker
+		else
 			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
 		return (invoker);
 	}

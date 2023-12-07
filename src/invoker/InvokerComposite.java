@@ -82,10 +82,19 @@ public class InvokerComposite extends Invoker {
 			invoker = policyManager.getInvoker(invokers, ram);
 		}
 		catch (NoInvokerAvailable e) {
-			if (getAvailableRam() >= ram)
-				return (this);
-			throw new NoInvokerAvailable("");
+			//if no invokers from the list have enough max ram we check if this composite has enough
+			if (getMaxRam() < ram) throw new NoInvokerAvailable("");
+			return (this);
 		}
+		//if all invokers are full this will return
+		if (invoker.getAvailableRam() - ram >= 0)
+			return (invoker);
+		//we have a full invoker, so we watch if the composite can be returned
+		if (this.getMaxRam() >= ram)
+			return (this);
+		// if we are here, it means our invoker cannot execute the invokable but a child invoker can
+		// in this case, we return the child
+		// TODO: think about this
 		return (invoker);
 	}
 
