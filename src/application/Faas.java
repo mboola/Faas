@@ -26,41 +26,57 @@ public class Faas {
 	public static void main(String[] args) 
 	{
 		Controller controller = Controller.instantiate();
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
 		Invoker.setController(controller);
-		InvokerComposite invoker = InvokerComposite.createInvoker(1);
-		Invoker invokerSimple0 = Invoker.createInvoker(1);
+		InvokerComposite invokerComposite = InvokerComposite.createInvoker(1);
 		Invoker.addObserver(new IdObserver());
+		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		try {
-			controller.registerInvoker(invoker);
-			controller.registerInvoker(invokerSimple0);
+			controller.registerInvoker(invokerComposite);
+			controller.registerAction("Substract", f, 1);
 		} catch (OperationNotValid e) {
-			System.out.println("error registering.\n");
+			assertTrue(false);
 		}
 
-		Invoker invokerSimple1 = Invoker.createInvoker(2);
-		Invoker invokerSimple2 = Invoker.createInvoker(3);
-		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
-		try
-		{
-			invoker.registerInvoker(invokerSimple1);
-			invoker.registerInvoker(invokerSimple2);
-			//controller.registerInvoker(invokerSimple1);
-			controller.registerAction("sub", f, 1);
-			Integer result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-			//get invoker used
-			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-			//get invoker used
-			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-			//get invoker used
-			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-			String str = controller.metrics.getData("IdObserver", "sub");
-			System.out.println(str);
+		Invoker invokerSimple = Invoker.createInvoker(1);	//1
+		Invoker invokerSimple1 = Invoker.createInvoker(1);	//2
+		Invoker invokerSimple2 = Invoker.createInvoker(1);	//3
+		Function<Integer, String> sleep = s -> {
+			try {
+				Thread.sleep(Duration.ofSeconds(s).toMillis());
+				return "Done!";
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		};
+
+		try {
+			controller.setPolicyManager(new RoundRobin());
+			controller.registerAction("Sleep", sleep, 1);
+			controller.registerInvoker(invokerSimple);
+			invokerComposite.registerInvoker(invokerSimple1);
+			invokerComposite.registerInvoker(invokerSimple2);
+
+			long currentTimeMillis = System.currentTimeMillis();
+			List<Future<String>> futures = new LinkedList<Future<String>>();
+			futures = controller.invoke_async("Sleep", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+			List<String> stringsResult = new LinkedList<String>();
+
+			for (Future<String> future : futures)
+				stringsResult.add(future.get());
+
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+			//assertEquals(4000, totalTime);
+
+			//if (totalTime > 4500 || totalTime < 4000) assertTrue(false);
+			//else assertTrue(true);
+		} 
+		catch (Exception e) {
+			assertTrue(false);
 		}
-		catch (Exception e){
-			System.out.println("error executing.\n");
-		}
+		String str = controller.metrics.getData("IdObserver", "Sleep");
+		System.out.println(str);
+		//assertEquals("132132", str);
 
 		/*
 		 * Controller controller = Controller.instantiate();

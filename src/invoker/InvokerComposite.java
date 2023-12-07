@@ -13,6 +13,11 @@ public class InvokerComposite extends Invoker {
 	private List<InvokerInterface>	invokers;
 	private	PolicyManager			policyManager;
 
+	private void maldad()
+	{
+		System.out.print("sin este print no funciona");
+	}
+
 	public static InvokerComposite createInvoker(long ram)
 	{
 		if (ram <= 0)
@@ -72,6 +77,9 @@ public class InvokerComposite extends Invoker {
 	 *  <li>Exeption: something goes wrong with RMI.</li>
 	 * </ul>
 	 */
+	//TODO: preguntar a Ussama
+	// va demasiado rapido y no se asignan correctamente los invokers porque cuando accede a la ramAvailable esta aun no ha
+	//sido actualizada
 	@Override
 	public InvokerInterface selectInvoker(long ram) throws Exception
 	{
@@ -86,12 +94,20 @@ public class InvokerComposite extends Invoker {
 			if (getMaxRam() < ram) throw new NoInvokerAvailable("");
 			return (this);
 		}
+		System.out.println("invoker selected: " + invoker.getId() + invoker.getAvailableRam());
 		//if all invokers are full this will return
 		if (invoker.getAvailableRam() - ram >= 0)
+		{
+			System.out.println("invoker used: " +invoker.getId() + invoker.getAvailableRam());
 			return (invoker);
+		}
 		//we have a full invoker, so we watch if the composite can be returned
 		if (this.getMaxRam() >= ram)
+		{
+			//System.out.println("invoker used: " +this.getId() + this.getAvailableRam());
 			return (this);
+		}
+		//System.out.println("invoker used: " +invoker.getId() + invoker.getAvailableRam());
 		// if we are here, it means our invoker cannot execute the invokable but a child invoker can
 		// in this case, we return the child
 		// TODO: think about this

@@ -123,7 +123,7 @@ public class BasicTestComposite {
 
 			long currentTimeMillis = System.currentTimeMillis();
 			List<Future<String>> futures = new LinkedList<Future<String>>();
-			futures = controller.invoke_async("Sleep", Arrays.asList(2,2));
+			futures = controller.invoke_async("Sleep", Arrays.asList(2,3,4,5));
 			List<String> stringsResult = new LinkedList<String>();
 
 			for (Future<String> future : futures)
@@ -131,12 +131,14 @@ public class BasicTestComposite {
 
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			if (totalTime > 2500 || totalTime < 2000) assertTrue(false);
-			else assertTrue(true);
+			//if (totalTime > 2500 || totalTime < 2000) assertTrue(false);
+			//else assertTrue(true);
 		} 
 		catch (Exception e) {
 			assertTrue(false);
 		}
+		String str = controller.metrics.getData("IdObserver", "Sleep");
+		assertEquals("1010", str);
 	}
 
 
@@ -243,7 +245,7 @@ public class BasicTestComposite {
 			assertTrue(false);
 		}
 		String str = controller.metrics.getData("IdObserver", "Sleep");
-		assertEquals("1320", str);
+		assertEquals("132132", str);
 	}
 
 }

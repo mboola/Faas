@@ -29,6 +29,8 @@ public class RoundRobin implements PolicyManager{
 	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception
 	{
 		InvokerInterface invoker;
+		InvokerInterface invokerExecutable;
+		int	invokerExecutablePos = 0;
 		int	lastInvokerChecked;
 		int	len;
 
@@ -38,11 +40,17 @@ public class RoundRobin implements PolicyManager{
 		len = invokers.size() - 1;
 		lastInvokerChecked = updatePos(lastInvokerChecked, len);
 		invoker = null;
+		invokerExecutable = null;
 		while (lastInvokerAssigned != lastInvokerChecked) {
 			//this selects an invoker from this invoker that can execute the invokable
 			try {
 				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
 				//check if it has resources to run
+				if (invokerExecutable == null)
+				{
+					invokerExecutable = invoker;
+					invokerExecutablePos = lastInvokerChecked;
+				}
 				if (invoker.getAvailableRam() - ram >= 0)
 					break ;
 				else
@@ -52,12 +60,12 @@ public class RoundRobin implements PolicyManager{
 				lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
 		}
-		//if more than one invoker but all full
 		if (lastInvokerAssigned != lastInvokerChecked)
 			lastInvokerAssigned = lastInvokerChecked;
-		else if (lastInvokerAssigned == lastInvokerChecked && invoker != null)
+		//if more than one invoker but all full
+		else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
 		{
-			lastInvokerAssigned = updatePos(lastInvokerChecked, len);
+			lastInvokerAssigned = invokerExecutablePos;
 			return (invokers.get(lastInvokerChecked).selectInvoker(ram));
 		}
 		//case only one invoker
