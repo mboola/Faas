@@ -30,7 +30,7 @@ public class DynamicProxyTest {
 		Invoker invoker = Invoker.createInvoker(2);
 		controller.registerInvoker(invoker);
 		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
+		controller.setPolicyManager(policyManager);
 
 		Function<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
 		controller.registerAction("suma", f1, 1);
@@ -64,7 +64,7 @@ public class DynamicProxyTest {
 		Invoker invoker = Invoker.createInvoker(2);
 		controller.registerInvoker(invoker);
 		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
+		controller.setPolicyManager(policyManager);
 
 		Function<Integer, String> sleep = s -> {
 			try {

@@ -77,11 +77,16 @@ public class BigGroup implements PolicyManager{
      * @param newMaxRetries The new value for maxRetries.
      * @throws IllegalArgumentException If the provided value is less than 0.
      */
-    public static void setMaxRetries(int newMaxRetries) throws IllegalArgumentException {   // Esto tampoco se si hará falta, pero sería interesante
+    public void setMaxRetries(int newMaxRetries) throws IllegalArgumentException {   // Esto tampoco se si hará falta, pero sería interesante
         if (newMaxRetries >= 0) {                                                           // de cara a que la función se adaptara si necesitara hacer
             maxRetries = newMaxRetries;                                                     // más retries. 
         } else {
             throw new IllegalArgumentException("Max retries must be greater than or equal to 0.");
         }
+    }
+
+    @Override
+    public PolicyManager copy() {
+        return (new BigGroup(this.maxRetries, this.groupSize));
     }
 }

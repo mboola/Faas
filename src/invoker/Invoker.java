@@ -31,7 +31,7 @@ public class Invoker implements InvokerInterface {
 	 * @throws NoResultAvailable
 	 */
 	//TODO: change list<PairValues> to Map<T, R>
-	public static<T, R> R getResult(String id, T args) throws NoResultAvailable
+	public static<T, R> R getCacheResult(String id, T args) throws NoResultAvailable
 	{
 		List<PairValues> list = Invoker.cacheDecorator.get(id);
 		if (list == null)
@@ -54,7 +54,7 @@ public class Invoker implements InvokerInterface {
 		}
 	}
 
-	public static<T, R> void storeResult(String id, T args, R result)
+	public static<T, R> void cacheResult(String id, T args, R result)
 	{
 		//TODO maybe check if it exists?
 		List<PairValues> list = Invoker.cacheDecorator.get(id);
@@ -76,8 +76,6 @@ public class Invoker implements InvokerInterface {
 	private long					maxRam;
 	private long					ramUsed;
 	private ExecutorService 		executor;
-
-	private List<InvokerInterface>	invokers; //???
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
 	private static Function<Invokable, Function<Object, Object>>	decoratorInitializer = null;

@@ -18,11 +18,11 @@ public class CacheDecorator<T, R> extends Decorator<T, R>{
 		R		result;
 
 		try {
-			result = Invoker.getResult(id, t);
+			result = Invoker.getCacheResult(id, t);
 		} //I do this in case a function is suposed to return null as a valid result
 		catch (NoResultAvailable e1) {
 			result = getFunction().apply(t);
-			Invoker.storeResult(id, t, result);
+			Invoker.cacheResult(id, t, result);
 		}
 		return (result);
 	}

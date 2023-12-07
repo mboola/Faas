@@ -11,16 +11,11 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import decorator.CacheDecorator;
-import decorator.TimerDecorator;
-import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerComposite;
 import observer.IdObserver;
-import policy_manager.GreedyGroup;
-import policy_manager.PolicyManager;
-import policy_manager.RoundRobin;
+import policy_manager.BigGroup;
 
 public class Faas {
 	public static void main(String[] args) 
@@ -50,7 +45,7 @@ public class Faas {
 		};
 
 		try {
-			controller.setPolicyManager(new RoundRobin());
+			controller.setPolicyManager(new BigGroup(3,3));
 			controller.registerAction("Sleep", sleep, 1);
 			controller.registerInvoker(invokerSimple);
 			invokerComposite.registerInvoker(invokerSimple1);
