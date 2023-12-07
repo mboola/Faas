@@ -86,9 +86,6 @@ public class InvokerComposite extends Invoker {
 				return (this);
 			throw new NoInvokerAvailable("");
 		}
-		invoker = policyManager.getInvoker(invokers, ram);
-		if (invoker.getAvailableRam() == 0 && getAvailableRam() >= ram)
-			return (this);
 		return (invoker);
 	}
 

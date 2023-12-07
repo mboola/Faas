@@ -340,17 +340,17 @@ public class Controller {
 	/* Used to search if we already have this action in our map */
 	public Action hasMapAction(String id)
 	{
-		if ( actions.isEmpty() )
+		if ( invokables.isEmpty() )
 			return (null);
-		return (actions.get(id));
+		return (invokables.get(id));
 	}
 
 	public void	listActions()
 	{
 		//TODO: is this all the info I wanna show?
-		if ( actions.isEmpty())
+		if ( invokables.isEmpty())
 			return ;
-		for(String key : actions.keySet())
+		for(String key : invokables.keySet())
 			System.out.println(key);
 	}
 
