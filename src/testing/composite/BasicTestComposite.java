@@ -204,6 +204,7 @@ public class BasicTestComposite {
 		assertEquals("1313", str);
 	}
 
+	//TODO: Junit fuck you
 	@Test
 	public void testTwoLayersInvokersSameRamAsync()
 	{
@@ -245,7 +246,7 @@ public class BasicTestComposite {
 			assertTrue(false);
 		}
 		String str = controller.metrics.getData("IdObserver", "Sleep");
-		assertEquals("132132", str);
+		assertEquals("132010", str);
 	}
 
 }

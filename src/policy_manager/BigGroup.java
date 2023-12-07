@@ -7,15 +7,16 @@ import invoker.InvokerInterface;
 
 public class BigGroup implements PolicyManager{
 
-    private static int maxRetries= 3;            
+    private int maxRetries;            
     private int groupSize;
     private int lastInvokerAssigned;
     private int count;
     private int retryCount;
     private long totalRamConsumed; // Variable global que almacena la RAM consumida total del grupo anterior
 
-    public BigGroup() {
-        groupSize = 2;
+    public BigGroup(int maxRetries, int groupSize) {
+        this.maxRetries = maxRetries;
+        this.groupSize = groupSize;
         lastInvokerAssigned = 0;
         count = 0;
         retryCount = 0;
@@ -24,9 +25,10 @@ public class BigGroup implements PolicyManager{
     
     @Override
     public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception {
-        InvokerInterface invoker = invokers.get(lastInvokerAssigned);
 
         if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+
+        InvokerInterface invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
         
         if (invoker.getMaxRam() >= ram) {
             count++;
