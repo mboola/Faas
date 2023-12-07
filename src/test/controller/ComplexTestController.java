@@ -17,7 +17,6 @@ import application.Controller;
 import dynamic_proxy.proxies.Calculator;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
-import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
 /**
@@ -42,11 +41,10 @@ public class ComplexTestController {
 		Invoker invoker = Invoker.createInvoker(1);
 		try {
 			controller.registerInvoker(invoker);
+			controller.setPolicyManager(new RoundRobin());
 		} catch (OperationNotValid e) {
 			assertTrue(false);
 		}
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
 		System.out.println("Controller instantiated");
 	}
 

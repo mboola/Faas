@@ -3,6 +3,7 @@ package invoker;
 import java.util.LinkedList;
 import java.util.List;
 
+import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.OperationNotValid;
 import policy_manager.PolicyManager;
@@ -42,7 +43,8 @@ public class InvokerComposite extends Invoker {
 
 	public void	setPolicyManager(PolicyManager policyManager)
 	{
-		this.policyManager = policyManager.copy();
+		if (policyManager != null)
+			this.policyManager = policyManager.copy();
 	}
 
 	/**
@@ -76,6 +78,14 @@ public class InvokerComposite extends Invoker {
 		InvokerInterface invoker;
 
 		if (policyManager == null) throw new NoPolicyManagerRegistered("There isn't a policy manager registered.");
+		try {
+			invoker = policyManager.getInvoker(invokers, ram);
+		}
+		catch (NoInvokerAvailable e) {
+			if (getAvailableRam() >= ram)
+				return (this);
+			throw new NoInvokerAvailable("");
+		}
 		invoker = policyManager.getInvoker(invokers, ram);
 		if (invoker.getAvailableRam() == 0 && getAvailableRam() >= ram)
 			return (this);

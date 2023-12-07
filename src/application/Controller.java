@@ -166,6 +166,15 @@ public class Controller {
 		return (invokables.get(id).getInvokable());
 	}
 
+	//TODO: define javadoc
+	public void	setPolicyManager(PolicyManager policyManager) throws OperationNotValid
+	{
+		if (policyManager == null) throw new OperationNotValid("Policy Manager cannot be null");
+		this.policyManager = policyManager;
+		for (InvokerInterface invoker : invokers)
+			invoker.setPolicyManager(policyManager);
+	}
+
 	/**
 	 * Method used to select a invoker to execute a function based on the ram it consumes and the policy we have assigned.
 	 * @param ram
@@ -304,6 +313,19 @@ public class Controller {
 	}
 
 	//TODO: invoke_async list of args
+	public <T, R> List<Future<R>> invoke_async(String id, List<T> args) throws Exception
+	{
+		Invokable		invokable;
+		List<Future<R>>	result;
+
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		invokable = getInvokable(id);
+		if (invokable == null) throw new OperationNotValid("There are no invokables registered with the id" + id);
+		result = new LinkedList<Future<R>>();
+		for (T element : args)
+			result.add(getResult_async(invokable, id, element));
+		return (result);
+	}
 
 	public Object getActionProxy(String id) throws Exception
 	{
@@ -330,13 +352,6 @@ public class Controller {
 			return ;
 		for(String key : actions.keySet())
 			System.out.println(key);
-	}
-	
-	public void	addPolicyManager(PolicyManager policyManager)
-	{
-		this.policyManager = policyManager;
-		for (InvokerInterface invoker : invokers)
-			invoker.setPolicyManager(policyManager);
 	}
 
 	public void listInvokersRam() throws Exception

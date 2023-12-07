@@ -35,15 +35,17 @@ public class RoundRobin implements PolicyManager{
 		invoker = null;
 		while (lastInvokerAssigned != lastInvokerChecked) {
 			//this selects an invoker from this invoker that can execute the invokable
-			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-			if (invoker != null)
-				break;
-			lastInvokerChecked = updatePos(lastInvokerChecked, len);
+			try {
+				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+				break ;
+			}
+			catch (NoInvokerAvailable e) {
+				lastInvokerChecked = updatePos(lastInvokerChecked, len);
+			}
 		}
 		lastInvokerAssigned = lastInvokerChecked;
 		if (invoker == null)
 			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-		if (invoker == null) throw new NoInvokerAvailable("No Invoker Available with at least " + ram + " RAM.");
 		return (invoker);
 	}
 
