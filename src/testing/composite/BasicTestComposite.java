@@ -1,4 +1,4 @@
-package test.composite;
+package testing.composite;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -22,7 +22,6 @@ import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerComposite;
 import observer.IdObserver;
-import policy_manager.PolicyManager;
 import policy_manager.RoundRobin;
 
 public class BasicTestComposite {
@@ -99,7 +98,7 @@ public class BasicTestComposite {
 			assertTrue(false);
 		}
 		String str = controller.metrics.getData("IdObserver", "Substract");
-		assertEquals(str, "1010");
+		assertEquals("1010", str);
 	}
 
 	@Test
@@ -166,7 +165,7 @@ public class BasicTestComposite {
 			assertTrue(false);
 		}
 		String str = controller.metrics.getData("IdObserver", "Substract");
-		assertEquals(str, "1312");
+		assertEquals("1312", str);
 	}
 
 	@Test
@@ -184,16 +183,16 @@ public class BasicTestComposite {
 
 			invokerComposite.registerInvoker(invokerSimple1);
 			invokerComposite.registerInvoker(invokerSimple2);
-			Integer result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
+			Integer result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
+			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
+			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
+			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
 		}
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Substract");
-		assertEquals(str, "1212");
+		String str = controller.metrics.getData("IdObserver", "Add");
+		assertEquals("1313", str);
 	}
 
 }
