@@ -61,16 +61,30 @@ public class RoundRobin implements PolicyManager{
 			}
 		}
 		if (lastInvokerAssigned != lastInvokerChecked)
+		{
+			System.out.println(" -a Invoker selected: " + invoker.getId());
 			lastInvokerAssigned = lastInvokerChecked;
+		}
 		//if more than one invoker but all full
 		else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
 		{
+			//check if the invoker I started poiting to has enough resources
+			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+			if (invoker.getAvailableRam() - ram >= 0)
+			{
+				System.out.println(" -b Invoker selected: " + invoker.getId());
+				return (invoker);
+			}
 			lastInvokerAssigned = invokerExecutablePos;
-			return (invokers.get(lastInvokerChecked).selectInvoker(ram));
+			System.out.println(" -c Invoker selected: " + invokerExecutable.getId());
+			return (invokerExecutable);
 		}
 		//case only one invoker
 		else
+		{
 			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+			System.out.println(" -d Invoker selected: " + invoker.getId());
+		}
 		return (invoker);
 	}
 

@@ -16,6 +16,7 @@ import invoker.Invoker;
 import invoker.InvokerComposite;
 import observer.IdObserver;
 import policy_manager.BigGroup;
+import policy_manager.RoundRobin;
 
 public class Faas {
 	public static void main(String[] args) 
@@ -45,7 +46,7 @@ public class Faas {
 		};
 
 		try {
-			controller.setPolicyManager(new BigGroup(3,3));
+			controller.setPolicyManager(new RoundRobin());
 			controller.registerAction("Sleep", sleep, 1);
 			controller.registerInvoker(invokerSimple);
 			invokerComposite.registerInvoker(invokerSimple1);
@@ -53,7 +54,7 @@ public class Faas {
 
 			long currentTimeMillis = System.currentTimeMillis();
 			List<Future<String>> futures = new LinkedList<Future<String>>();
-			futures = controller.invoke_async("Sleep", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
+			futures = controller.invoke_async("Sleep", Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8));
 			List<String> stringsResult = new LinkedList<String>();
 
 			for (Future<String> future : futures)

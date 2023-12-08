@@ -81,7 +81,7 @@ public class InvokerComposite extends Invoker {
 	// va demasiado rapido y no se asignan correctamente los invokers porque cuando accede a la ramAvailable esta aun no ha
 	//sido actualizada
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws Exception
+	public synchronized InvokerInterface selectInvoker(long ram) throws Exception
 	{
 		InvokerInterface invoker;
 
@@ -91,22 +91,16 @@ public class InvokerComposite extends Invoker {
 		}
 		catch (NoInvokerAvailable e) {
 			//if no invokers from the list have enough max ram we check if this composite has enough
-			if (getMaxRam() < ram) throw new NoInvokerAvailable("");
+			if (this.getMaxRam() < ram) throw new NoInvokerAvailable("");
 			return (this);
 		}
-		System.out.println("invoker selected: " + invoker.getId() + invoker.getAvailableRam());
 		//if all invokers are full this will return
 		if (invoker.getAvailableRam() - ram >= 0)
-		{
-			System.out.println("invoker used: " +invoker.getId() + invoker.getAvailableRam());
 			return (invoker);
-		}
 		//we have a full invoker, so we watch if the composite can be returned
 		if (this.getMaxRam() >= ram)
-		{
 			//System.out.println("invoker used: " +this.getId() + this.getAvailableRam());
 			return (this);
-		}
 		//System.out.println("invoker used: " +invoker.getId() + invoker.getAvailableRam());
 		// if we are here, it means our invoker cannot execute the invokable but a child invoker can
 		// in this case, we return the child

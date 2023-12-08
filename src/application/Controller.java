@@ -186,7 +186,7 @@ public class Controller {
 	 *  <li>Exeption: something goes wrong with RMI.</li>
 	 * </ul>
 	 */
-	private InvokerInterface selectInvoker(long ram) throws Exception
+	private synchronized InvokerInterface selectInvoker(long ram) throws Exception
 	{
 		if (policyManager == null) throw new NoPolicyManagerRegistered("There isn't a policy manager registered.");
 		return (policyManager.getInvoker(invokers, ram));
