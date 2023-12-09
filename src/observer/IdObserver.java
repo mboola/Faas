@@ -9,6 +9,9 @@ public class IdObserver implements Observer {
 	private Controller	controller;
 	private String		metricId	= "IdObserver";
 
+	public void preinitialize(String id, Controller controller, InvokerInterface invoker) throws Exception{
+	}
+
 	@SuppressWarnings({"unchecked"})
 	@Override
 	public <T> Metric<T> initialize(String id, Controller controller, InvokerInterface invoker) throws Exception

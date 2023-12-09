@@ -209,6 +209,13 @@ public class Invoker implements InvokerInterface {
 		return ((Function<T, R>)Invoker.decoratorInitializer.apply(invokable));
 	}
 
+	private void preinitializeObservers(String id) throws Exception 
+	{
+		for (Observer observer : observers) {
+			observer.preinitialize(id, Invoker.controller, this);
+		}
+	}
+
 	/**
 	 * This initializes the value of all the observers being used in the invocation.
 	 * 
@@ -216,7 +223,7 @@ public class Invoker implements InvokerInterface {
 	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
 	 * @throws Exception
 	 */
-	private HashMap<Observer, Metric<Object>> initializeAllObservers(String id) throws Exception 
+	private HashMap<Observer, Metric<Object>> initializeObservers(String id) throws Exception 
 	{
 		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
 
@@ -240,7 +247,7 @@ public class Invoker implements InvokerInterface {
 	 * This is to ensure a correct funcionality of the observers.
 	 * </p>
 	 */
-	private void notifyAllObservers(HashMap<Observer, Metric<Object>> metrics)
+	private void notifyObservers(HashMap<Observer, Metric<Object>> metrics)
 	{
 		Metric<Object>	metric;
 
@@ -266,15 +273,15 @@ public class Invoker implements InvokerInterface {
 		R									result;
 		HashMap<Observer, Metric<Object>>	metricsList;
 
-		metricsList = initializeAllObservers(id);
+		preinitializeObservers(id);
+
+		metricsList = initializeObservers(id);
 
 		functionDecorated = applyDecorators(invokable);
 
-		//This breaks for some reason
-		//System.out.println(functionDecorated.toString());
 		result = functionDecorated.apply(args);
 
-		notifyAllObservers(metricsList);
+		notifyObservers(metricsList);
 		return (result);
 	}
 
@@ -283,10 +290,12 @@ public class Invoker implements InvokerInterface {
 	// If there is no space in the pool, it waits and then it gets invoked.
 	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception
 	{
-		Function<T, R>						functionDecorated;
-		Future<R>							futureResult;
+		Function<T, R>	functionDecorated;
+		Future<R>		futureResult;
 
 		functionDecorated = applyDecorators(invokable);
+
+		preinitializeObservers(id);
 
 		futureResult = executor.submit( 
 			() -> {
@@ -304,19 +313,18 @@ public class Invoker implements InvokerInterface {
 						}
 					}
 					ramUsed += invokable.getRam();
+					metricsList = initializeObservers(id);
 				}
-				metricsList = initializeAllObservers(id);
 				result = functionDecorated.apply(args);
 				synchronized (this)
 				{
 					ramUsed -= invokable.getRam();
+					notifyObservers(metricsList);
 					notify();
 				}
-				notifyAllObservers(metricsList);
 				return (result);
 			}
 		);
-
 		return (futureResult);
 	}
 

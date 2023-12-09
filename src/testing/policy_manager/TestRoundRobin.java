@@ -22,6 +22,7 @@ import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import observer.IdObserver;
+import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 
 public class TestRoundRobin {
@@ -44,7 +45,7 @@ public class TestRoundRobin {
 			}
 		};
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
-		Invoker.addObserver(new IdObserver());
+		Invoker.addObserver(new InvocationObserver());
 
 		try {
 			controller.setPolicyManager(new RoundRobin());
@@ -94,7 +95,7 @@ public class TestRoundRobin {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Add");
+		String str = controller.metrics.getData("InvocationObserver", "Add");
 		assertEquals("000", str);
 	}
 
@@ -118,7 +119,7 @@ public class TestRoundRobin {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Sleep");
+		String str = controller.metrics.getData("InvocationObserver", "Sleep");
 		assertEquals("000", str);
 	}
 
@@ -133,7 +134,7 @@ public class TestRoundRobin {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Add");
+		String str = controller.metrics.getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
@@ -157,7 +158,7 @@ public class TestRoundRobin {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Sleep");
+		String str = controller.metrics.getData("InvocationObserver", "Sleep");
 		assertEquals("101010", str);
 	}
 
@@ -172,42 +173,65 @@ public class TestRoundRobin {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Add");
+		String str = controller.metrics.getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
-	@Test
-	public void testRoundRobinTwoInvokerDifferentRamAsyncFunc()
+	private <T, R> List<R> invokeList(String id, int numCalls, T data, boolean delay)
 	{
-		Future<String> future1, future2, future3, future4, future5, future6;
-		List<String> stringsResult = new LinkedList<String>();
+		List<Future<R>> futures = new LinkedList<Future<R>>();
+		List<R> result = new LinkedList<R>();
+		
+		for (int i = 0; i < numCalls; i++) {
+			try {
+				futures.add(controller.invoke_async(id, data));
+				if (delay)
+					Thread.sleep(1000);
+			}
+			catch (Exception e) {
+			}
+		}
+		for (Future<R> future : futures) {
+			try {
+				result.add(future.get());
+			}
+			catch (Exception e) {
+			}
+		}
+		return (result);
+	}
+
+	@Test
+	public void testRoundRobinTwoInvokerDifferentRamAsyncFuncA()
+	{
+		List<String> stringsResult;
 
 		createAndAddInvokers(Arrays.asList(2L, 1L));
 
 		try {
-			future1 = controller.invoke_async("Sleep", 10000);
-			Thread.sleep(1000);
-			future2 = controller.invoke_async("Sleep",10000);
-			Thread.sleep(1000);
-			future3 = controller.invoke_async("Sleep", 10000);
-			Thread.sleep(1000);
-			future4 = controller.invoke_async("Sleep", 10000);
-			Thread.sleep(1000);
-			future5 = controller.invoke_async("Sleep", 10000);
-			Thread.sleep(1000);
-			future6 = controller.invoke_async("Sleep", 10000);
-			Thread.sleep(1000);
-			stringsResult.add(future1.get());
-			stringsResult.add(future2.get());
-			stringsResult.add(future3.get());
-			stringsResult.add(future4.get());
-			stringsResult.add(future5.get());
-			stringsResult.add(future6.get());
+			stringsResult = invokeList("Sleep", 6, 10000, true);
 		}
 		catch (Exception e) {
 		}
 
-		String str = controller.metrics.getData("IdObserver", "Sleep");
+		String str = controller.metrics.getData("InvocationObserver", "Sleep");
 		assertEquals("100101", str);
+	}
+
+	@Test
+	public void testRoundRobinTwoInvokerDifferentRamAsyncFuncB()
+	{
+		List<String> stringsResult;
+
+		createAndAddInvokers(Arrays.asList(1L, 2L));
+
+		try {
+			stringsResult = invokeList("Sleep", 6, 10000, true);
+		}
+		catch (Exception e) {
+		}
+
+		String str = controller.metrics.getData("InvocationObserver", "Sleep");
+		assertEquals("101010", str);
 	}
 }

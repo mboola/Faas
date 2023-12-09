@@ -9,6 +9,10 @@ public class TimerObserver implements Observer {
 	private Controller	controller;
 	private String		metricId	= "TimerObserver";
 	
+	@Override
+	public void preinitialize(String id, Controller controller, InvokerInterface invoker) {
+	}
+	
 	@SuppressWarnings({"unchecked"})
 	@Override
 	public <T> Metric<T> initialize(String id, Controller controller, InvokerInterface invoker)
