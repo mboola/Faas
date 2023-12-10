@@ -84,9 +84,8 @@ public class Controller {
 	 * @throws OperationNotValid If the invoker received as a parameter is null or is already inside the list.
 	 * @throws NoPolicyManagerRegistered If no policy manager is registered with the controller.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid, NoPolicyManagerRegistered
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid
 	{
-		if (policyManager == null) throw new NoPolicyManagerRegistered("There isn't a policy manager registered.");
 		if (invoker == null) throw new OperationNotValid("Invoker cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
 		invokers.add(invoker);

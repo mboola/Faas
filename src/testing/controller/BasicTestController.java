@@ -57,7 +57,7 @@ public class BasicTestController {
 			assertThrows(OperationNotValid.class, () -> controller.registerInvoker(invoker));
 		} catch (OperationNotValid e) {
 		}
-		List<InvokerInterface> invokers = controller.getInvokerInterfaces();
+		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 		assertTrue(invokers.contains(invoker));
 		assertTrue(invokers.size() == 1);
  	}
@@ -76,7 +76,7 @@ public class BasicTestController {
 			controller.deleteInvoker(invoker);
 		} catch (OperationNotValid e) {
 		}
-		List<InvokerInterface> invokers = controller.getInvokerInterfaces();
+		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 		assertTrue(!invokers.contains(invoker));
 		assertTrue(invokers.size() == 0);
  	}

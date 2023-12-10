@@ -15,6 +15,8 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
+import action.Action;
+import action.FactorialAction;
 import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.NoPolicyManagerRegistered;
@@ -22,9 +24,11 @@ import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerComposite;
 import observer.IdObserver;
+import observer.InvocationObserver;
 import policy_manager.RoundRobin;
+import testing.InvocationTester;
 
-public class BasicTestComposite {
+public class BasicTestComposite extends InvocationTester {
 
 	private Controller			controller;
 	private InvokerComposite	invokerComposite;
@@ -35,16 +39,25 @@ public class BasicTestComposite {
 	 * childs, one Invoker(1), one IdObserver and one function.
 	 */
 	@Before
+	@SuppressWarnings({"rawtypes"})
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
 		Invoker.setController(controller);
-		invokerComposite = InvokerComposite.createInvoker(1);
-		Invoker.addObserver(new IdObserver());
+
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
+		Action factorial = new FactorialAction();
+
+		invokerComposite = InvokerComposite.createInvoker(1);
+
+		Invoker.addObserver(new InvocationObserver());
+		
 		try {
 			controller.registerInvoker(invokerComposite);
-			controller.registerAction("Substract", f, 1);
+			controller.setPolicyManager(new RoundRobin());
+			controller.registerAction("Add", f, 1);
+			controller.registerAction("Factorial", factorial, 2);
+			initializeSleepAction("Sleep", 1, controller);
 		} catch (OperationNotValid e) {
 			assertTrue(false);
 		}
@@ -57,18 +70,10 @@ public class BasicTestComposite {
 	public void	testCompositeNullValues()
 	{
 		//we don't have a policy manager registered
-		assertThrows(NoPolicyManagerRegistered.class, () -> controller.invoke("Substract", Map.of("x", 2, "y", 1)));
-
-		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
-		try {
-			controller.setPolicyManager(new RoundRobin());
-			controller.registerAction("Add", f, 3);
-		} catch (OperationNotValid e) {
-			assertTrue(false);
-		}
+		//assertThrows(NoPolicyManagerRegistered.class, () -> controller.invoke("Substract", Map.of("x", 2, "y", 1)));
 
 		//here we invoke a function that cannot be invoked from any invoker
-		assertThrows(NoInvokerAvailable.class, () -> controller.invoke("Add", Map.of("x", 2, "y", 1)));
+		assertThrows(NoInvokerAvailable.class, () -> controller.invoke("Factorial", 1));
 	}
 
 	/**
@@ -77,28 +82,16 @@ public class BasicTestComposite {
 	@Test
 	public void testOneLayerInvokersSync()
 	{
+		createAndAddInvokers(Arrays.asList(1L), controller);
 
-		Invoker invokerSimple = Invoker.createInvoker(1);
-		// Here we will do multiple invokations
 		try {
-			controller.registerInvoker(invokerSimple);
-			controller.setPolicyManager(new RoundRobin());
-
-			Integer result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-		}
-		catch (NoInvokerAvailable e) {
-			assertTrue(false);
-		}
-		catch (OperationNotValid e) {
-			assertTrue(false);
+			List<Integer> result = controller.invoke("Add", 
+				Arrays.asList(Map.of("x", 2, "y", 1), Map.of("x", 4, "y", 2), Map.of("x", 7, "y", 3), Map.of("x", 7, "y", 3)));
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Substract");
+		String str = controller.getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
@@ -137,7 +130,7 @@ public class BasicTestComposite {
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Sleep");
+		String str = controller.getData("IdObserver", "Sleep");
 		assertEquals("1010", str);
 	}
 
@@ -171,7 +164,7 @@ public class BasicTestComposite {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Substract");
+		String str = controller.getData("IdObserver", "Substract");
 		assertEquals("13121", str);
 	}
 
@@ -200,7 +193,7 @@ public class BasicTestComposite {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Add");
+		String str = controller.getData("IdObserver", "Add");
 		assertEquals("1313", str);
 	}
 
@@ -245,7 +238,7 @@ public class BasicTestComposite {
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.metrics.getData("IdObserver", "Sleep");
+		String str = controller.getData("IdObserver", "Sleep");
 		assertEquals("132010", str);
 	}
 

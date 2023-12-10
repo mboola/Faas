@@ -2,7 +2,6 @@ package policy_manager;
 import java.util.List;
 
 import faas_exceptions.NoInvokerAvailable;
-import invoker.Invoker;
 import invoker.InvokerInterface;
 
 /**
@@ -91,6 +90,13 @@ public class UniformGroup implements PolicyManager{
         } else {
             throw new IllegalArgumentException("Max retries must be greater than or equal to 0.");
         }
+    }
+
+
+    @Override
+    public PolicyManager copy() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'copy'");
     }
 
 
