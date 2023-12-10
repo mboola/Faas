@@ -22,8 +22,7 @@ public class IdObserver implements Observer {
 
 	@Override
 	public <T> void update(Metric<T> metric) {
-		//TODO change the way I access this
-		controller.metrics.addMetric(metricId, metric);
+		controller.addMetric(metricId, metric);
 	}
 
 }

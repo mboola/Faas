@@ -20,10 +20,13 @@ import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
+import policy_manager.UniformGroup;
 import testing.InvocationTester;
 
+
+//TODO: change this tests
 @SuppressWarnings("unused")
-public class TestRoundRobin extends InvocationTester {
+public class TestUniformGroup extends InvocationTester {
 
 	private Controller controller;
 
@@ -40,7 +43,7 @@ public class TestRoundRobin extends InvocationTester {
 		Invoker.addObserver(new InvocationObserver());
 
 		try {
-			controller.setPolicyManager(new RoundRobin());
+			controller.setPolicyManager(new UniformGroup());
 			initializeSleepAction("Sleep", 1, controller);
 			controller.registerAction("Add", f, 1);
 			controller.registerAction("Factorial", factorial, 2);

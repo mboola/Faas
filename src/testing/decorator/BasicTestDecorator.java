@@ -16,10 +16,10 @@ import action.FactorialAction;
 import application.Controller;
 import application.Invokable;
 import decorator.CacheDecorator;
-import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import policy_manager.RoundRobin;
 
+@SuppressWarnings({"unchecked", "unused"})
 public class BasicTestDecorator {
     
 	static final long FACT_20=(long) 2432902008176640000L;
@@ -37,9 +37,9 @@ public class BasicTestDecorator {
 		Invoker.setController(controller);
 		Invoker invokerSimple = Invoker.createInvoker(1);
 		try {
-			controller.registerInvoker(invokerSimple);
 			controller.setPolicyManager(new RoundRobin());
-		} catch (OperationNotValid e) {
+			controller.registerInvoker(invokerSimple);
+		} catch (Exception e) {
 			assertTrue(false);
 		}
 	}
@@ -80,10 +80,6 @@ public class BasicTestDecorator {
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			Invoker.printCache();
-			
-			//long cacheResult = Invoker.getCacheResult("Factorial", (long) 20);
-
-			//assertEquals(FACT_20, cacheResult);
 		}
 		catch (Exception e) {
 			assertTrue(false);

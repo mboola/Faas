@@ -115,6 +115,30 @@ public class Controller {
 	{
 		return (invokers);
 	}
+
+	/**
+	 * 
+	 * 
+	 * @param metricId
+	 * @param functionId
+	 * @return
+	 */
+	public String getData(String metricId, String functionId)
+	{
+		return (metrics.getData(metricId, functionId));
+	}
+
+	/**
+	 * 
+	 * 
+	 * @param <T>
+	 * @param metricId
+	 * @param metric
+	 */
+	public <T> void addMetric(String metricId, Metric<T> metric)
+	{
+		metrics.addMetric(metricId, metric);
+	}
 	
 	/**
 	 * Checks if the id of an action that we are trying to register is already registered.

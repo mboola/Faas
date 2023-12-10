@@ -32,6 +32,7 @@ public class MetricSet {
 	 * 
 	 * @param metricId Id of the metric to add.
 	 */
+	@SuppressWarnings({"unchecked"})
 	public <T> void addMetric(String metricId, Metric<T> metric)
 	{
 		Map<String, List<Metric<Object>>> metricMap;

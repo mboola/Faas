@@ -42,6 +42,7 @@ public class Invoker implements InvokerInterface {
         }
     }
 
+	@SuppressWarnings({"unchecked"})
     public static <T, R> R getCacheResult(String id, T args) throws NoResultAvailable {
         String key = args.toString();
         Map<String, Object> innerMap = cacheDecorator.get(id);

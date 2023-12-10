@@ -1,0 +1,2 @@
+1-PolicyManager should always be assigned before adding an invoker to the list of invokers.
+2-The proxies classes that the DynamicProxy uses are encapsulated in Invokable, and will crash if tried to invoke.

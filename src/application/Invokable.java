@@ -1,7 +1,6 @@
 package application;
 
 import java.io.Serializable;
-import java.util.function.Function;
 
 public class Invokable implements Serializable{
 
@@ -28,10 +27,5 @@ public class Invokable implements Serializable{
 	public long getRam()
 	{
 		return (this.ram);
-	}
-
-	public <T, R> R apply(T args)
-	{
-		return (((Function<T, R>)invokable).apply(args));
 	}
 }

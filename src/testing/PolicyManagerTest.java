@@ -1,5 +1,6 @@
 package testing;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
@@ -25,9 +26,6 @@ public class PolicyManagerTest {
 		Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
-		controller.registerInvoker(invoker);
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
 
 		Function<Integer, String> sleep = s -> {
 			try {
@@ -37,7 +35,15 @@ public class PolicyManagerTest {
 				throw new RuntimeException(e);
 			}
 		};
-		controller.registerAction("sleepAction", sleep, 1);
+
+		try {
+			controller.setPolicyManager(new RoundRobin());
+			controller.registerInvoker(invoker);
+			controller.registerAction("sleepAction", sleep, 1);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
 
 		/* 
 		 * This test consists in creating threads and observing if the execution

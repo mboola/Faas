@@ -8,9 +8,9 @@ public class InvocationObserver implements Observer {
 
 	private String	metricId = "InvocationObserver";
 
-	public void preinitialize(String id, Controller controller, InvokerInterface invoker) throws Exception{
-		System.out.println("!!!!!Invoker selected: " + invoker.getId());
-		controller.metrics.addMetric(metricId, new Metric<String>(id, invoker.getId()));
+	public void preinitialize(String id, Controller controller, InvokerInterface invoker) throws Exception
+	{
+		controller.addMetric(metricId, new Metric<String>(id, invoker.getId()));
 	}
 
 	@Override

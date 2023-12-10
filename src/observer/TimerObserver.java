@@ -29,8 +29,7 @@ public class TimerObserver implements Observer {
 		time = System.nanoTime() - time;
 		timeMetric.setDataType(time);
 
-		//TODO change the way I access this
-		controller.metrics.addMetric(metricId, timeMetric);
+		controller.addMetric(metricId, timeMetric);
 	}
 	
 }
