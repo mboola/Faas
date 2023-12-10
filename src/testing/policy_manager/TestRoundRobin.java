@@ -415,5 +415,42 @@ public class TestRoundRobin extends InvocationTester {
 		String str = controller.metrics.getData("InvocationObserver", "Sleep");
 		assertEquals("120100", str);
 	}
+
+	@Test
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncC()
+	{
+		List<String> stringsResult;
+
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = controller.metrics.getData("InvocationObserver", "Sleep");
+		assertEquals("120101", str);
+	}
+
+	@Test
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncD()
+	{
+		List<String> stringsResult;
+
+		initializeSleepAction("Sleep2", 2, controller);
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep2", 4, 5000, true, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = controller.metrics.getData("InvocationObserver", "Sleep2");
+		assertEquals("1010", str);
+	}
 	
 }
