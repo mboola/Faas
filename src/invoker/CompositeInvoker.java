@@ -8,25 +8,20 @@ import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.OperationNotValid;
 import policy_manager.PolicyManager;
 
-public class InvokerComposite extends Invoker {
+public class CompositeInvoker extends Invoker {
 
 	private List<InvokerInterface>	invokers;
 	private	PolicyManager			policyManager;
 
-	private void maldad()
-	{
-		System.out.print("sin este print no funciona");
-	}
-
-	public static InvokerComposite createInvoker(long ram)
+	public static CompositeInvoker createInvoker(long ram)
 	{
 		if (ram <= 0)
 			return (null);
 		else
-			return (new InvokerComposite(ram));
+			return (new CompositeInvoker(ram));
 	}
 
-	private InvokerComposite(long ram) 
+	private CompositeInvoker(long ram) 
 	{
 		super(ram);
 		invokers = new LinkedList<InvokerInterface>();
@@ -38,7 +33,7 @@ public class InvokerComposite extends Invoker {
 	 * @param invoker The InvokerInterface to be registered.
 	 * @throws OperationNotValid If the invoker passed as a parameter is null or is already inside the list.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid
+	public void registerInvoker(InvokerInterface invoker) throws Exception
 	{
 		if (invoker == null) throw new OperationNotValid("Invoker to register cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
@@ -58,7 +53,7 @@ public class InvokerComposite extends Invoker {
 	 * @param invoker The InvokerInterface to be removed.
 	 * @throws OperationNotValid If the invoker passed as a parameter is null or is not inside the list.
 	 */
-	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid
+	public void deleteInvoker(InvokerInterface invoker) throws Exception
 	{
 		if (invoker == null) throw new OperationNotValid("Invoker to delete cannot be null.");
 		if (!invokers.contains(invoker)) throw new OperationNotValid("Invoker is not registered.");
@@ -81,7 +76,7 @@ public class InvokerComposite extends Invoker {
 	// va demasiado rapido y no se asignan correctamente los invokers porque cuando accede a la ramAvailable esta aun no ha
 	//sido actualizada
 	@Override
-	public synchronized InvokerInterface selectInvoker(long ram) throws Exception
+	public InvokerInterface selectInvoker(long ram) throws Exception
 	{
 		InvokerInterface invoker;
 

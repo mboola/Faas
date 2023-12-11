@@ -1,30 +1,34 @@
 package RMI;
 
 import java.io.NotSerializableException;
-import java.io.Serializable;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.time.Duration;
 import java.util.Map;
-import java.util.function.Function;
 
 import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
 import invoker.Invoker;
 import invoker.InvokerInterface;
-import policy_manager.GreedyGroup;
-import policy_manager.PolicyManager;
+import policy_manager.RoundRobin;
 
+/**
+ * This class will locate all servers that have an invoker ready and will use them to
+ * invoke functions.
+ */
 public class ClientController {
 	 public static void main(String[] args) {
 
 		Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
-		PolicyManager policyManager = new GreedyGroup();
-		controller.addPolicyManager(policyManager);
 
 		SerializedFunction<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
-		controller.registerAction("suma", f1, 1);
+		try {
+			controller.setPolicyManager(new RoundRobin());
+			controller.registerAction("suma", f1, 1);
+		}
+		catch (Exception e) {
+
+		}
 
 		//here get all invokers and add them to contoller
 		try {

@@ -69,7 +69,7 @@ public class Controller {
 	 * @param policyManager The Policy Manager to be set for the Controller and invokers.
 	 * @throws OperationNotValid If the Policy Manager is null.
 	 */
-	public void	setPolicyManager(PolicyManager policyManager) throws OperationNotValid
+	public void	setPolicyManager(PolicyManager policyManager) throws Exception
 	{
 		if (policyManager == null) throw new OperationNotValid("Policy Manager cannot be null");
 		this.policyManager = policyManager;
@@ -84,7 +84,7 @@ public class Controller {
 	 * @throws OperationNotValid If the invoker received as a parameter is null or is already inside the list.
 	 * @throws NoPolicyManagerRegistered If no policy manager is registered with the controller.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid
+	public void registerInvoker(InvokerInterface invoker) throws Exception
 	{
 		if (invoker == null) throw new OperationNotValid("Invoker cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");

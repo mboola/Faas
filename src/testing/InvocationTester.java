@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 import application.Controller;
 import invoker.Invoker;
-import invoker.InvokerComposite;
+import invoker.CompositeInvoker;
 
 public class InvocationTester {
 
@@ -46,7 +46,7 @@ public class InvocationTester {
 		}
 	}
 
-	protected void createAndAddInvokers(List<Long> ramInvokers, InvokerComposite composite)
+	protected void createAndAddInvokers(List<Long> ramInvokers, CompositeInvoker composite)
 	{
 		Invoker invoker;
 		for (Long ram : ramInvokers) {

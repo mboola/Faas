@@ -13,7 +13,7 @@ import java.util.function.Function;
 
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
-import invoker.InvokerComposite;
+import invoker.CompositeInvoker;
 import observer.IdObserver;
 import policy_manager.BigGroup;
 import policy_manager.RoundRobin;
@@ -23,7 +23,7 @@ public class Faas {
 	{
 		Controller controller = Controller.instantiate();
 		Invoker.setController(controller);
-		InvokerComposite invokerComposite = InvokerComposite.createInvoker(1);
+		CompositeInvoker invokerComposite = CompositeInvoker.createInvoker(1);
 		Invoker.addObserver(new IdObserver());
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		try {

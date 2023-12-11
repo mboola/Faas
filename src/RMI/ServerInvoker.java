@@ -6,35 +6,50 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Future;
 
-import application.Action;
+import application.Invokable;
+import invoker.CompositeInvoker;
 import invoker.Invoker;
 import invoker.InvokerInterface;
+import policy_manager.PolicyManager;
 
+/**
+ */
 public class ServerInvoker extends UnicastRemoteObject implements InvokerInterface {
 
 	private	Invoker	invoker;
 
-	protected ServerInvoker() throws RemoteException {
+	protected ServerInvoker(Long ram, boolean isComposite) throws RemoteException {
 		super();
-		invoker = Invoker.createInvoker(1);
+		if (isComposite)
+			invoker = CompositeInvoker.createInvoker(ram);
+		else
+			invoker = Invoker.createInvoker(ram);
 	}
 
 	public static void main(String[] args) {
+		//creates the struct of the network
+		
+		ServerInvoker server;
 		try {
-			ServerInvoker obj = new ServerInvoker();
+			//ServerInvoker server = new ServerInvoker(1L);
+			if (Integer.parseInt(args[2]) == 1)
+				server = new ServerInvoker(Long.valueOf(args[1]), true);
+			else
+				server = new ServerInvoker(Long.valueOf(args[1]), false);
+			//Registry registry = LocateRegistry.createRegistry(1099);
 			Registry registry = LocateRegistry.createRegistry(Integer.valueOf(args[0]));
-			//registry.rebind("Invoker"+obj.invoker.getId(), obj);
-			registry.rebind("Invoker", obj);
 
-			System.out.println("Invoker ready.");
+			registry.rebind("Invoker", server);
+
+			System.out.println("Invoker with id " + server.getId() + " created and ready.");
 		} catch (Exception e) {
-			System.err.println("Excepción del servidor: " + e.toString());
+			System.err.println("Excepcion del servidor: " + e.toString());
 			e.printStackTrace();
 		}
 	}
 
 	@Override
-	public String getId() {
+	public String getId() throws RemoteException {
 		return (invoker.getId());
 	}
 
@@ -54,18 +69,38 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public <T, R> R invoke(Action action, T args, String id) throws Exception {
+	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception {
 		System.out.println("testing");
-		return (invoker.invoke(action, args, id));
+		return (invoker.invoke(invokable, args, id));
 	}
 
 	@Override
-	public <T, R> Future<R> invokeAsync(Action action, T args, String id) throws Exception {
-		return (invoker.invoke(action, args, id));
+	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception {
+		return (invoker.invoke(invokable, args, id));
+	}
+
+	@Override
+	public InvokerInterface selectInvoker(long ram) throws Exception {
+		return (invoker.selectInvoker(ram));
+	}
+
+	@Override
+	public void setPolicyManager(PolicyManager policyManager) {
+		invoker.setPolicyManager(policyManager);
 	}
 
 	@Override
 	public void shutdownInvoker() {
 		invoker.shutdownInvoker();
+	}
+
+	@Override
+	public void registerInvoker(InvokerInterface invoker) throws Exception {
+		this.invoker.registerInvoker(invoker);
+	}
+
+	@Override
+	public void deleteInvoker(InvokerInterface invoker) throws Exception {
+		this.invoker.deleteInvoker(invoker);
 	}
 }

@@ -336,4 +336,12 @@ public class Invoker implements InvokerInterface {
 	{
 		executor.shutdown();
 	}
+
+	@Override
+	public void registerInvoker(InvokerInterface invoker) throws Exception {
+	}
+
+	@Override
+	public void deleteInvoker(InvokerInterface invoker) throws Exception {
+	}
 }

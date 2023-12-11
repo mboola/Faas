@@ -4,12 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.Duration;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.junit.Before;
@@ -21,7 +18,7 @@ import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
-import invoker.InvokerComposite;
+import invoker.CompositeInvoker;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 import testing.InvocationTester;
@@ -29,7 +26,7 @@ import testing.InvocationTester;
 public class BasicTestComposite extends InvocationTester {
 
 	private Controller			controller;
-	private InvokerComposite	invokerComposite;
+	private CompositeInvoker	invokerComposite;
 
 	/*
 	 * This gets called before each Test. We create a core controller that
@@ -46,7 +43,7 @@ public class BasicTestComposite extends InvocationTester {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		Action factorial = new FactorialAction();
 
-		invokerComposite = InvokerComposite.createInvoker(1);
+		invokerComposite = CompositeInvoker.createInvoker(1);
 
 		Invoker.addObserver(new InvocationObserver());
 		
