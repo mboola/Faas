@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import application.Controller;
 import invoker.Invoker;
+import invoker.InvokerComposite;
 
 public class InvocationTester {
 
@@ -39,6 +40,19 @@ public class InvocationTester {
 			invoker = Invoker.createInvoker(ram);
 			try {
 				controller.registerInvoker(invoker);
+			}
+			catch (Exception e) {
+			}
+		}
+	}
+
+	protected void createAndAddInvokers(List<Long> ramInvokers, InvokerComposite composite)
+	{
+		Invoker invoker;
+		for (Long ram : ramInvokers) {
+			invoker = Invoker.createInvoker(ram);
+			try {
+				composite.registerInvoker(invoker);
 			}
 			catch (Exception e) {
 			}

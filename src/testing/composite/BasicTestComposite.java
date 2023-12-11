@@ -19,11 +19,9 @@ import action.Action;
 import action.FactorialAction;
 import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.NoPolicyManagerRegistered;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerComposite;
-import observer.IdObserver;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 import testing.InvocationTester;
@@ -98,40 +96,22 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void testOneLayerInvokersAsync()
 	{
-		Invoker invokerSimple = Invoker.createInvoker(1);
-
-		Function<Integer, String> sleep = s -> {
-			try {
-				Thread.sleep(Duration.ofSeconds(s).toMillis());
-				return "Done!";
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		};
+		createAndAddInvokers(Arrays.asList(1L), controller);
 
 		try {
-			controller.registerInvoker(invokerSimple);
-			controller.setPolicyManager(new RoundRobin());
-			controller.registerAction("Sleep", sleep, 1);
-
 			long currentTimeMillis = System.currentTimeMillis();
-			List<Future<String>> futures = new LinkedList<Future<String>>();
-			futures = controller.invoke_async("Sleep", Arrays.asList(2,3,4,5));
-			List<String> stringsResult = new LinkedList<String>();
-
-			for (Future<String> future : futures)
-				stringsResult.add(future.get());
-
+			List<String> stringsResult = invokeList("Sleep", 3, 3000, true, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			//if (totalTime > 2500 || totalTime < 2000) assertTrue(false);
-			//else assertTrue(true);
-		} 
+			if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
+			else assertTrue(true);
+		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.getData("IdObserver", "Sleep");
-		assertEquals("1010", str);
+
+		String str = controller.getData("InvocationObserver", "Sleep");
+		assertEquals("101", str);
 	}
 
 
@@ -144,102 +124,79 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void	testTwoLayersInvokersSameRamSync()
 	{
-		Invoker invokerSimple = Invoker.createInvoker(1);
-		Invoker invokerSimple1 = Invoker.createInvoker(1);
-		Invoker invokerSimple2 = Invoker.createInvoker(1);
+		createAndAddInvokers(Arrays.asList(1L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 1L), invokerComposite);
 
-		try
-		{
-			controller.registerInvoker(invokerSimple);
-			invokerComposite.registerInvoker(invokerSimple1);
-			invokerComposite.registerInvoker(invokerSimple2);
-			controller.setPolicyManager(new RoundRobin());
-
-			Integer result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Substract", Map.of("x", 2, "y", 1));
+		try {
+			List<Integer> result = controller.invoke("Add", 
+				Arrays.asList(Map.of("x", 2, "y", 1), Map.of("x", 4, "y", 2), Map.of("x", 7, "y", 3), Map.of("x", 7, "y", 3)));
 		}
-		catch (Exception e){
+		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.getData("IdObserver", "Substract");
-		assertEquals("13121", str);
+		String str = controller.getData("InvocationObserver", "Add");
+		assertEquals("1312", str);
 	}
 
 	@Test
 	public void	testTwoLayersInvokersDifferentRamSync()
 	{
-		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
-
-		Invoker invokerSimple = Invoker.createInvoker(2);	//1
-		Invoker invokerSimple1 = Invoker.createInvoker(1);	//2
-		Invoker invokerSimple2 = Invoker.createInvoker(2);	//3
-
-		try
-		{
-			controller.registerAction("Add", f, 2);
-			controller.setPolicyManager(new RoundRobin());
-			controller.registerInvoker(invokerSimple);
-			invokerComposite.registerInvoker(invokerSimple1);
-			invokerComposite.registerInvoker(invokerSimple2);
-
-			Integer result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
-			result = (Integer) controller.invoke("Add", Map.of("x", 2, "y", 1));
-		}
-		catch (Exception e){
-			assertTrue(false);
-		}
-		String str = controller.getData("IdObserver", "Add");
-		assertEquals("1313", str);
-	}
-
-	//TODO: Junit fuck you
-	@Test
-	public void testTwoLayersInvokersSameRamAsync()
-	{
-		Invoker invokerSimple = Invoker.createInvoker(1);	//1
-		Invoker invokerSimple1 = Invoker.createInvoker(1);	//2
-		Invoker invokerSimple2 = Invoker.createInvoker(1);	//3
-		Function<Integer, String> sleep = s -> {
-			try {
-				Thread.sleep(Duration.ofSeconds(s).toMillis());
-				return "Done!";
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		};
+		createAndAddInvokers(Arrays.asList(2L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
 
 		try {
-			controller.setPolicyManager(new RoundRobin());
-			controller.registerAction("Sleep", sleep, 1);
-			controller.registerInvoker(invokerSimple);
-			invokerComposite.registerInvoker(invokerSimple1);
-			invokerComposite.registerInvoker(invokerSimple2);
-
-			long currentTimeMillis = System.currentTimeMillis();
-			List<Future<String>> futures = new LinkedList<Future<String>>();
-			futures = controller.invoke_async("Sleep", Arrays.asList(1, 2, 3, 4, 5, 6));
-			List<String> stringsResult = new LinkedList<String>();
-
-			for (Future<String> future : futures)
-				stringsResult.add(future.get());
-
-			long totalTime = System.currentTimeMillis() - currentTimeMillis;
-
-			//assertEquals(4000, totalTime);
-
-			//if (totalTime > 4500 || totalTime < 4000) assertTrue(false);
-			//else assertTrue(true);
-		} 
+			List<Integer> result = controller.invoke("Factorial", 
+				Arrays.asList(1L, 1L, 1L, 1L));
+		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = controller.getData("IdObserver", "Sleep");
+		String str = controller.getData("InvocationObserver", "Factorial");
+		assertEquals("1313", str);
+	}
+
+	@Test
+	public void testTwoLayersInvokersSameRamAsync()
+	{
+		createAndAddInvokers(Arrays.asList(1L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 1L), invokerComposite);
+
+		try {
+			long currentTimeMillis = System.currentTimeMillis();
+			List<String> stringsResult = invokeList("Sleep", 6, 6000, true, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
+			//else assertTrue(true);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = controller.getData("InvocationObserver", "Sleep");
 		assertEquals("132010", str);
+	}
+
+	@Test
+	public void testTwoLayersInvokersDifferentRamAsync()
+	{
+		createAndAddInvokers(Arrays.asList(2L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
+
+		try {
+			long currentTimeMillis = System.currentTimeMillis();
+			List<String> stringsResult = invokeList("Sleep", 7, 7000, true, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
+			//else assertTrue(true);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = controller.getData("InvocationObserver", "Sleep");
+		assertEquals("1312301", str);
 	}
 
 }
