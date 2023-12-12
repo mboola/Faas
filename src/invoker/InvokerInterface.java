@@ -16,7 +16,7 @@ public interface InvokerInterface extends Remote {
 	 * 
 	 * @return Ram being used.
 	 */
-	public long	getRamUsed() throws RemoteException;
+	public long	getUsedRam() throws RemoteException;
 
 	/**
 	 * Getter of the ram avaiable to use.
@@ -25,6 +25,7 @@ public interface InvokerInterface extends Remote {
 	 */
 	public long	getAvailableRam() throws RemoteException;
 	
+	public void reserveRam(long ram) throws Exception;
 	/**
 	 * Getter of the max ram of the Invoker.
 	 * 

@@ -18,6 +18,7 @@ import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
+import invoker.InvokerInterface;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 import testing.InvocationTester;
@@ -426,10 +427,21 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 10, 3000, false, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
+		}
+
+		List<InvokerInterface>	invokers = controller.getRegisteredInvokers();
+		for (InvokerInterface invokerInterface : invokers) {
+			try {
+				System.out.println("Ram reserved: " + invokerInterface.getAvailableRam());
+				System.out.println("Ram used: " + invokerInterface.getUsedRam());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 		String str = controller.getData("InvocationObserver", "Sleep");

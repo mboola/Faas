@@ -14,6 +14,7 @@ import application.Invokable;
 import application.Metric;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.NoResultAvailable;
+import faas_exceptions.OperationNotValid;
 import observer.Observer;
 import policy_manager.PolicyManager;
 
@@ -54,12 +55,59 @@ public class Invoker implements InvokerInterface, Serializable {
     }
 
 	//all good here
-	private static final int 		MAX_THREADS = 8;
+	private static final int 		MAX_THREADS = 8; //TODO: talk about this 
 	private static long				numInvokers = 0;
 
-	private String 					id;
-	private long					maxRam;
-	private long					ramUsed;
+	private final String	id;
+	private final long		maxRam;			//lo maximo que podemos usar para ejecutar funciones: ej si tenemos 5 y queremos ejecutar algo de 6 no se podra //TODO; wtf
+	
+	private long			reservedRam;	//la que se va a usar pero aun no. Usada desde el PolicyManager
+	private long			usedRam;		//ram en uno actualmente en los invokers
+
+	public long getAvailableRam()
+	{
+		return (maxRam - reservedRam);
+	}
+
+	public void reserveRam(long ram) throws Exception
+	{
+		if (reservedRam + ram > maxRam) throw new OperationNotValid("this operation would result in reservedRam being greater than maxRam");
+		if (reservedRam + ram < 0) throw new OperationNotValid("this operation would result in reservedRam being lower than zero");
+		reservedRam += ram;
+	}
+
+	//invoker
+	public long getUnusedRam()
+	{
+		return (maxRam - usedRam);
+	}
+
+	/**
+	 * Getter of the ram being used.
+	 * 
+	 * @return Ram being used.
+	 */
+	public long	getUsedRam()
+	{
+		return (usedRam);
+	}
+
+	public long	getReservedRam()
+	{
+		return (reservedRam);
+	}
+	
+	/**
+	 * Getter of the max ram of the Invoker.
+	 * 
+	 * @return Max ram to be used by this invoker.
+	 */
+	public long	getMaxRam()
+	{
+		return (maxRam);
+	}
+
+
 	private transient ExecutorService 		executor;
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
@@ -90,7 +138,8 @@ public class Invoker implements InvokerInterface, Serializable {
 	protected Invoker(long ram)
 	{
 		this.maxRam = ram;
-		ramUsed = 0;
+		usedRam = 0;
+		reservedRam = 0;
 
 		executor = Executors.newFixedThreadPool(MAX_THREADS);
 
@@ -171,36 +220,6 @@ public class Invoker implements InvokerInterface, Serializable {
 	{
 	}
 
-	/**
-	 * Getter of the ram being used.
-	 * 
-	 * @return Ram being used.
-	 */
-	public long	getRamUsed()
-	{
-		return (ramUsed);
-	}
-
-	/**
-	 * Getter of the ram avaiable to use.
-	 * 
-	 * @return Ram avaiable to use.
-	 */
-	public long	getAvailableRam()
-	{
-		return (maxRam - ramUsed);
-	}
-	
-	/**
-	 * Getter of the max ram of the Invoker.
-	 * 
-	 * @return Max ram to be used by this invoker.
-	 */
-	public long	getMaxRam()
-	{
-		return (maxRam);
-	}
-
 	//TODO: javadocs
 	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
 	@SuppressWarnings({"unchecked"})
@@ -274,6 +293,9 @@ public class Invoker implements InvokerInterface, Serializable {
 		Function<T, R>						functionDecorated;
 		R									result;
 		HashMap<Observer, Metric<Object>>	metricsList;
+		Long								ram;
+
+		ram = invokable.getRam();
 
 		preinitializeObservers(id);
 
@@ -284,6 +306,7 @@ public class Invoker implements InvokerInterface, Serializable {
 		result = functionDecorated.apply(args);
 
 		notifyObservers(metricsList);
+
 		return (result);
 	}
 
@@ -299,6 +322,8 @@ public class Invoker implements InvokerInterface, Serializable {
 
 		preinitializeObservers(id);
 
+		this.reserveRam(invokable.getRam());
+
 		futureResult = executor.submit( 
 			() -> {
 				R	result;
@@ -306,7 +331,7 @@ public class Invoker implements InvokerInterface, Serializable {
 
 				synchronized (this)
 				{
-					while (getAvailableRam() - invokable.getRam() < 0)
+					while (getUnusedRam() - invokable.getRam() < 0)
 					{
 						try {
 							wait();
@@ -314,14 +339,14 @@ public class Invoker implements InvokerInterface, Serializable {
 							Thread.currentThread().interrupt();
 						}
 					}
-					ramUsed += invokable.getRam();
+					usedRam += invokable.getRam();
 					metricsList = initializeObservers(id);
 				}
 				result = functionDecorated.apply(args);
 				synchronized (this)
 				{
-					ramUsed -= invokable.getRam();
-					//
+					usedRam -= invokable.getRam();
+					this.reserveRam(-invokable.getRam());
 					notifyObservers(metricsList);
 					notify();
 				}

@@ -17,7 +17,7 @@ public class MemoryObserver implements Observer {
 	public <T> Metric<T> initialize(String id, Controller controller, InvokerInterface invoker) throws Exception
 	{
 		this.controller = controller;
-		return (Metric<T>) (new Metric<Long>(id, invoker.getRamUsed()));
+		return (Metric<T>) (new Metric<Long>(id, invoker.getUsedRam()));
 	}
 
 	@Override

@@ -33,7 +33,7 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 		try {
 			//ServerInvoker server = new ServerInvoker(1L);
 			server = new ServerInvoker(Long.valueOf(args[1]), Integer.parseInt(args[2]) == 1);
-			
+
 			//Registry registry = LocateRegistry.createRegistry(1099);
 			Registry registry = LocateRegistry.createRegistry(Integer.valueOf(args[0]));
 
@@ -53,7 +53,7 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 
 	@Override
 	public long getRamUsed() {
-		return (invoker.getRamUsed());
+		return (invoker.getUsedRam());
 	}
 
 	@Override
