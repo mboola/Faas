@@ -1,21 +1,39 @@
 package action;
 
-public class MapFileAction implements Action<String, String[]> {
+import java.util.LinkedList;
+import java.util.List;
+
+public class MapFileAction implements Action<String, List<String>> {
 
 	@Override
-	public String[] apply(String arg)
+	public List<String> apply(String arg)
 	{
-		String[]	strToReturn;
-		Integer		len;
-		Integer		numOfFiles = 10;
+		List<String>	strToReturn;
+		Integer			numOfFiles = 10;
+		int 			end, start;
 		
-		strToReturn = new String[numOfFiles];
-		len = arg.length() / numOfFiles;
-		
-		//find next space from len.
-		//once I find it, substr til len * 2, also space.
-		//add to strToReturn
-		//this numOfFiles times
+		//experimental]
+		strToReturn = new LinkedList<String>();
+
+		int length = arg.length();
+		int chunkSize = (int) Math.ceil((double) length / numOfFiles);
+		start = 0;
+
+		for (int i = 0; i < length; i += chunkSize)
+		{
+			end = Math.min(start + chunkSize, length);
+
+			while (end < length && arg.charAt(end) != ' ') {
+                end++;
+            }
+
+			strToReturn.add(arg.substring(start, end).trim());
+            start = end;
+
+			while (start < length && arg.charAt(start) == ' ') {
+                start++;
+            }
+		}
 
 		return (strToReturn);
 	}

@@ -261,6 +261,7 @@ public class Controller {
 		InvokerInterface	invoker;
 
 		invoker = selectInvoker(invokable.getRam());
+		//
 		return (invoker.invoke(invokable, args, id));
 	}
 

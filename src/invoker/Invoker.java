@@ -321,6 +321,7 @@ public class Invoker implements InvokerInterface, Serializable {
 				synchronized (this)
 				{
 					ramUsed -= invokable.getRam();
+					//
 					notifyObservers(metricsList);
 					notify();
 				}

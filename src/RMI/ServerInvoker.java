@@ -32,10 +32,8 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 		ServerInvoker server;
 		try {
 			//ServerInvoker server = new ServerInvoker(1L);
-			if (Integer.parseInt(args[2]) == 1)
-				server = new ServerInvoker(Long.valueOf(args[1]), true);
-			else
-				server = new ServerInvoker(Long.valueOf(args[1]), false);
+			server = new ServerInvoker(Long.valueOf(args[1]), Integer.parseInt(args[2]) == 1);
+			
 			//Registry registry = LocateRegistry.createRegistry(1099);
 			Registry registry = LocateRegistry.createRegistry(Integer.valueOf(args[0]));
 
