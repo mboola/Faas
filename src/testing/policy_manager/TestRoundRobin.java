@@ -44,7 +44,7 @@ public class TestRoundRobin extends InvocationTester {
 			initializeSleepAction("Sleep", 1, controller);
 			controller.registerAction("Add", f, 1);
 			controller.registerAction("Factorial", factorial, 2);
-		} catch (OperationNotValid e) {
+		} catch (Exception e) {
 			assertTrue(false);
 		}
 	}

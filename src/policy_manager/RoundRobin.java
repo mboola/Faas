@@ -1,10 +1,11 @@
 package policy_manager;
+import java.io.Serializable;
 import java.util.List;
 
 import faas_exceptions.NoInvokerAvailable;
 import invoker.InvokerInterface;
 
-public class RoundRobin implements PolicyManager{
+public class RoundRobin implements PolicyManager, Serializable {
 
 	private int	lastInvokerAssigned;
 
@@ -53,38 +54,30 @@ public class RoundRobin implements PolicyManager{
 				}
 				if (invoker.getAvailableRam() - ram >= 0)
 					break ;
-				else
-					lastInvokerChecked = updatePos(lastInvokerChecked, len);
+				lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
 			catch (NoInvokerAvailable e) {
 				lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		if (lastInvokerAssigned != lastInvokerChecked)
-		{
-			System.out.println(" -a Invoker selected: " + invoker.getId());
 			lastInvokerAssigned = lastInvokerChecked;
-		}
 		//if more than one invoker but all full
 		else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
 		{
 			//check if the invoker I started poiting to has enough resources
 			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
 			if (invoker.getAvailableRam() - ram >= 0)
-			{
-				System.out.println(" -b Invoker selected: " + invoker.getId());
 				return (invoker);
-			}
 			lastInvokerAssigned = invokerExecutablePos;
-			System.out.println(" -c Invoker selected: " + invokerExecutable.getId());
 			return (invokerExecutable);
 		}
 		//case only one invoker
 		else
-		{
 			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-			System.out.println(" -d Invoker selected: " + invoker.getId());
-		}
 		return (invoker);
 	}
 

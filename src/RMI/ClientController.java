@@ -13,7 +13,7 @@ import policy_manager.RoundRobin;
 
 /**
  * This class will locate all servers that have an invoker ready and will use them to
- * invoke functions.
+ * invoke functions. If
  */
 public class ClientController {
 	 public static void main(String[] args) {

@@ -1,4 +1,5 @@
 package invoker;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,7 +17,7 @@ import faas_exceptions.NoResultAvailable;
 import observer.Observer;
 import policy_manager.PolicyManager;
 
-public class Invoker implements InvokerInterface {
+public class Invoker implements InvokerInterface, Serializable {
 
 	private static Map<String, Map<String, Object>> cacheDecorator = new HashMap<>();
 
@@ -59,7 +60,7 @@ public class Invoker implements InvokerInterface {
 	private String 					id;
 	private long					maxRam;
 	private long					ramUsed;
-	private ExecutorService 		executor;
+	private transient ExecutorService 		executor;
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
 	private static Function<Invokable, Function<Object, Object>>	decoratorInitializer = null;

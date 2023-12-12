@@ -136,5 +136,7 @@ public class ServerHandler {
 				e.printStackTrace();
 			}
 		}
+
+		//here in theory all invokers are registered
 	}
 }
