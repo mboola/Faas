@@ -3,7 +3,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -13,46 +12,11 @@ import application.Controller;
 import application.Invokable;
 import application.Metric;
 import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.NoResultAvailable;
 import faas_exceptions.OperationNotValid;
 import observer.Observer;
 import policy_manager.PolicyManager;
 
 public class Invoker implements InvokerInterface, Serializable {
-
-	private static Map<String, Map<String, Object>> cacheDecorator = new HashMap<>();
-
-    public static void printCache() {
-        if (cacheDecorator.isEmpty()) {
-            System.out.println("Cache is empty.");
-            return;
-        }
-        for (String id : cacheDecorator.keySet()) {
-            System.out.println("Function: " + id);
-            Map<String, Object> innerMap = cacheDecorator.get(id);
-            for (Map.Entry<String, Object> entry : innerMap.entrySet()) {
-                System.out.println("Args: " + entry.getKey() + ". Ret: " + entry.getValue());
-            }
-        }
-    }
-
-    public static <T, R> void cacheResult(String id, T args, R result) {
-        String key = args.toString();
-        Map<String, Object> innerMap = cacheDecorator.computeIfAbsent(id, k -> new HashMap<>());
-        if (!innerMap.containsKey(key)) {
-            innerMap.put(key, result);
-        }
-    }
-
-	@SuppressWarnings({"unchecked"})
-    public static <T, R> R getCacheResult(String id, T args) throws NoResultAvailable {
-        String key = args.toString();
-        Map<String, Object> innerMap = cacheDecorator.get(id);
-        if (innerMap == null || !innerMap.containsKey(key)) {
-            throw new NoResultAvailable("No matching arguments have been found");
-        }
-        return (R) innerMap.get(key);
-    }
 
 	//all good here
 	private static final int 		MAX_THREADS = 8; //TODO: talk about this 
@@ -293,9 +257,6 @@ public class Invoker implements InvokerInterface, Serializable {
 		Function<T, R>						functionDecorated;
 		R									result;
 		HashMap<Observer, Metric<Object>>	metricsList;
-		Long								ram;
-
-		ram = invokable.getRam();
 
 		preinitializeObservers(id);
 
