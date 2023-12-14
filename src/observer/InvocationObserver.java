@@ -2,19 +2,20 @@ package observer;
 
 import application.Controller;
 import application.Metric;
+import application.MetricSet;
 import invoker.InvokerInterface;
 
 public class InvocationObserver implements Observer {
 
 	private String	metricId = "InvocationObserver";
 
-	public void preinitialize(String id, Controller controller, InvokerInterface invoker) throws Exception
+	public void preinitialize(String id, InvokerInterface invoker) throws Exception
 	{
-		controller.addMetric(metricId, new Metric<String>(id, invoker.getId()));
+		MetricSet.instantiate().addMetric(metricId, new Metric<String>(id, invoker.getId()));
 	}
 
 	@Override
-	public <T> Metric<T> initialize(String id, Controller controller, InvokerInterface invoker) {
+	public <T> Metric<T> initialize(String id, InvokerInterface invoker) {
 		return (null);
 	}
 

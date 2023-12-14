@@ -18,10 +18,8 @@ import application.Controller;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
-import invoker.CompositeInvoker;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
-import testing.InvocationTester;
 
 public class BasicTestComposite extends InvocationTester {
 
@@ -38,7 +36,6 @@ public class BasicTestComposite extends InvocationTester {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker.setController(controller);
 
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		Action factorial = new FactorialAction();

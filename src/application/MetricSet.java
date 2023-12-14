@@ -8,8 +8,23 @@ public class MetricSet {
 
 	private Map<String, Map<String, List<Metric<Object>>>> dataCollected;
 
-	public MetricSet()
-	{
+	private static MetricSet uniqueInstance = null;
+
+	/**
+	 * Checks if the MetricSet is instanciated, creates one if it isn't.
+	 * 
+	 * @return The Singleton instance of MetricSet. 
+	 */
+	public static MetricSet instantiate() {
+		if (uniqueInstance == null)
+			uniqueInstance = new MetricSet();
+		return (uniqueInstance);
+	}
+
+	/**
+	 * Constructs a new instance of MetricSet and instantiates all the structs it uses.
+	 */
+	private MetricSet() {
 		dataCollected = new HashMap<String, Map<String, List<Metric<Object>>>>();
 	}
 

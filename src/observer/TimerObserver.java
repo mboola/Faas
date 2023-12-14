@@ -1,23 +1,21 @@
 package observer;
 
-import application.Controller;
 import application.Metric;
+import application.MetricSet;
 import invoker.InvokerInterface;
 
 public class TimerObserver implements Observer {
 
-	private Controller	controller;
 	private String		metricId	= "TimerObserver";
 	
 	@Override
-	public void preinitialize(String id, Controller controller, InvokerInterface invoker) {
+	public void preinitialize(String id, InvokerInterface invoker) {
 	}
 	
 	@SuppressWarnings({"unchecked"})
 	@Override
-	public <T> Metric<T> initialize(String id, Controller controller, InvokerInterface invoker)
+	public <T> Metric<T> initialize(String id, InvokerInterface invoker)
 	{
-		this.controller = controller;
 		return (Metric<T>) (new Metric<Long>(id, System.nanoTime()));
 	}
 
@@ -29,7 +27,7 @@ public class TimerObserver implements Observer {
 		time = System.nanoTime() - time;
 		timeMetric.setDataType(time);
 
-		controller.addMetric(metricId, timeMetric);
+		MetricSet.instantiate().addMetric(metricId, timeMetric);
 	}
 	
 }

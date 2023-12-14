@@ -76,7 +76,6 @@ public class Invoker implements InvokerInterface, Serializable {
 
 	private static List<Observer>								observers = new LinkedList<Observer>();
 	private static Function<Invokable, Function<Object, Object>>	decoratorInitializer = null;
-	private static Controller									controller = null;
 	
 	/**
 	 * This method creates an Invoker.
@@ -109,16 +108,6 @@ public class Invoker implements InvokerInterface, Serializable {
 
 		id = ((Long)numInvokers).toString();
 		numInvokers++;
-	}
-
-	/**
-	 * Assigns a Controller to the static variable controller of this class.
-	 * 
-	 * @param controller The Controller to be used by all the invokers.
-	 */
-	public static void setController(Controller controller)
-	{
-		Invoker.controller = controller;
 	}
 
 	/**
@@ -197,7 +186,7 @@ public class Invoker implements InvokerInterface, Serializable {
 	private void preinitializeObservers(String id) throws Exception 
 	{
 		for (Observer observer : observers) {
-			observer.preinitialize(id, Invoker.controller, this);
+			observer.preinitialize(id, this);
 		}
 	}
 
@@ -213,7 +202,7 @@ public class Invoker implements InvokerInterface, Serializable {
 		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
 
 		for (Observer observer : observers) {
-			metrics.put(observer, observer.initialize(id, Invoker.controller, this));
+			metrics.put(observer, observer.initialize(id, this));
 		}
 		return (metrics);
 	}

@@ -15,6 +15,7 @@ import action.Action;
 import action.FactorialAction;
 import application.Controller;
 import application.Invokable;
+import decorator.Cache;
 import decorator.CacheDecorator;
 import invoker.Invoker;
 import policy_manager.RoundRobin;
@@ -34,7 +35,6 @@ public class BasicTestDecorator {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker.setController(controller);
 		Invoker invokerSimple = Invoker.createInvoker(1);
 		try {
 			controller.setPolicyManager(new RoundRobin());
@@ -79,7 +79,7 @@ public class BasicTestDecorator {
 			List<Integer> result = controller.invoke("Addition", singleList);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			Invoker.printCache();
+			Cache.instantiate().printCache();
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -112,7 +112,7 @@ public class BasicTestDecorator {
 
 			assertEquals(FACT_20, (long) result);
 			
-			long cacheResult = Invoker.getCacheResult("Factorial", (long) 20);
+			long cacheResult = Cache.instantiate().getCacheResult("Factorial", (long) 20);
 
 			assertEquals(FACT_20, cacheResult);
 		}

@@ -30,9 +30,6 @@ public class Controller {
 	 */
 	private Map<String, Invokable>	invokables;
 
-	//TODO: this was made private, what does this do? If needed implement getters/setters.
-	private MetricSet metrics;
-
 	/**
 	 * Determines what policy will be used to select an invoker.
 	 */
@@ -60,7 +57,6 @@ public class Controller {
 	private Controller() {
 		invokers = new LinkedList<InvokerInterface>();
 		invokables = new HashMap<String, Invokable>();
-		metrics = new MetricSet();
 	}
 
 	/**
@@ -113,30 +109,6 @@ public class Controller {
 	public List<InvokerInterface> getRegisteredInvokers()
 	{
 		return (invokers);
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param metricId
-	 * @param functionId
-	 * @return
-	 */
-	public String getData(String metricId, String functionId)
-	{
-		return (metrics.getData(metricId, functionId));
-	}
-
-	/**
-	 * 
-	 * 
-	 * @param <T>
-	 * @param metricId
-	 * @param metric
-	 */
-	public <T> void addMetric(String metricId, Metric<T> metric)
-	{
-		metrics.addMetric(metricId, metric);
 	}
 	
 	/**
