@@ -71,6 +71,7 @@ public class InvocationTester {
 					Thread.sleep(1000);
 			}
 			catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		for (Future<R> future : futures) {
@@ -78,6 +79,7 @@ public class InvocationTester {
 				result.add(future.get());
 			}
 			catch (Exception e) {
+				System.out.println("error2");
 			}
 		}
 		return (result);

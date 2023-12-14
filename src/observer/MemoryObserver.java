@@ -8,12 +8,14 @@ public class MemoryObserver implements Observer {
 
 	private String		metricId	= "MemoryObserver";
 
-	public void preinitialize(String id, InvokerInterface invoker){
+	public <T> void initialize(String id, InvokerInterface invoker) throws Exception
+	{
+
 	}
 
 	@SuppressWarnings({"unchecked"})
 	@Override
-	public <T> Metric<T> initialize(String id, InvokerInterface invoker) throws Exception
+	public <T> Metric<T> execution(String id, InvokerInterface invoker) throws Exception
 	{
 		return (Metric<T>) (new Metric<Long>(id, invoker.getUsedRam()));
 	}

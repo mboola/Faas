@@ -1,6 +1,7 @@
 package observer;
 
-import application.Controller;
+import java.rmi.RemoteException;
+
 import application.Metric;
 import application.MetricSet;
 import invoker.InvokerInterface;
@@ -9,13 +10,18 @@ public class InvocationObserver implements Observer {
 
 	private String	metricId = "InvocationObserver";
 
-	public void preinitialize(String id, InvokerInterface invoker) throws Exception
+	public <T> void initialize(String id, InvokerInterface invoker) throws Exception
 	{
-		MetricSet.instantiate().addMetric(metricId, new Metric<String>(id, invoker.getId()));
+		try {
+			MetricSet.instantiate().addMetric(metricId, new Metric<String>(id, invoker.getId()));
+		} catch (RemoteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public <T> Metric<T> initialize(String id, InvokerInterface invoker) {
+	public <T> Metric<T> execution(String id, InvokerInterface invoker) {
 		return (null);
 	}
 

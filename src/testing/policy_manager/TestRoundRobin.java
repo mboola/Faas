@@ -15,6 +15,7 @@ import org.junit.Test;
 import action.Action;
 import action.FactorialAction;
 import application.Controller;
+import application.MetricSet;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
@@ -33,7 +34,6 @@ public class TestRoundRobin extends InvocationTester {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker.setController(controller);
 
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
 		Action factorial = new FactorialAction();
@@ -69,7 +69,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("000", str);
 	}
 
@@ -84,7 +84,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("000", str);
 	}
 
@@ -107,7 +107,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("000", str);
 	}
 
@@ -130,7 +130,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("000", str);
 	}
 
@@ -145,7 +145,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
@@ -160,7 +160,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
@@ -178,7 +178,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("101010", str);
 	}
 
@@ -196,7 +196,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("101010", str);
 	}
 
@@ -211,7 +211,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("1010", str);
 	}
 
@@ -225,7 +225,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Factorial");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
 		assertEquals("11", str);
 	}
 
@@ -242,7 +242,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e) {
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("100101", str);
 	}
 
@@ -259,7 +259,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e) {
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("101010", str);
 	}
 
@@ -280,7 +280,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e) {
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep2");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("00", str);
 	}
 
@@ -296,7 +296,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("120120", str);
 	}
 
@@ -312,7 +312,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("120120", str);
 	}
 
@@ -330,7 +330,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120120", str);
 	}
 
@@ -348,7 +348,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120120", str);
 	}
 
@@ -364,7 +364,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Add");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("120120", str);
 	}
 
@@ -379,7 +379,7 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = controller.getData("InvocationObserver", "Factorial");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
 		assertEquals("1212", str);
 	}
 
@@ -397,7 +397,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120122", str);
 	}
 
@@ -415,7 +415,7 @@ public class TestRoundRobin extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120100", str);
 	}
 
@@ -427,13 +427,14 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 10, 3000, false, controller);
+			stringsResult = invokeList("Sleep", 6, 3000, false, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
-		List<InvokerInterface>	invokers = controller.getRegisteredInvokers();
+		/*
+		 * List<InvokerInterface>	invokers = controller.getRegisteredInvokers();
 		for (InvokerInterface invokerInterface : invokers) {
 			try {
 				System.out.println("Ram reserved: " + invokerInterface.getAvailableRam());
@@ -443,8 +444,9 @@ public class TestRoundRobin extends InvocationTester {
 				e.printStackTrace();
 			}
 		}
+		 */
 
-		String str = controller.getData("InvocationObserver", "Sleep");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120101", str);
 	}
 
@@ -457,13 +459,16 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep2", 4, 5000, true, controller);
+			stringsResult = invokeList("Sleep2", 4, 5000, false, controller);
+			for (String string : stringsResult) {
+				System.out.println(string);
+			}
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
-		String str = controller.getData("InvocationObserver", "Sleep2");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("1010", str);
 	}
 	

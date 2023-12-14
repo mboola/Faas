@@ -8,13 +8,12 @@ public class TimerObserver implements Observer {
 
 	private String		metricId	= "TimerObserver";
 	
-	@Override
-	public void preinitialize(String id, InvokerInterface invoker) {
+	public <T> void initialize(String id, InvokerInterface invoker) throws Exception {
 	}
-	
+
 	@SuppressWarnings({"unchecked"})
 	@Override
-	public <T> Metric<T> initialize(String id, InvokerInterface invoker)
+	public <T> Metric<T> execution(String id, InvokerInterface invoker)
 	{
 		return (Metric<T>) (new Metric<Long>(id, System.nanoTime()));
 	}

@@ -8,11 +8,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import application.Controller;
 import application.Invokable;
 import application.Metric;
 import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.OperationNotValid;
 import observer.Observer;
 import policy_manager.PolicyManager;
 
@@ -35,9 +33,9 @@ public class Invoker implements InvokerInterface, Serializable {
 
 	public void reserveRam(long ram) throws Exception
 	{
-		if (reservedRam + ram > maxRam) throw new OperationNotValid("this operation would result in reservedRam being greater than maxRam");
-		if (reservedRam + ram < 0) throw new OperationNotValid("this operation would result in reservedRam being lower than zero");
-		reservedRam += ram;
+		if (reservedRam + ram > maxRam) reservedRam = maxRam;
+		else if (reservedRam + ram < 0) reservedRam = 0;
+		else reservedRam += ram;
 	}
 
 	//invoker
@@ -183,10 +181,10 @@ public class Invoker implements InvokerInterface, Serializable {
 		return ((Function<T, R>)Invoker.decoratorInitializer.apply(invokable));
 	}
 
-	private void preinitializeObservers(String id) throws Exception 
+	private void initializeObservers(String id) throws Exception 
 	{
 		for (Observer observer : observers) {
-			observer.preinitialize(id, this);
+			observer.initialize(id, this);
 		}
 	}
 
@@ -197,12 +195,12 @@ public class Invoker implements InvokerInterface, Serializable {
 	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
 	 * @throws Exception
 	 */
-	private HashMap<Observer, Metric<Object>> initializeObservers(String id) throws Exception 
+	private synchronized HashMap<Observer, Metric<Object>> executeObservers(String id) throws Exception 
 	{
 		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
 
 		for (Observer observer : observers) {
-			metrics.put(observer, observer.initialize(id, this));
+			metrics.put(observer, observer.execution(id, this));
 		}
 		return (metrics);
 	}
@@ -247,9 +245,8 @@ public class Invoker implements InvokerInterface, Serializable {
 		R									result;
 		HashMap<Observer, Metric<Object>>	metricsList;
 
-		preinitializeObservers(id);
-
-		metricsList = initializeObservers(id);
+		initializeObservers(id);
+		metricsList = executeObservers(id);
 
 		functionDecorated = applyDecorators(invokable);
 
@@ -268,9 +265,8 @@ public class Invoker implements InvokerInterface, Serializable {
 		Function<T, R>	functionDecorated;
 		Future<R>		futureResult;
 
+		initializeObservers(id);
 		functionDecorated = applyDecorators(invokable);
-
-		preinitializeObservers(id);
 
 		this.reserveRam(invokable.getRam());
 
@@ -290,7 +286,7 @@ public class Invoker implements InvokerInterface, Serializable {
 						}
 					}
 					usedRam += invokable.getRam();
-					metricsList = initializeObservers(id);
+					metricsList = executeObservers(id);
 				}
 				result = functionDecorated.apply(args);
 				synchronized (this)

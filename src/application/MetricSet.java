@@ -8,7 +8,8 @@ public class MetricSet {
 
 	private Map<String, Map<String, List<Metric<Object>>>> dataCollected;
 
-	private static MetricSet uniqueInstance = null;
+	private static volatile MetricSet uniqueInstance = null;
+	private static Object mutex = new Object();
 
 	/**
 	 * Checks if the MetricSet is instanciated, creates one if it isn't.
@@ -16,9 +17,19 @@ public class MetricSet {
 	 * @return The Singleton instance of MetricSet. 
 	 */
 	public static MetricSet instantiate() {
+		MetricSet instance;
+
+		instance = uniqueInstance;
 		if (uniqueInstance == null)
-			uniqueInstance = new MetricSet();
-		return (uniqueInstance);
+		{
+			synchronized (mutex)
+			{
+				instance = uniqueInstance;
+				if (instance == null)
+					instance = uniqueInstance = new MetricSet();
+			}
+		}
+		return (instance);
 	}
 
 	/**
@@ -48,7 +59,7 @@ public class MetricSet {
 	 * @param metricId Id of the metric to add.
 	 */
 	@SuppressWarnings({"unchecked"})
-	public <T> void addMetric(String metricId, Metric<T> metric)
+	public synchronized <T> void addMetric(String metricId, Metric<T> metric)
 	{
 		Map<String, List<Metric<Object>>> metricMap;
 		List<Metric<Object>> metrics;

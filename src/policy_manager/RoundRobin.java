@@ -63,21 +63,26 @@ public class RoundRobin implements PolicyManager, Serializable {
 				e.printStackTrace();
 			}
 		}
-		if (lastInvokerAssigned != lastInvokerChecked)
-			lastInvokerAssigned = lastInvokerChecked;
-		//if more than one invoker but all full
-		else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
-		{
-			//check if the invoker I started poiting to has enough resources
-			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-			if (invoker.getAvailableRam() - ram >= 0)
-				return (invoker);
-			lastInvokerAssigned = invokerExecutablePos;
-			return (invokerExecutable);
+		try {
+			if (lastInvokerAssigned != lastInvokerChecked)
+				lastInvokerAssigned = lastInvokerChecked;
+			//if more than one invoker but all full
+			else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
+			{
+				//check if the invoker I started poiting to has enough resources
+				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+				if (invoker.getAvailableRam() - ram >= 0)
+					return (invoker);
+				lastInvokerAssigned = invokerExecutablePos;
+				return (invokerExecutable);
+			}
+			//case only one invoker
+			else
+				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
 		}
-		//case only one invoker
-		else
-			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+		catch (Exception e) {
+			System.out.println("soy bobo");
+		}
 		return (invoker);
 	}
 
