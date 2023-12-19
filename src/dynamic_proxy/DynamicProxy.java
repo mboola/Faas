@@ -38,10 +38,12 @@ public class DynamicProxy implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception
 	{
+		System.out.println("Method name: " + method.getName());
 		String	id = method.getName();
 		Controller	controller;
 		controller = Controller.instantiate();
-		Object result = controller.invoke_async(id, args[0]);
+		System.out.println("Invoking the method.");
+		Object result = controller.invoke(id, args[0]);
 		return result;
 	}
 }

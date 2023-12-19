@@ -54,7 +54,6 @@ public class ServerMasterInvoker {
 		catch (Exception e) {
 
 		}
-		Invoker.setController(controller);
 
 		ServerHandler.main(argServerHandler);
 		System.out.println("Servers created");

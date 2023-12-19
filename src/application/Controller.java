@@ -1,10 +1,12 @@
 package application;
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import dynamic_proxy.DynamicProxy;
 import faas_exceptions.NoActionRegistered;
@@ -344,6 +346,25 @@ public class Controller {
 		return (result);
 	}
 
+	private <T, R> Function<T, R> convertMethodToFunction(Object instance, String methodName, Class<T> inputType, Class<R> returnType) throws NoSuchMethodException, SecurityException
+	{
+		System.out.println("Method name trying to register:" + methodName);
+        Method method = instance.getClass().getMethod(methodName, inputType);
+
+        return input -> {
+            try {
+                // Invoke the method on the instance with the provided input
+                Object result = method.invoke(instance, input);
+
+                // Cast the result to the desired return type
+                return returnType.cast(result);
+            }
+			catch (Exception e) {
+                throw new RuntimeException("Error invoking method", e);
+            }
+        };
+    }
+
 	/**
 	 * Retrieves a proxy object for an action with the specified ID.
 	 *
@@ -358,7 +379,37 @@ public class Controller {
 	 */
 	public Object getActionProxy(String id) throws Exception
 	{
-		return (DynamicProxy.instantiate(getInvokable(id).getInvokable()));
+		Object						actionProxy;
+		Function<Object, Class<?>>	actionProxyFunction;
+
+		//get the function that will return an instantiated class
+		actionProxyFunction = (Function<Object, Class<?>>) getInvokable(id).getInvokable();
+
+		//here I get the class
+		Object resultClass = actionProxyFunction.apply(null);
+
+		//the metadata of the class
+		Class<?> actionProxyClass = resultClass.getClass();
+
+		//and all his methods
+		Method[] methods = actionProxyClass.getDeclaredMethods();
+
+		for (Method method : methods) {
+			//if there is not an action with this name
+			Class<?>[] parameterTypes = method.getParameterTypes();
+			Class<?> returnType = method.getReturnType();
+			try {
+				System.out.println("Method name" + method.getName());
+				this.registerAction(method.getName(), convertMethodToFunction(resultClass, method.getName(), parameterTypes[0], returnType), getInvokable(id).getRam());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		//and we get the proxy
+		actionProxy = DynamicProxy.instantiate(resultClass);
+		return (actionProxy);
 	}
 
 	/**

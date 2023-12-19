@@ -18,6 +18,7 @@ public class Invoker implements InvokerInterface, Serializable {
 
 	//all good here
 	private static final int 		MAX_THREADS = 8; //TODO: talk about this 
+	//TODO: change this to dynamically reserved or parameter
 	private static long				numInvokers = 0;
 
 	private final String	id;
@@ -248,9 +249,7 @@ public class Invoker implements InvokerInterface, Serializable {
 		initializeObservers(id);
 		metricsList = executeObservers(id);
 
-		functionDecorated = applyDecorators(invokable);
-
-		result = functionDecorated.apply(args);
+		result = ((Function<T, R>)invokable.getInvokable()).apply(args);
 
 		notifyObservers(metricsList);
 

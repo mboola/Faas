@@ -1,19 +1,18 @@
 package dynamic_proxy.proxies;
 
 import java.util.Map;
-import java.util.concurrent.Future;
 
 public class Calculator implements CalculatorProxy{
 
 	public Calculator() {
 	}
 
-	public Future<Integer> suma(Map<String, Integer> map) {
-		return (null);
+	public Integer suma(Map<String, Integer> map) {
+		return (map.get("x") + map.get("y"));
 	}
 
-	public Future<Integer> resta(Map<String, Integer> map) {
-		return (null);
+	public Integer resta(Map<String, Integer> map) {
+		return (map.get("x") - map.get("y"));
 	}
 
 }

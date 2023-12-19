@@ -61,9 +61,10 @@ public class BasicTestDecorator {
 		;
 		Invoker.setDecoratorInitializer(decoratorInitializer);
 		Function<List<Integer>, Integer> f = x -> x.get(0) + x.get(1);
+		var f2 = new CacheDecorator<>(f, null);
 
 		try {
-			controller.registerAction("Addition", f, 1);
+			controller.registerAction("Addition", f2, 1);
 
 			List<Integer> args1 = new LinkedList<Integer>();
 			args1.add(11);
