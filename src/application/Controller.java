@@ -315,7 +315,23 @@ public class Controller {
 		return (getResult_async(getInvokable(id), id, args));
 	}
 
-	//TODO: invoke_async list of args
+	/**
+	 * Invokes an action with the specified ID asynchronously, providing a list of arguments for each invocation.
+	 *
+	 * @param <T>  Datatype of the parameters of the function to be invoked.
+	 * @param <R>  Datatype of the return of the function to be invoked.
+	 * @param id   Identifier of the action to be invoked.
+	 * @param args List of parameters for each asynchronous invocation.
+	 * @return List of Future results of the invocations of the action.
+	 * @throws Exception The exception can be caused because:
+	 * <ul>
+	 *   <li>The id passed as a parameter is null.</li>
+	 *   <li>There is no action found with the id passed as a parameter.</li>
+	 *   <li>There is no invoker with enough max ram to run execute the action.</li>
+	 *   <li>Something goes wrong when executing one or more actions.</li>
+	 * </ul>
+	 * //TODO: Specify more details about the potential exceptions.
+	 */
 	public <T, R> List<Future<R>> invoke_async(String id, List<T> args) throws Exception
 	{
 		Invokable		invokable;
@@ -328,6 +344,18 @@ public class Controller {
 		return (result);
 	}
 
+	/**
+	 * Retrieves a proxy object for an action with the specified ID.
+	 *
+	 * @param id Identifier of the action.
+	 * @return Proxy object for the action.
+	 * @throws Exception The exception can be caused because:
+	 * <ul>
+	 *   <li>The id passed as a parameter is null.</li>
+	 *   <li>There is no action found with the id passed as a parameter.</li>
+	 * </ul>
+	 * //TODO: Specify more details about the potential exceptions.
+	 */
 	public Object getActionProxy(String id) throws Exception
 	{
 		return (DynamicProxy.instantiate(getInvokable(id).getInvokable()));
