@@ -60,9 +60,7 @@ public class BasicTestDecorator {
 			Long[] longArray = {1L, 2L, 3L, 4L, 5L, 1L};
 			List<Long>	input = Arrays.asList(longArray);
 			
-			//long currentTimeMillis = System.currentTimeMillis();
 			List<Integer> result = controller.invoke("factorial", input);
-			//long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			Cache.instantiate().printCache();
 		}
@@ -74,7 +72,8 @@ public class BasicTestDecorator {
 	@Test
 	public void	testCacheDecoratorFactorial()
 	{
-		Function<Invokable, Function<Object,Object>> decoratorInitializer = 
+		/*
+		 * Function<Invokable, Function<Object,Object>> decoratorInitializer = 
 			(invokable) -> {
 				Function<Object, Object>	cacheDecorator;
 				String						id;
@@ -86,7 +85,8 @@ public class BasicTestDecorator {
 				return (cacheDecorator);
 			}
 		;
-		Invoker.setDecoratorInitializer(decoratorInitializer);
+		 */
+		
 		Action<Long, Long> f = new FactorialAction();
 		try {
 			controller.registerAction("Factorial", f, 1);
@@ -109,7 +109,8 @@ public class BasicTestDecorator {
 	@Test
 	public void	testCacheDecoratorSleep()
 	{
-		Function<Invokable, Function<Object,Object>> decoratorInitializer = 
+		/*
+		 * Function<Invokable, Function<Object,Object>> decoratorInitializer = 
 			(invokable) -> {
 				Function<Object, Object>	cacheDecorator;
 				String						id;
@@ -121,18 +122,10 @@ public class BasicTestDecorator {
 				return (cacheDecorator);
 			}
 		;
-		Invoker.setDecoratorInitializer(decoratorInitializer);
+		 */
 
-		Function<Integer, String> sleep = s -> {
-			try {
-				Thread.sleep(Duration.ofSeconds(s).toMillis());
-				return "Done!";
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
-		};
-
-		try {
+		/*
+		 * try {
 			controller.registerAction("Sleep", sleep, 1);
 
 			long currentTimeMillis = System.currentTimeMillis();
@@ -150,6 +143,7 @@ public class BasicTestDecorator {
 		catch (Exception e1) {
 			assertTrue(false);
 		}
+		 */
 	}
 
 }

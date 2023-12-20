@@ -20,7 +20,7 @@ import invoker.CompositeInvoker;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 
-public class Faas {
+public class MainTesting {
 	public static void main(String[] args) 
 	{
 		Controller controller = Controller.instantiate();

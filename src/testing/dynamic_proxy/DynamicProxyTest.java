@@ -13,7 +13,6 @@ import org.junit.Test;
 import application.Controller;
 import application.Invokable;
 import decorator.CacheDecorator;
-import dynamic_proxy.ActionProxy;
 import dynamic_proxy.DynamicProxy;
 import dynamic_proxy.proxies.Calculator;
 import dynamic_proxy.proxies.CalculatorProxy;

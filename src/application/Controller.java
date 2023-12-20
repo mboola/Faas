@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+import java.util.function.Function;
 
 import faas_exceptions.NoActionRegistered;
 import faas_exceptions.NoPolicyManagerRegistered;
@@ -141,12 +142,12 @@ public class Controller {
 	 * 	<li>The id we are tring to register already exists.</li>
 	 * </ul>
 	 */
-	public void registerAction(String id, Object invokable, long ram) throws OperationNotValid
+	public <T, R> void registerAction(String id, Function<T, R> invokable, long ram) throws OperationNotValid
 	{
 		if (invokable == null) throw new OperationNotValid("Action registered cannot be null.");
 		if (id == null)	throw new OperationNotValid("ID cannot be null.");
 		if (isAlreadyRegistered(id)) throw new OperationNotValid("Action already registered.");
-		invokables.put(id, new Invokable(id, invokable, ram));
+		invokables.put(id, new Invokable<T, R>(invokable, ram));
 	}
 
 	/**

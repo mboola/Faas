@@ -1,15 +1,15 @@
 package application;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 /**
  * A class that represents an invokable function with a unique identifier, the invokable function itself,
  * and the allocated RAM for execution.
  */
-public class Invokable implements Serializable{
+public class Invokable<T, R> implements Serializable{
 
-	private String id;
-	private Object invokable;
+	private Function<T, R> invokable;
 	private long ram;
 
 	/**
@@ -19,20 +19,9 @@ public class Invokable implements Serializable{
      * @param invokable The invokable function.
      * @param ram       The allocated RAM for the invokable function.
      */
-	public Invokable(String id, Object invokable, long ram) {
+	public Invokable(Function<T, R> invokable, long ram) {
 		this.ram = ram;
 		this.invokable = invokable;
-		this.id	= id;
-	}
-
-    /**
-     * Gets the ID of the invokable function.
-     *
-     * @return The unique identifier.
-     */
-	public String getId()
-	{
-		return (id);
 	}
 
 	/**
@@ -40,7 +29,7 @@ public class Invokable implements Serializable{
      *
      * @return The invokable function.
      */
-    public Object getInvokable()
+    public Function<T, R> getInvokable()
 	{
 		return (this.invokable);
 	}
