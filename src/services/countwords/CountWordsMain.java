@@ -34,7 +34,7 @@ public class CountWordsMain {
 		List<Long> result = new LinkedList<>();
 
 		try {
-			CountWordsProxy countWordsProxy = (CountWordsProxy)DynamicProxy.getActionProxy("CountWordsService");
+			CountWordsProxy countWordsProxy = (CountWordsProxy)DynamicProxy.getActionProxy("CountWordsService", false);
 			Object text = countWordsProxy.mapFile("src\\services\\countwords\\test.txt");
 
 			List<String> finalText = ((Future<List<String>>)text).get();

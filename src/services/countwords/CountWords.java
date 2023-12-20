@@ -8,6 +8,7 @@ import java.util.List;
 
 public class CountWords implements CountWordsProxy{
 	
+	@Override
 	public Object mapFile(String pathName) throws IOException
 	{
 		List<String> lines;
@@ -16,6 +17,7 @@ public class CountWords implements CountWordsProxy{
 		return (lines);
 	}
 
+	@Override
 	public Object countWords(String allWords)
 	{
 		String[]	words;
@@ -24,6 +26,7 @@ public class CountWords implements CountWordsProxy{
 		return (long) (words.length);
 	}
 
+	@Override
 	public Object countWordsReduce(List<Long> arg)
 	{
 		Long	count;

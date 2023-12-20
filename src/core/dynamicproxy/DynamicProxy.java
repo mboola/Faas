@@ -3,7 +3,6 @@ package core.dynamicproxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import core.application.Controller;
@@ -13,6 +12,7 @@ import core.exceptions.*;
 public class DynamicProxy implements InvocationHandler {
 
 	//The instance which this proxy intercepts methods from.
+	private boolean isSync;
 
 	/** TODO change this definition
 	 * This DynamicProxy will intercept the invocations of the methods called from target
@@ -22,15 +22,16 @@ public class DynamicProxy implements InvocationHandler {
 	 * @param target Object referenced when method invoke is called. IT IS NOT CONTROLLER
 	 * @return The proxy
 	 */
-	public static Object instantiate(Object target) {
+	public static Object instantiate(Object target, boolean isSync) {
 		Class<?> targetClass = target.getClass();
 		Class<?> interfaces[] = targetClass.getInterfaces();
 
 		return Proxy.newProxyInstance(targetClass.getClassLoader(),
-				interfaces, new DynamicProxy());
+				interfaces, new DynamicProxy(isSync));
 	}
 
-	private DynamicProxy() {
+	private DynamicProxy(boolean isSync) {
+		this.isSync = isSync;
 	}
 	  
 	/** TODO: change this definition
@@ -46,7 +47,11 @@ public class DynamicProxy implements InvocationHandler {
 		String	id = method.getName();
 		Controller	controller;
 		controller = Controller.instantiate();
-		Object result = controller.invoke_async(id, args[0]);
+		Object result;
+		if (!isSync)
+			result = controller.invoke_async(id, args[0]);
+		else
+			result = controller.invoke(id, args[0]);
 		return result;
 	}
 
@@ -80,7 +85,7 @@ public class DynamicProxy implements InvocationHandler {
 	 * </ul>
 	 * //TODO: Specify more details about the potential exceptions.
 	 */
-	public static Object getActionProxy(String id) throws Exception
+	public static Object getActionProxy(String id, boolean isSync) throws Exception
 	{
 		Controller	controller;
 		Invokable	invokable;
@@ -118,6 +123,6 @@ public class DynamicProxy implements InvocationHandler {
 				e.printStackTrace();
 			}
 		}
-		return (DynamicProxy.instantiate(resultClass));
+		return (DynamicProxy.instantiate(resultClass, isSync));
 	}
 }
