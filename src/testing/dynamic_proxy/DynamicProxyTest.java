@@ -1,4 +1,4 @@
-package testing;
+package testing.dynamic_proxy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +13,7 @@ import org.junit.Test;
 import application.Controller;
 import application.Invokable;
 import decorator.CacheDecorator;
+import dynamic_proxy.ActionProxy;
 import dynamic_proxy.proxies.Calculator;
 import dynamic_proxy.proxies.CalculatorProxy;
 import dynamic_proxy.proxies.Timer;
@@ -30,6 +31,7 @@ public class DynamicProxyTest {
 	{
 		Controller controller = Controller.instantiate();
 		Invoker invoker = Invoker.createInvoker(2);
+		ActionProxy	actionProxy = new ActionProxy();
 
 		Function<Object, Object> calculator = 
 			(obj) -> {
@@ -49,7 +51,7 @@ public class DynamicProxyTest {
 		int result = 0;
 		int	err = 0;
 		try {
-			CalculatorProxy calc = (CalculatorProxy)controller.getActionProxy("calculator");
+			CalculatorProxy calc = (CalculatorProxy)actionProxy.getActionProxy("calculator");
 			Integer res = calc.suma(Map.of("x", 1, "y", 2));
 			assertEquals(3, res);
 		}
