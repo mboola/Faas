@@ -1,7 +1,7 @@
 package observer;
 
-import application.Metric;
 import invoker.InvokerInterface;
+import metrics.Metric;
 
 public interface Observer {
 

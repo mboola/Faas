@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -44,41 +45,24 @@ public class BasicTestDecorator {
 		}
 	}
 
+	/*
+	 * This tests checks if creating
+	 */
 	@Test
-	public void	testCacheDecoratorOverlapp()
+	public void	testCacheDecoratorHashmapOverlapping()
 	{
-		Function<Invokable, Function<Object,Object>> decoratorInitializer = 
-			(invokable) -> {
-				Function<Object, Object>	cacheDecorator;
-				String						id;
-				Function<Object, Object>	function;
-
-				function = (Function<Object, Object>)invokable.getInvokable();
-				id = invokable.getId();
-				cacheDecorator = new CacheDecorator<>(function, id);
-				return (cacheDecorator);
-			}
-		;
-		Invoker.setDecoratorInitializer(decoratorInitializer);
-		Function<List<Integer>, Integer> f = x -> x.get(0) + x.get(1);
-		var f2 = new CacheDecorator<>(f, null);
+		Action factorial = new FactorialAction();
+		CacheDecorator cacheDecorator = new CacheDecorator<>(factorial, "factorial");
 
 		try {
-			controller.registerAction("Addition", f2, 1);
+			controller.registerAction("factorial", cacheDecorator, 1);
 
-			List<Integer> args1 = new LinkedList<Integer>();
-			args1.add(11);
-			args1.add(0);
-			List<Integer> args2 = new LinkedList<Integer>();
-			args2.add(1);
-			args2.add(10);
-			List<List<Integer>> singleList = new LinkedList<List<Integer>>();
-			singleList.add(args1);
-			singleList.add(args2);
+			Long[] longArray = {1L, 2L, 3L, 4L, 5L, 1L};
+			List<Long>	input = Arrays.asList(longArray);
 			
-			long currentTimeMillis = System.currentTimeMillis();
-			List<Integer> result = controller.invoke("Addition", singleList);
-			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+			//long currentTimeMillis = System.currentTimeMillis();
+			List<Integer> result = controller.invoke("factorial", input);
+			//long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			Cache.instantiate().printCache();
 		}

@@ -1,17 +1,13 @@
 package invoker;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import application.Invokable;
-import application.Metric;
 import faas_exceptions.NoInvokerAvailable;
-import observer.Observer;
+import metrics.MetricRecollector;
 import policy_manager.PolicyManager;
 
 public class Invoker implements InvokerInterface, Serializable {
@@ -72,9 +68,6 @@ public class Invoker implements InvokerInterface, Serializable {
 
 
 	private transient ExecutorService 		executor;
-
-	private static List<Observer>								observers = new LinkedList<Observer>();
-	private static Function<Invokable, Function<Object, Object>>	decoratorInitializer = null;
 	
 	/**
 	 * This method creates an Invoker.
@@ -107,34 +100,6 @@ public class Invoker implements InvokerInterface, Serializable {
 
 		id = ((Long)numInvokers).toString();
 		numInvokers++;
-	}
-
-	/**
-	 * Adds an observer to the list of observers to be used by all invokers.
-	 * 
-	 * @param observer Observer that will be notified when a function is invoked.
-	 */
-	public static void addObserver(Observer observer)
-	{
-		//TODO: check if the observer is already added
-		Invoker.observers.add(observer);
-	}
-
-	/**
-	 * Removes an observer to the list of observers to be used by all invokers.
-	 * 
-	 * @param observer Observer that won't be notified when a function is invoked.
-	 */
-	public static void removeObserver(Observer observer)
-	{
-		//TODO: check of the observer is on the list
-		Invoker.observers.remove(observer);
-	}
-
-	
-	public static void setDecoratorInitializer(Function<Invokable, Function<Object, Object>> decoratorInitializer)
-	{
-		Invoker.decoratorInitializer = decoratorInitializer;
 	}
 
 	public String getId()
@@ -172,65 +137,6 @@ public class Invoker implements InvokerInterface, Serializable {
 	{
 	}
 
-	//TODO: javadocs
-	//TODO specify when I wanna use this Decorators. Not always are needed. Specially in testing
-	@SuppressWarnings({"unchecked"})
-	private <T, R> Function<T, R> applyDecorators(Invokable invokable)
-	{
-		if (Invoker.decoratorInitializer == null)
-			return ((Function<T, R>)invokable.getInvokable());
-		return ((Function<T, R>)Invoker.decoratorInitializer.apply(invokable));
-	}
-
-	private void initializeObservers(String id) throws Exception 
-	{
-		for (Observer observer : observers) {
-			observer.initialize(id, this);
-		}
-	}
-
-	/**
-	 * This initializes the value of all the observers being used in the invocation.
-	 * 
-	 * @param id Id of the function. Needed by the observers to update the content of a dictionary in the controller.
-	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
-	 * @throws Exception
-	 */
-	private synchronized HashMap<Observer, Metric<Object>> executeObservers(String id) throws Exception 
-	{
-		HashMap<Observer, Metric<Object>> metrics = new HashMap<Observer, Metric<Object>>();
-
-		for (Observer observer : observers) {
-			metrics.put(observer, observer.execution(id, this));
-		}
-		return (metrics);
-	}
-
-	/**
-	 * This modifies all the values of the metrics created by 'initializeAllObservers'
-	 * 
-	 * @param metrics Map of all the metrics to be updated by the observers
-	 * 
-	 * <p><strong>Note:</strong> If the list of observers changed between initialization and this method,
-	 * two things can happen:
-	 * <ul>
-	 * 		<li> If observers were added, the new observers will not be notified.</li>
-	 * 		<li> If observers were removed, the removed observers will not be notified.</li>
-	 * </ul>
-	 * This is to ensure a correct funcionality of the observers.
-	 * </p>
-	 */
-	private void notifyObservers(HashMap<Observer, Metric<Object>> metrics)
-	{
-		Metric<Object>	metric;
-
-		for (Observer observer : observers) {
-			metric = metrics.get(observer);
-			if (metric != null)
-				observer.update(metric);
-		}
-	}
-
 	/**
 	 * This method is called to execute a sync function passed by reference, applying all the observers and decorators.
 	 * 
@@ -242,16 +148,16 @@ public class Invoker implements InvokerInterface, Serializable {
 	 */
 	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception
 	{
-		Function<T, R>						functionDecorated;
+		MetricRecollector	metricsRecollector;
 		R									result;
-		HashMap<Observer, Metric<Object>>	metricsList;
 
-		initializeObservers(id);
-		metricsList = executeObservers(id);
+		metricsRecollector = new MetricRecollector(id, this);
+		metricsRecollector.initializeObservers();
+		metricsRecollector.executeObservers();
 
 		result = ((Function<T, R>)invokable.getInvokable()).apply(args);
 
-		notifyObservers(metricsList);
+		metricsRecollector.notifyObservers();
 
 		return (result);
 	}
@@ -261,18 +167,19 @@ public class Invoker implements InvokerInterface, Serializable {
 	// If there is no space in the pool, it waits and then it gets invoked.
 	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception
 	{
-		Function<T, R>	functionDecorated;
+		Function<T, R>	function;
+		MetricRecollector	metricsRecollector;
 		Future<R>		futureResult;
 
-		initializeObservers(id);
-		functionDecorated = applyDecorators(invokable);
+		metricsRecollector = new MetricRecollector(id, this);
+		metricsRecollector.initializeObservers();
+		function = (Function<T, R>)invokable.getInvokable();
 
 		this.reserveRam(invokable.getRam());
 
 		futureResult = executor.submit( 
 			() -> {
 				R	result;
-				HashMap<Observer, Metric<Object>>	metricsList;
 
 				synchronized (this)
 				{
@@ -285,14 +192,14 @@ public class Invoker implements InvokerInterface, Serializable {
 						}
 					}
 					usedRam += invokable.getRam();
-					metricsList = executeObservers(id);
+					metricsRecollector.executeObservers();
 				}
-				result = functionDecorated.apply(args);
+				result = function.apply(args);
 				synchronized (this)
 				{
 					usedRam -= invokable.getRam();
 					this.reserveRam(-invokable.getRam());
-					notifyObservers(metricsList);
+					metricsRecollector.notifyObservers();
 					notify();
 				}
 				return (result);

@@ -15,11 +15,11 @@ import org.junit.Test;
 import action.Action;
 import action.FactorialAction;
 import application.Controller;
-import application.MetricSet;
 import faas_exceptions.NoInvokerAvailable;
 import faas_exceptions.OperationNotValid;
 import invoker.Invoker;
 import invoker.InvokerInterface;
+import metrics.MetricSet;
 import observer.InvocationObserver;
 import policy_manager.RoundRobin;
 import testing.InvocationTester;
@@ -38,7 +38,7 @@ public class TestRoundRobin extends InvocationTester {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
 		Action factorial = new FactorialAction();
 
-		Invoker.addObserver(new InvocationObserver());
+		MetricSet.instantiate().addObserver(new InvocationObserver());
 
 		try {
 			controller.setPolicyManager(new RoundRobin());

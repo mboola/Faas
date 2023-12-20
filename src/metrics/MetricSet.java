@@ -1,15 +1,19 @@
-package application;
+package metrics;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import observer.Observer;
+
 public class MetricSet {
 
 	private Map<String, Map<String, List<Metric<Object>>>> dataCollected;
 
-	private static volatile MetricSet uniqueInstance = null;
-	private static Object mutex = new Object();
+	private List<Observer>				observers;
+
+	private static volatile MetricSet	uniqueInstance = null;
+	private static Object				mutex = new Object();
 
 	/**
 	 * Checks if the MetricSet is instanciated, creates one if it isn't.
@@ -38,6 +42,7 @@ public class MetricSet {
 	 */
 	private MetricSet() {
 		dataCollected = new HashMap<String, Map<String, List<Metric<Object>>>>();
+		observers = new LinkedList<Observer>();
 	}
 
 	/**
@@ -91,6 +96,33 @@ public class MetricSet {
 		//we get the list of metrics
 		metrics = metricMap.get(metric.getFunctionId());
 		metrics.add((Metric<Object>)metric);
+	}
+
+	/**
+	 * Adds an observer to the list of observers to be used by all invokers.
+	 * 
+	 * @param observer Observer that will be notified when a function is invoked.
+	 */
+	public void addObserver(Observer observer)
+	{
+		//TODO: check if the observer is already added
+		observers.add(observer);
+	}
+
+	/**
+	 * Removes an observer to the list of observers to be used by all invokers.
+	 * 
+	 * @param observer Observer that won't be notified when a function is invoked.
+	 */
+	public void removeObserver(Observer observer)
+	{
+		//TODO: check of the observer is on the list
+		observers.remove(observer);
+	}
+
+	public List<Observer> getObservers()
+	{
+		return observers;
 	}
 
 }

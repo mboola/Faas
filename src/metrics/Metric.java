@@ -1,4 +1,4 @@
-package application;
+package metrics;
 
 /**
  * A generic class to define and save metrics from a function. 

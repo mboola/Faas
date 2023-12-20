@@ -9,8 +9,8 @@ import java.io.Serializable;
 public class Invokable implements Serializable{
 
 	private String id;
-    private Object invokable;
-    private long ram;
+	private Object invokable;
+	private long ram;
 
 	/**
      * Constructs an Invokable instance with the specified ID, invokable function, and allocated RAM.

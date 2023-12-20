@@ -2,9 +2,9 @@ package observer;
 
 import java.rmi.RemoteException;
 
-import application.Metric;
-import application.MetricSet;
 import invoker.InvokerInterface;
+import metrics.Metric;
+import metrics.MetricSet;
 
 public class InvocationObserver implements Observer {
 
