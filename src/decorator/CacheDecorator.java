@@ -1,7 +1,8 @@
 package decorator;
+
 import java.util.function.Function;
 
-import faas_exceptions.NoResultAvailable;
+import core.exceptions.NoResultAvailable;
 
 /**
  * A decorator class for storing a cache of functions executed. 

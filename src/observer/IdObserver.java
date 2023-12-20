@@ -1,8 +1,8 @@
 package observer;
 
-import invoker.InvokerInterface;
-import metrics.Metric;
-import metrics.MetricSet;
+import core.invoker.InvokerInterface;
+import core.metrics.Metric;
+import core.metrics.MetricSet;
 
 public class IdObserver implements Observer {
 

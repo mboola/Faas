@@ -3,7 +3,7 @@ package decorator;
 import java.util.HashMap;
 import java.util.Map;
 
-import faas_exceptions.NoResultAvailable;
+import core.exceptions.NoResultAvailable;
 
 /**
  * A class that acts as the cache itself of the cache decorator.

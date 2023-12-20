@@ -1,4 +1,5 @@
 package decorator;
+
 import java.util.function.Function;
 
 /**

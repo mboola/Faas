@@ -1,8 +1,8 @@
 package observer;
 
-import invoker.InvokerInterface;
-import metrics.Metric;
-import metrics.MetricSet;
+import core.invoker.InvokerInterface;
+import core.metrics.Metric;
+import core.metrics.MetricSet;
 
 public class MemoryObserver implements Observer {
 
@@ -10,7 +10,6 @@ public class MemoryObserver implements Observer {
 
 	public <T> void initialize(String id, InvokerInterface invoker) throws Exception
 	{
-
 	}
 
 	@SuppressWarnings({"unchecked"})
