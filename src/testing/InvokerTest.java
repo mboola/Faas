@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import invoker.Invoker;
+import core.invoker.Invoker;
 
 public class InvokerTest {
 	@Test
@@ -31,11 +31,4 @@ public class InvokerTest {
 		inv = Invoker.createInvoker(-1);
 		assertEquals(inv, null);
 	}
-
-	@Test
-	public void    invokerErasedCorrectly()
-	{
-		
-	}
-
 }

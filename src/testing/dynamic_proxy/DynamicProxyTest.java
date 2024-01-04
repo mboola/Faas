@@ -5,24 +5,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Timer;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.junit.Test;
 
-import application.Controller;
-import application.Invokable;
-import decorator.CacheDecorator;
-import dynamic_proxy.DynamicProxy;
-import dynamic_proxy.proxies.Calculator;
-import dynamic_proxy.proxies.CalculatorProxy;
-import dynamic_proxy.proxies.Timer;
-import dynamic_proxy.proxies.TimerProxy;
-import faas_exceptions.NoActionRegistered;
-import faas_exceptions.NoInvokerAvailable;
-import invoker.Invoker;
-import policy_manager.PolicyManager;
-import policy_manager.RoundRobin;
+import core.application.Controller;
+import core.dynamicproxy.DynamicProxy;
+import core.exceptions.NoActionRegistered;
+import core.invoker.Invoker;
+import policymanager.PolicyManager;
+import policymanager.RoundRobin;
+import services.proxies.Calculator;
+import services.proxies.CalculatorProxy;
+import services.proxies.TimerProxy;
+
+
 
 public class DynamicProxyTest {
 
@@ -78,7 +77,7 @@ public class DynamicProxyTest {
 			}
 		};
 		controller.registerAction("sleep", sleep, 1);
-		controller.registerAction("timer", new Timer(), 1);
+		//controller.registerAction("timer", new Timer(), 1);
 
 		int result = 0;
 		int	err = 0;

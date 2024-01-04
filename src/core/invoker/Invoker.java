@@ -2,6 +2,7 @@ package core.invoker;
 
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -129,7 +130,7 @@ public class Invoker implements InvokerInterface, Serializable {
 	 * </ul>
 	 */
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws Exception
+	public InvokerInterface selectInvoker(long ram) throws NoInvokerAvailable, RemoteException
 	{
 		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
 		return (this);

@@ -2,7 +2,7 @@ package testing.policy_manager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,16 +12,13 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
-import action.Action;
-import action.FactorialAction;
-import application.Controller;
-import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.OperationNotValid;
-import invoker.Invoker;
-import invoker.InvokerInterface;
-import metrics.MetricSet;
+import core.application.Action;
+import core.application.Controller;
+import core.exceptions.*;
+import core.metrics.MetricSet;
 import observer.InvocationObserver;
-import policy_manager.RoundRobin;
+import policymanager.RoundRobin;
+import services.otheractions.FactorialAction;
 import testing.InvocationTester;
 
 @SuppressWarnings("unused")
@@ -432,19 +429,6 @@ public class TestRoundRobin extends InvocationTester {
 		catch (Exception e) {
 			assertTrue(false);
 		}
-
-		/*
-		 * List<InvokerInterface>	invokers = controller.getRegisteredInvokers();
-		for (InvokerInterface invokerInterface : invokers) {
-			try {
-				System.out.println("Ram reserved: " + invokerInterface.getAvailableRam());
-				System.out.println("Ram used: " + invokerInterface.getUsedRam());
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		 */
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("120101", str);

@@ -1,8 +1,10 @@
-package action;
+package services.otheractions;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import core.application.Action;
 
 //reduce of WordCountAction
 public class AddMapAction implements Action<List<Map<String, Long>>, Map<String, Long>>

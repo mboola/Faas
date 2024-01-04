@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
-import application.Controller;
-import invoker.Invoker;
-import invoker.CompositeInvoker;
+import core.application.Controller;
+import core.invoker.CompositeInvoker;
+import core.invoker.Invoker;
 
 public class InvocationTester {
 

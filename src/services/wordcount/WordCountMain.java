@@ -3,7 +3,6 @@ package services.wordcount;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import core.application.Controller;

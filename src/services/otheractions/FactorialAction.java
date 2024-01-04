@@ -1,4 +1,6 @@
-package action;
+package services.otheractions;
+
+import core.application.Action;
 
 public class FactorialAction implements Action<Long, Long> {
 

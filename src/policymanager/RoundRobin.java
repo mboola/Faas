@@ -1,6 +1,7 @@
 package policymanager;
 
 import java.io.Serializable;
+import java.rmi.RemoteException;
 import java.util.List;
 
 import core.exceptions.NoInvokerAvailable;
@@ -28,7 +29,7 @@ public class RoundRobin implements PolicyManager, Serializable {
 	 * If none of them have resources, they will get again selected uniformly.
 	 */
 	@Override
-	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable, RemoteException
 	{
 		InvokerInterface invoker;
 		InvokerInterface invokerExecutable;
@@ -64,26 +65,21 @@ public class RoundRobin implements PolicyManager, Serializable {
 				e.printStackTrace();
 			}
 		}
-		try {
-			if (lastInvokerAssigned != lastInvokerChecked)
-				lastInvokerAssigned = lastInvokerChecked;
-			//if more than one invoker but all full
-			else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
-			{
-				//check if the invoker I started poiting to has enough resources
-				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
-				if (invoker.getAvailableRam() - ram >= 0)
-					return (invoker);
-				lastInvokerAssigned = invokerExecutablePos;
-				return (invokerExecutable);
-			}
-			//case only one invoker
-			else
-				invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+		if (lastInvokerAssigned != lastInvokerChecked)
+			lastInvokerAssigned = lastInvokerChecked;
+		//if more than one invoker but all full
+		else if (lastInvokerAssigned == lastInvokerChecked && invokerExecutable != null)
+		{
+			//check if the invoker I started poiting to has enough resources
+			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
+			if (invoker.getAvailableRam() - ram >= 0)
+				return (invoker);
+			lastInvokerAssigned = invokerExecutablePos;
+			return (invokerExecutable);
 		}
-		catch (Exception e) {
-			System.out.println("soy bobo");
-		}
+		//case only one invoker
+		else
+			invoker = invokers.get(lastInvokerChecked).selectInvoker(ram);
 		return (invoker);
 	}
 

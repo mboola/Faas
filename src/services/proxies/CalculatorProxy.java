@@ -1,4 +1,4 @@
-package dynamic_proxy.proxies;
+package services.proxies;
 
 import java.util.Map;
 

@@ -6,12 +6,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
+import core.application.Controller;
+import core.exceptions.OperationNotValid;
+import core.invoker.Invoker;
+import core.invoker.InvokerInterface;
+
 import java.util.List;
 
-import application.Controller;
-import faas_exceptions.OperationNotValid;
-import invoker.Invoker;
-import invoker.InvokerInterface;
 
 /**
  * The BasicTestController class contains basic test cases for the Controller class.
@@ -29,7 +30,6 @@ public class BasicTestController {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		System.out.println("Controller instantiated");
 	}
 
 	/*
@@ -55,7 +55,8 @@ public class BasicTestController {
 		try {
 			controller.registerInvoker(invoker);
 			assertThrows(OperationNotValid.class, () -> controller.registerInvoker(invoker));
-		} catch (OperationNotValid e) {
+		} catch (Exception e) {
+			assertTrue(false);
 		}
 		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 		assertTrue(invokers.contains(invoker));
@@ -74,7 +75,8 @@ public class BasicTestController {
 		try {
 			controller.registerInvoker(invoker);
 			controller.deleteInvoker(invoker);
-		} catch (OperationNotValid e) {
+		} catch (Exception e) {
+			assertTrue(false);
 		}
 		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 		assertTrue(!invokers.contains(invoker));

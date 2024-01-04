@@ -1,6 +1,8 @@
-package action;
+package services.otheractions;
 
 import java.util.Map;
+
+import core.application.Action;
 
 public class AddAction implements Action<Map<String, Integer>, Integer> {
 

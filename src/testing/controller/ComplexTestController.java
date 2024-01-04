@@ -5,19 +5,26 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.Duration;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import action.Action;
-import action.AddAction;
-import application.Controller;
-import dynamic_proxy.proxies.Calculator;
-import faas_exceptions.OperationNotValid;
-import invoker.Invoker;
-import policy_manager.RoundRobin;
+import core.application.Action;
+import core.application.Controller;
+import core.exceptions.NoActionRegistered;
+import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoResultAvailable;
+import core.exceptions.OperationNotValid;
+import core.invoker.Invoker;
+import policymanager.RoundRobin;
+import services.otheractions.AddAction;
+
 
 /**
  * The BasicTestController class contains more complex test cases for the Controller class.
@@ -37,15 +44,13 @@ public class ComplexTestController {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
 		try {
 			controller.registerInvoker(invoker);
 			controller.setPolicyManager(new RoundRobin());
-		} catch (OperationNotValid e) {
+		} catch (Exception e) {
 			assertTrue(false);
 		}
-		System.out.println("Controller instantiated");
 	}
 
 	@Test
@@ -104,113 +109,55 @@ public class ComplexTestController {
 		}
 		assertEquals(result, 1);
 	}
-
-	@Test
-	public void	testRegisterClass()
-	{
-		long ram = 1;
-		Calculator calculator = new Calculator();
-		try {
-			controller.registerAction("calculator", calculator, ram);
-		} catch (OperationNotValid e) {
-			assertTrue(false);
-		}
-		assertSame(calculator, controller.getAction("calculator"));
-	}
 	
-    /*
-	 * @Test
+    @Test
 	public void	functionInvokedCorrectly()
 	{
 		Controller controller = Controller.instantiate();
-		Invoker.setController(controller);
 		Invoker invoker = Invoker.createInvoker(1);
-		controller.registerInvoker(invoker);
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
 
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
-		controller.registerAction("sub", f, 1);
+
+		try {
+			controller.registerInvoker(invoker);
+			controller.setPolicyManager(new RoundRobin());
+			controller.registerAction("sub", f, 1);
+		} catch (Exception e) {
+			assertTrue(false);
+		}
 
 		// Invoking a function correctly 
 		Integer	result = 0;
-		Integer	err = 0;
 		try {
 			result = (Integer) controller.invoke("sub", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvailable e1) {
-			err = 1;
-		} catch (NoResultAvailable e2) {
-			err = 2;
-		} catch (Exception e3) {
-			err = 3;
+		} catch (Exception e) {
+			assertTrue(false);
 		}
 		assertEquals(result, 1);
-		assertEquals(err, 0);
 
 		//Invoking a function that has not been registered
-		result = 0;
-		err = 0;
-		try {
-			result = (Integer) controller.invoke("hi", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvailable e1) {
-			err = 1;
-		} catch (NoActionRegistered e2) {
-			err = 2;
-		} catch (Exception e3) {
-			err = 3;
-		}
-		assertEquals(result, 0);
-		assertEquals(err, 2);
+		assertThrows(NoActionRegistered.class, () -> controller.invoke("hi", Map.of("x", 2, "y", 1)));
 
 		// Invoking a function with an invalid argument
-		result = 0;
-		err = 0;
-		try {
-			result = (Integer) controller.invoke("sub", 2);
-		} catch (NoInvokerAvailable e1) {
-			err = 1;
-		} catch (NoResultAvailable e2) {
-			err = 2;
-		} catch (Exception e3) {
-			err = 3;
-		}
-		assertEquals(result, 0);
-		assertEquals(err, 3);
+		assertThrows(Exception.class, () -> controller.invoke("sub", 2));
 
+		// Passing a null as the id of the function to execute
+		assertThrows(OperationNotValid.class, () -> controller.invoke(null, 1));
 
 		Function<Map<String, Integer>, Integer> f2 = x -> x.get("x") - x.get("y");
-		controller.registerAction("sub2", f2, 2);
+		try {
+			controller.registerAction("sub2", f2, 2);
+		} catch (Exception e) {
+			assertTrue(false);
+		}
 
 		// Invoking a function with not enough RAM
-		result = 0;
-		err = 0;
-		try {
-			result = (Integer) controller.invoke("sub2", Map.of("x", 2, "y", 1));
-		} catch (NoInvokerAvailable e1) {
-			err = 1;
-		} catch (NoResultAvailable e2) {
-			err = 2;
-		} catch (Exception e3) {
-			err = 3;
-		}
-		assertEquals(result, 0);
-		assertEquals(err, 1);
-
-		//TODO test async function
+		assertThrows(NoInvokerAvailable.class, () -> controller.invoke("sub2", Map.of("x", 2, "y", 1)));
 	}
-	 */
-
-	/*
-	 * @Test
+	
+	@Test
 	public void	asyncFunctionTests()
 	{
-		Controller controller = Controller.instantiate();
-		Invoker.setController(controller);
-		Invoker invoker = Invoker.createInvoker(1);
-		controller.registerInvoker(invoker);
-		PolicyManager policyManager = new RoundRobin();
-		controller.addPolicyManager(policyManager);
-
 		Function<Integer, String> sleep = s -> {
 			try {
 				Thread.sleep(Duration.ofSeconds(s).toMillis());
@@ -219,10 +166,15 @@ public class ComplexTestController {
 				throw new RuntimeException(e);
 			}
 		};
-		controller.registerAction("sleepAction", sleep, 1);
 
-		long currentTimeMillis = System.currentTimeMillis();
 		try {
+			controller.registerAction("sleepAction", sleep, 1);
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
+		try {
+			long currentTimeMillis = System.currentTimeMillis();
 			Future<String> fut;
 			List<Future<String>> resList = new LinkedList<Future<String>>();
 			for(int i = 0; i < 2; i++)
@@ -234,25 +186,15 @@ public class ComplexTestController {
 			for (Future<String> future : resList) {
 				stringsResult.add(future.get());
 			}
-		}
-		catch (NoInvokerAvailable e1) {
-			System.out.println(e1.getMessage());
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+			if (totalTime > 4500 || totalTime < 4000)
+				assertTrue(false);
+			else
+				assertTrue(true);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			assertTrue(false);
 		}
-		long finalimeMillis = System.currentTimeMillis();
-		long totalTime = finalimeMillis - currentTimeMillis;
 
-		System.out.println(" Seconds:" + totalTime);
-		int result;
-		if (totalTime > 4500 || totalTime < 4000)
-			result = 0;
-		else
-			result = 1;
-		//IMPORTANT: do not use cache decorator or this test will fail
-		assertEquals(result, 1);
 	}
-	 */
 
 }

@@ -12,14 +12,16 @@ import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
 
-import action.Action;
-import action.FactorialAction;
-import application.Controller;
-import faas_exceptions.NoInvokerAvailable;
-import faas_exceptions.OperationNotValid;
-import invoker.Invoker;
+import core.application.Action;
+import core.application.Controller;
+import core.exceptions.*;
+import core.invoker.CompositeInvoker;
+import core.invoker.Invoker;
 import observer.InvocationObserver;
-import policy_manager.RoundRobin;
+import policymanager.RoundRobin;
+import services.otheractions.FactorialAction;
+import testing.InvocationTester;
+
 
 public class BasicTestComposite extends InvocationTester {
 
