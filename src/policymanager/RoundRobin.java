@@ -5,6 +5,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
 import core.invoker.InvokerInterface;
 
 public class RoundRobin implements PolicyManager, Serializable {
@@ -29,7 +30,7 @@ public class RoundRobin implements PolicyManager, Serializable {
 	 * If none of them have resources, they will get again selected uniformly.
 	 */
 	@Override
-	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable, RemoteException
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
 	{
 		InvokerInterface invoker;
 		InvokerInterface invokerExecutable;

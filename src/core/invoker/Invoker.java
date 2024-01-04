@@ -130,7 +130,7 @@ public class Invoker implements InvokerInterface, Serializable {
 	 * </ul>
 	 */
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws NoInvokerAvailable, RemoteException
+	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
 	{
 		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
 		return (this);

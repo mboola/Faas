@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 
 import core.application.Invokable;
 import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
 import policymanager.PolicyManager;
 
 public interface InvokerInterface extends Remote {
@@ -59,7 +60,7 @@ public interface InvokerInterface extends Remote {
 	 * @return The invoker that will execute our function.
 	 * @throws Exception If there is not an invoker with enough max ram or RSI brokes.
 	 */
-	public InvokerInterface selectInvoker(long ram) throws NoInvokerAvailable, RemoteException;
+	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException;
 
 	//TODO; javadoc this
 	public void	setPolicyManager(PolicyManager policyManager) throws Exception;

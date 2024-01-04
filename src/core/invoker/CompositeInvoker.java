@@ -1,5 +1,6 @@
 package core.invoker;
 
+import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,7 +75,7 @@ public class CompositeInvoker extends Invoker {
 	// va demasiado rapido y no se asignan correctamente los invokers porque cuando accede a la ramAvailable esta aun no ha
 	//sido actualizada
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws Exception
+	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
 	{
 		InvokerInterface invoker;
 
