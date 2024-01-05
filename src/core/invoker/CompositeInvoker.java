@@ -71,9 +71,6 @@ public class CompositeInvoker extends Invoker {
 	 *  <li>Exeption: something goes wrong with RMI.</li>
 	 * </ul>
 	 */
-	//TODO: preguntar a Ussama
-	// va demasiado rapido y no se asignan correctamente los invokers porque cuando accede a la ramAvailable esta aun no ha
-	//sido actualizada
 	@Override
 	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
 	{

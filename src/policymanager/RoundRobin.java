@@ -62,9 +62,6 @@ public class RoundRobin implements PolicyManager, Serializable {
 			catch (NoInvokerAvailable e) {
 				lastInvokerChecked = updatePos(lastInvokerChecked, len);
 			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 		if (lastInvokerAssigned != lastInvokerChecked)
 			lastInvokerAssigned = lastInvokerChecked;

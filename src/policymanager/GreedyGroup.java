@@ -1,9 +1,11 @@
-package policy_manager;
+package policymanager;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
-import faas_exceptions.NoInvokerAvailable;
-import invoker.InvokerInterface;
+import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
+import core.invoker.InvokerInterface;
 
 public class GreedyGroup implements PolicyManager{
 
@@ -21,54 +23,67 @@ public class GreedyGroup implements PolicyManager{
 			return (0);
 	}
 
-	private	InvokerInterface getNextInvokerList(List<InvokerInterface> invokers)
+	private	InvokerInterface getNextInvokerList(List<InvokerInterface> invokers, long ram) throws NoPolicyManagerRegistered, RemoteException
 	{
+		InvokerInterface invokerSelected;
+		InvokerInterface currInvoker;
+		boolean	found;
+
+		found = false;
 		lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
-		return (invokers.get(lastInvokerAssigned));
-		
+		currInvoker = invokers.get(lastInvokerAssigned);
+		invokerSelected = null;
+		while (!found) {
+			try {
+				invokerSelected = currInvoker.selectInvoker(ram);
+				found = true;
+			}
+			catch (NoInvokerAvailable e) {
+				lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
+				currInvoker = invokers.get(lastInvokerAssigned);
+			}
+		}
+		return (invokerSelected);
 	}
 
 	@Override
-	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception {
-		//conceptualment, aquest metode ha de omplir al maxim un invoker abans d-avan\ar al seguent
-		//pero la llista d'invokers pot variar. o pot ser que tingui una referencia a un invoker
-		//que esta omplint pero encara li queda i un altre que ja ha omplert es buida i te la mida
-		//perfecta per executar la funcio que volem.
-		//
-		//hem de recorrer tota la llista d'invokers guardant l'index del que menys ram te, pero suficient
-		//per a correr la funcio. seguidament, retornem l-invoker
-
-		int		posLessRam;
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
+	{
+		InvokerInterface invokerSelected;
+		InvokerInterface lastInvokerSelected;
 		int		hasEnoughRam;
+		long	invokerRam;
 		long	lessRam;
-		long	invRam;
-		int		i;
 
-		if (invokers.isEmpty())
-			throw new NoInvokerAvailable("List of invokers empty.");
-		posLessRam = -1;
-		lessRam = Long.MAX_VALUE;
-		i = 0;
+		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+		//here we store the invoker with less ram available that can execute the function
+		lastInvokerSelected = null;
+		//if there is an invoker that can execute the function
 		hasEnoughRam = 0;
+		lessRam = Long.MAX_VALUE;
 		for (InvokerInterface invoker : invokers) {
-			if (invoker.getMaxRam() >= ram)
-			{
+			try {
+				//we select a invoker from all the invokers this (maybe) composite has
+				invokerSelected = invoker.selectInvoker(ram);
+				//if we are here it means the invoker selected has enough max ram to execute the function
 				hasEnoughRam = 1;
-				invRam = invoker.getAvailableRam();
-				if (invRam >= ram && invRam < lessRam)
+				//but has ram available?
+				invokerRam = invoker.getAvailableRam();
+				if (invokerRam >= ram && invokerRam < lessRam)
 				{
-					lessRam = invRam;
-					posLessRam = i;
+					lessRam = invokerRam;
+					lastInvokerSelected = invokerSelected;
 				}
 			}
-			i++;
+			catch (NoInvokerAvailable e) {
+				//we update the position
+			}
 		}
 		//all invokers are full, distribute the invokers as a round robin
-		if (posLessRam == -1 && hasEnoughRam == 1)
-			return (getNextInvokerList(invokers));
-		if (posLessRam == -1)
-			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
-		return (invokers.get(posLessRam));
+		if (lastInvokerSelected == null && hasEnoughRam == 1)
+			return (getNextInvokerList(invokers, ram));
+		if (lastInvokerSelected == null) throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
+		return (lastInvokerSelected);
 	}
 
 	@Override
