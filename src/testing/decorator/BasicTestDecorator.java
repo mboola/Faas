@@ -1,31 +1,29 @@
 package testing.decorator;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import action.Action;
-import action.FactorialAction;
-import application.Controller;
-import application.Invokable;
+import core.application.Action;
+import core.application.Controller;
+import core.invoker.Invoker;
 import decorator.Cache;
 import decorator.CacheDecorator;
-import invoker.Invoker;
-import policy_manager.RoundRobin;
+import policymanager.RoundRobin;
+import services.otheractions.FactorialAction;
 
-@SuppressWarnings({"unchecked", "unused"})
+@SuppressWarnings({"unchecked", "unused", "rawtypes"})
 public class BasicTestDecorator {
     
 	static final long FACT_20=(long) 2432902008176640000L;
-    private Controller	controller;
+    private Controller controller;
 
 	/*
 	 * This gets called before each Test. We create a core controller that
@@ -51,6 +49,25 @@ public class BasicTestDecorator {
 	@Test
 	public void	testCacheDecoratorHashmapOverlapping()
 	{
+		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
+		CacheDecorator cacheDecorator = new CacheDecorator<>(f, "add");
+
+		try {
+			controller.registerAction("add", cacheDecorator, 1);
+			
+			Integer result1 = controller.invoke("add", Map.of("x", 11, "y", 0));
+			Integer result2 = controller.invoke("add", Map.of("x", 1, "y", 10));
+			Integer result3 = controller.invoke("add", Map.of("x", 1, "y", 10));
+
+			Cache.instantiate().printCache();
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+	}
+
+	@Test
+	public void	testCacheDecoratorFactorial()
+	{
 		Action factorial = new FactorialAction();
 		CacheDecorator cacheDecorator = new CacheDecorator<>(factorial, "factorial");
 
@@ -70,63 +87,22 @@ public class BasicTestDecorator {
 	}
 
 	@Test
-	public void	testCacheDecoratorFactorial()
-	{
-		/*
-		 * Function<Invokable, Function<Object,Object>> decoratorInitializer = 
-			(invokable) -> {
-				Function<Object, Object>	cacheDecorator;
-				String						id;
-				Function<Object, Object>	function;
-
-				function = (Function<Object, Object>)invokable.getInvokable();
-				id = invokable.getId();
-				cacheDecorator = new CacheDecorator<>(function, id);
-				return (cacheDecorator);
-			}
-		;
-		 */
-		
-		Action<Long, Long> f = new FactorialAction();
-		try {
-			controller.registerAction("Factorial", f, 1);
-
-			long currentTimeMillis = System.currentTimeMillis();
-			long result = (long) controller.invoke("Factorial", (long) 20);
-			long totalTime = System.currentTimeMillis() - currentTimeMillis;
-
-			assertEquals(FACT_20, (long) result);
-			
-			long cacheResult = Cache.instantiate().getCacheResult("Factorial", (long) 20);
-
-			assertEquals(FACT_20, cacheResult);
-		}
-		catch (Exception e1) {
-			assertTrue(false);
-		}
-	}
-
-	@Test
 	public void	testCacheDecoratorSleep()
 	{
-		/*
-		 * Function<Invokable, Function<Object,Object>> decoratorInitializer = 
-			(invokable) -> {
-				Function<Object, Object>	cacheDecorator;
-				String						id;
-				Function<Object, Object>	function;
-
-				function = (Function<Object, Object>)invokable.getInvokable();
-				id = invokable.getId();
-				cacheDecorator = new CacheDecorator<>(function, id);
-				return (cacheDecorator);
+		Function<Integer, String> sleep = s -> {
+			long time = Duration.ofMillis(s).toMillis();
+			try {
+				Thread.sleep(time);
+				return "Done!";
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
 			}
-		;
-		 */
+		};
+		CacheDecorator cacheDecorator = new CacheDecorator<>(sleep, "Sleep");
+		List<String> stringsResult;
 
-		/*
-		 * try {
-			controller.registerAction("Sleep", sleep, 1);
+		try {
+			controller.registerAction("Sleep", cacheDecorator, 1);
 
 			long currentTimeMillis = System.currentTimeMillis();
 			String result = (String) controller.invoke("Sleep", 2);
@@ -143,7 +119,6 @@ public class BasicTestDecorator {
 		catch (Exception e1) {
 			assertTrue(false);
 		}
-		 */
 	}
 
 }
