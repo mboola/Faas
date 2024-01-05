@@ -1,4 +1,4 @@
-package RMI;
+package rmi;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
-import application.Controller;
-import invoker.Invoker;
-import invoker.InvokerInterface;
+import core.application.Controller;
+import core.invoker.InvokerInterface;
+import core.metrics.MetricSet;
 import observer.InvocationObserver;
-import policy_manager.RoundRobin;
+import policymanager.RoundRobin;
 
 /*
  * This class is different from ServerInvoker. ServerInvoker only creates an invoker but doesn't
@@ -58,37 +58,20 @@ public class ServerMasterInvoker {
 		ServerHandler.main(argServerHandler);
 		System.out.println("Servers created");
 
-		Invoker.addObserver(new InvocationObserver());
+		MetricSet.instantiate().addObserver(new InvocationObserver());
 
 		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
-		for (InvokerInterface invokerInterface : invokers) {
-			System.out.println("a");
-		}
 
 		try {
 			Integer result = controller.invoke("add1", 10);
 			System.out.println(result);
 		}
 		catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		/*
-		 * try {
-			controller.setPolicyManager(new RoundRobin());
-			controller.registerAction("add1", add, 1);
-
-			List<Integer> result = controller.invoke("add1", Arrays.asList(2, 5, 19, 10, 9));
-			for (Integer res : result) {
-				System.out.println(res);
-			}
-		}
-		catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 
-		String str = controller.getData("InvocationObserver", "add1");
+		String str = MetricSet.instantiate().getData("InvocationObserver", "add1");
 		System.out.println(str);
-		 */
 	}
 
 }

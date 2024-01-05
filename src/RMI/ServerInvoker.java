@@ -1,4 +1,4 @@
-package RMI;
+package rmi;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -6,14 +6,15 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.Future;
 
-import application.Invokable;
-import invoker.CompositeInvoker;
-import invoker.Invoker;
-import invoker.InvokerInterface;
-import policy_manager.PolicyManager;
+import core.application.Invokable;
+import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
+import core.invoker.CompositeInvoker;
+import core.invoker.Invoker;
+import core.invoker.InvokerInterface;
+import policymanager.PolicyManager;
 
-/**
- */
+
 public class ServerInvoker extends UnicastRemoteObject implements InvokerInterface {
 
 	private	Invoker	invoker;
@@ -52,13 +53,18 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public long getRamUsed() {
+	public long	getUsedRam() throws RemoteException {
 		return (invoker.getUsedRam());
 	}
 
 	@Override
-	public long getAvailableRam() {
+	public long getAvailableRam() throws RemoteException {
 		return (invoker.getAvailableRam());
+	}
+
+	@Override
+	public void reserveRam(long ram) throws RemoteException {
+		invoker.reserveRam(ram);
 	}
 
 	@Override
@@ -67,23 +73,23 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public <T, R> R invoke(Invokable invokable, T args, String id) throws Exception {
+	public <T, R> R invoke(Invokable<T, R> invokable, T args, String id) throws Exception {
 		System.out.println("testing");
 		return (invoker.invoke(invokable, args, id));
 	}
 
 	@Override
-	public <T, R> Future<R> invokeAsync(Invokable invokable, T args, String id) throws Exception {
-		return (invoker.invoke(invokable, args, id));
+	public <T, R> Future<R> invokeAsync(Invokable<T, R> invokable, T args, String id) throws Exception {
+		return (invoker.invokeAsync(invokable, args, id));
 	}
 
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws Exception {
+	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException {
 		return (invoker.selectInvoker(ram));
 	}
 
 	@Override
-	public void setPolicyManager(PolicyManager policyManager) {
+	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException {
 		invoker.setPolicyManager(policyManager);
 	}
 
@@ -92,6 +98,7 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 		invoker.shutdownInvoker();
 	}
 
+	//TODO exceptions?
 	@Override
 	public void registerInvoker(InvokerInterface invoker) throws Exception {
 		this.invoker.registerInvoker(invoker);

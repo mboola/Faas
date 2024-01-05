@@ -1,15 +1,15 @@
-package RMI;
+package rmi;
 
 import java.io.NotSerializableException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Map;
 
-import application.Controller;
-import faas_exceptions.NoInvokerAvailable;
-import invoker.Invoker;
-import invoker.InvokerInterface;
-import policy_manager.RoundRobin;
+import core.application.Controller;
+import core.exceptions.NoInvokerAvailable;
+import core.invoker.InvokerInterface;
+import policymanager.RoundRobin;
+
 
 /**
  * This class will locate all servers that have an invoker ready and will use them to
@@ -19,7 +19,6 @@ public class ClientController {
 	 public static void main(String[] args) {
 
 		Controller controller = Controller.instantiate();
-		Invoker.setController(controller);
 
 		SerializedFunction<Map<String, Integer>, Integer> f1 = x -> x.get("x") + x.get("y");
 		try {

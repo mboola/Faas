@@ -28,7 +28,7 @@ public interface InvokerInterface extends Remote {
 	 */
 	public long	getAvailableRam() throws RemoteException;
 	
-	public void reserveRam(long ram) throws Exception;
+	public void reserveRam(long ram) throws RemoteException;
 	/**
 	 * Getter of the max ram of the Invoker.
 	 * 

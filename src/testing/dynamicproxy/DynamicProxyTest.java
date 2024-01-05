@@ -13,7 +13,6 @@ import org.junit.Test;
 import core.application.Controller;
 import core.dynamicproxy.DynamicProxy;
 import core.exceptions.NoActionRegistered;
-import core.exceptions.NoInvokerAvailable;
 import core.exceptions.OperationNotValid;
 import core.invoker.Invoker;
 import policymanager.RoundRobin;
@@ -22,7 +21,7 @@ import services.proxies.CalculatorProxy;
 import services.proxies.Timer;
 import services.proxies.TimerProxy;
 
-
+@SuppressWarnings({"unchecked","unused"})
 public class DynamicProxyTest {
 
 	@Test

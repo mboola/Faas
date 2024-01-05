@@ -1,4 +1,4 @@
-package RMI;
+package rmi;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,8 +7,10 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Base64;
 
-import application.Controller;
-import invoker.InvokerInterface;
+import core.application.Controller;
+import core.invoker.InvokerInterface;
+
+
 
 /**
  * Class used to define multiple invokers as a servers.

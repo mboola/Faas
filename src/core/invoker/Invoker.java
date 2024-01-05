@@ -31,7 +31,7 @@ public class Invoker implements InvokerInterface, Serializable {
 		return (maxRam - reservedRam);
 	}
 
-	public void reserveRam(long ram) throws Exception
+	public void reserveRam(long ram)
 	{
 		if (reservedRam + ram > maxRam) reservedRam = maxRam;
 		else if (reservedRam + ram < 0) reservedRam = 0;
