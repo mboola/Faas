@@ -94,7 +94,7 @@ public class TestRoundRobin extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			stringsResult = invokeList("Sleep", 3, 3000, true, controller);
+			stringsResult = invokeList("Sleep", 3, 3000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			if (totalTime > 9200 || totalTime < 8800) assertTrue(false);
@@ -117,7 +117,7 @@ public class TestRoundRobin extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			stringsResult = invokeList("Sleep", 3, 3000, true, controller);
+			stringsResult = invokeList("Sleep", 3, 3000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
@@ -169,7 +169,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -187,7 +187,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -234,7 +234,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 		}
@@ -251,7 +251,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 		}
@@ -270,7 +270,7 @@ public class TestRoundRobin extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			stringsResult = invokeList("Sleep2", 2, 4000, true, controller);
+			stringsResult = invokeList("Sleep2", 2, 4000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 			assertTrue(totalTime < 8300 && totalTime > 7800);
 		}
@@ -321,7 +321,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 1L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -339,7 +339,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 2L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 7000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 7000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -388,7 +388,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 2L, 3L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -406,7 +406,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(3L, 2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, true, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -424,7 +424,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 3000, false, controller);
+			stringsResult = invokeList("Sleep", 6, 3000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -443,7 +443,7 @@ public class TestRoundRobin extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep2", 4, 5000, false, controller);
+			stringsResult = invokeList("Sleep2", 4, 5000, controller);
 			for (String string : stringsResult) {
 				System.out.println(string);
 			}

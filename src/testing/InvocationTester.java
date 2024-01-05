@@ -59,7 +59,7 @@ public class InvocationTester {
 		}
 	}
 
-	protected <T, R> List<R> invokeList(String id, int numCalls, T data, boolean delay, Controller controller)
+	protected <T, R> List<R> invokeList(String id, int numCalls, T data, Controller controller)
 	{
 		List<Future<R>> futures = new LinkedList<Future<R>>();
 		List<R> result = new LinkedList<R>();
@@ -67,8 +67,6 @@ public class InvocationTester {
 		for (int i = 0; i < numCalls; i++) {
 			try {
 				futures.add(controller.invoke_async(id, data));
-				if (delay)
-					Thread.sleep(1000);
 			}
 			catch (Exception e) {
 				e.printStackTrace();
@@ -79,7 +77,7 @@ public class InvocationTester {
 				result.add(future.get());
 			}
 			catch (Exception e) {
-				System.out.println("error2");
+				e.printStackTrace();
 			}
 		}
 		return (result);

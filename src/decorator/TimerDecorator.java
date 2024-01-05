@@ -29,7 +29,7 @@ public class TimerDecorator<T, R> extends Decorator<T, R>{
 		R		result;
 
 		timeExecution = System.nanoTime();
-		result = getFunction().apply(t);
+		result = function.apply(t);
 		timeExecution = System.nanoTime() - timeExecution;
 		System.out.println("Time of execution is " + timeExecution + " ns.");
 		return (result);

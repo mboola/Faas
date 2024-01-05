@@ -113,7 +113,7 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 3, 3000, true, controller);
+			List<String> stringsResult = invokeList("Sleep", 3, 3000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
@@ -196,7 +196,7 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 6, 6000, true, controller);
+			List<String> stringsResult = invokeList("Sleep", 6, 6000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
@@ -224,7 +224,7 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 7, 7000, true, controller);
+			List<String> stringsResult = invokeList("Sleep", 7, 7000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
 			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);

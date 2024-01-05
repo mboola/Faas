@@ -15,7 +15,6 @@ public abstract class Decorator<T, R> implements Function<T, R> {
      * @param function The function to be wrapped by the decorator.
      */
 	public Decorator(Function<T, R> function) {
-		super();
 		this.function = function;
 	}
 
@@ -28,16 +27,6 @@ public abstract class Decorator<T, R> implements Function<T, R> {
 	@Override
 	public R apply(T t) {
 		return (function.apply(t));
-	}
-
-	/**
-	 * Gets the underlying function associated with this decorator.
-	 *
-	 * @return The underlying function.
-	 */
-	public Function<T, R> getFunction()
-	{
-		return (function);
 	}
 
 }

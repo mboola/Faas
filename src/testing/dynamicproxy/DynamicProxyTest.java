@@ -1,4 +1,4 @@
-package testing.dynamic_proxy;
+package testing.dynamicproxy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

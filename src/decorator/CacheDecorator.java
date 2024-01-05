@@ -37,7 +37,7 @@ public class CacheDecorator<T, R> extends Decorator<T, R>{
 			result = cache.getCacheResult(id, t);
 		} //I do this in case a function is suposed to return null as a valid result
 		catch (NoResultAvailable e1) {
-			result = getFunction().apply(t);
+			result = function.apply(t);
 			cache.cacheResult(id, t, result);
 		}
 		return (result);
