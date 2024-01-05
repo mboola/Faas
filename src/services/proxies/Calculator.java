@@ -7,11 +7,11 @@ public class Calculator implements CalculatorProxy{
 	public Calculator() {
 	}
 
-	public Integer suma(Map<String, Integer> map) {
+	public Object suma(Map<String, Integer> map) {
 		return (map.get("x") + map.get("y"));
 	}
 
-	public Integer resta(Map<String, Integer> map) {
+	public Object resta(Map<String, Integer> map) {
 		return (map.get("x") - map.get("y"));
 	}
 

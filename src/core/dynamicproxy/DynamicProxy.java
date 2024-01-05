@@ -55,7 +55,7 @@ public class DynamicProxy implements InvocationHandler {
 		return result;
 	}
 
-	private static <T, R> Function<T, R> convertMethodToFunction(Object instance, String methodName, Class<T> inputType, Class<R> returnType) throws NoSuchMethodException, SecurityException
+	private static <T, R> Function<T, R> convertMethodToFunction(Object instance, String methodName, Class<?> inputType, Class<R> returnType) throws NoSuchMethodException, SecurityException
 	{
 		Method method = instance.getClass().getMethod(methodName, inputType);
 
@@ -85,19 +85,14 @@ public class DynamicProxy implements InvocationHandler {
 	 * </ul>
 	 * //TODO: Specify more details about the potential exceptions.
 	 */
-	public static Object getActionProxy(String id, boolean isSync) throws Exception
+	public static Object getActionProxy(String id, boolean isSync) throws OperationNotValid, NoActionRegistered
 	{
 		Controller	controller;
 		Invokable	invokable;
 		Function<Object, Class<?>>	actionProxyFunction;
 
 		controller = Controller.instantiate();
-		try {
-			invokable = controller.getInvokable(id);
-		}
-		catch (OperationNotValid | NoActionRegistered e) {
-			return (null);
-		}
+		invokable = controller.getInvokable(id);
 
 		//get the function that will return an instantiated class
 		actionProxyFunction = (Function<Object, Class<?>>) invokable.getInvokable();
