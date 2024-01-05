@@ -85,5 +85,10 @@ public class RoundRobin implements PolicyManager, Serializable {
 	public PolicyManager copy() {
 		return (new RoundRobin());
 	}
+
+	@Override
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	{
+	}
     
 }

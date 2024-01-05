@@ -262,6 +262,7 @@ public class Controller {
 	 */
 	public <T, R> R invoke(String id, T args) throws Exception
 	{
+		policyManager.prepareDistribution(0, 0, true);
 		return (getResult(getInvokable(id), id, args));
 	}
 
@@ -285,8 +286,14 @@ public class Controller {
 	{
 		Invokable	invokable;
 		List<R> 	result;
+		long		ram;
 
 		invokable = getInvokable(id);
+		ram = invokable.getRam();
+
+		//prepare policy manager with args.size() and ram
+		policyManager.prepareDistribution(args.size(), ram, false);
+
 		result = new LinkedList<R>();
 		for (T element : args)
 			result.add((R)getResult(invokable, id, element));
@@ -311,6 +318,7 @@ public class Controller {
 	 */
 	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
 	{
+		policyManager.prepareDistribution(0, 0, true);
 		return (getResult_async(getInvokable(id), id, args));
 	}
 
@@ -335,8 +343,14 @@ public class Controller {
 	{
 		Invokable		invokable;
 		List<Future<R>>	result;
+		long			ram;
 
 		invokable = getInvokable(id);
+		ram = invokable.getRam();
+
+		//prepare policy manager with args.size() and ram
+		policyManager.prepareDistribution(args.size(), ram, false);
+
 		result = new LinkedList<Future<R>>();
 		for (T element : args)
 			result.add(getResult_async(invokable, id, element));

@@ -89,4 +89,10 @@ public class BigGroup implements PolicyManager{
     public PolicyManager copy() {
         return (new BigGroup(this.maxRetries, this.groupSize));
     }
+
+    @Override
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	{
+		//set the num of elements for each group
+	}
 }

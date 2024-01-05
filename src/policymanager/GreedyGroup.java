@@ -90,5 +90,10 @@ public class GreedyGroup implements PolicyManager{
 	public PolicyManager copy() {
 		return (new GreedyGroup());
 	}
+
+	@Override
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	{
+	}
 		
 }

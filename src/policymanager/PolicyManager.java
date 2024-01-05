@@ -12,4 +12,6 @@ public interface PolicyManager {
 	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException;
 
 	public PolicyManager	copy();
+
+	public void				prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation);
 }
