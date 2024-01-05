@@ -40,7 +40,7 @@ public class CompositeInvoker extends Invoker {
 		invoker.setPolicyManager(policyManager);
 	}
 
-	public void	setPolicyManager(PolicyManager policyManager)
+	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException
 	{
 		if (policyManager != null)
 			this.policyManager = policyManager.copy();

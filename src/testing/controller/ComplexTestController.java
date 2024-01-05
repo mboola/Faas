@@ -19,7 +19,6 @@ import core.application.Action;
 import core.application.Controller;
 import core.exceptions.NoActionRegistered;
 import core.exceptions.NoInvokerAvailable;
-import core.exceptions.NoResultAvailable;
 import core.exceptions.OperationNotValid;
 import core.invoker.Invoker;
 import policymanager.RoundRobin;

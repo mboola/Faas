@@ -27,7 +27,7 @@ public class TestRoundRobin extends InvocationTester {
 	private Controller controller;
 
 	@Before
-	@SuppressWarnings({"rawtypes"})
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();

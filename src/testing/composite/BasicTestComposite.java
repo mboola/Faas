@@ -22,7 +22,7 @@ import policymanager.RoundRobin;
 import services.otheractions.FactorialAction;
 import testing.InvocationTester;
 
-
+@SuppressWarnings("unused")
 public class BasicTestComposite extends InvocationTester {
 
 	private Controller			controller;
@@ -33,8 +33,8 @@ public class BasicTestComposite extends InvocationTester {
 	 * will be used for testing. It will have one InvokerComposite(0) without
 	 * childs, one Invoker(1), one IdObserver and one function.
 	 */
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	@Before
-	@SuppressWarnings({"rawtypes"})
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
@@ -48,10 +48,9 @@ public class BasicTestComposite extends InvocationTester {
 		
 		try {
 			controller.registerInvoker(invokerComposite);
-			controller.setPolicyManager(new RoundRobin());
 			controller.registerAction("Add", f, 1);
-			controller.registerAction("Factorial", factorial, 2);
 			initializeSleepAction("Sleep", 1, controller);
+			controller.registerAction("Factorial", factorial, 2);
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -64,7 +63,13 @@ public class BasicTestComposite extends InvocationTester {
 	public void	testCompositeNullValues()
 	{
 		//we don't have a policy manager registered
-		//assertThrows(NoPolicyManagerRegistered.class, () -> controller.invoke("Substract", Map.of("x", 2, "y", 1)));
+		assertThrows(NoPolicyManagerRegistered.class, () -> controller.invoke("Add", Map.of("x", 2, "y", 1)));
+
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
 
 		//here we invoke a function that cannot be invoked from any invoker
 		assertThrows(NoInvokerAvailable.class, () -> controller.invoke("Factorial", 1));
@@ -76,6 +81,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void testOneLayerInvokersSync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
 		createAndAddInvokers(Arrays.asList(1L), controller);
 
 		try {
@@ -92,6 +103,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void testOneLayerInvokersAsync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
 		createAndAddInvokers(Arrays.asList(1L), controller);
 
 		try {
@@ -120,6 +137,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void	testTwoLayersInvokersSameRamSync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
 		createAndAddInvokers(Arrays.asList(1L), controller);
 		createAndAddInvokers(Arrays.asList(1L, 1L), invokerComposite);
 
@@ -138,6 +161,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void	testTwoLayersInvokersDifferentRamSync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
 		createAndAddInvokers(Arrays.asList(2L), controller);
 		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
 
@@ -156,6 +185,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void testTwoLayersInvokersSameRamAsync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
 		createAndAddInvokers(Arrays.asList(1L), controller);
 		createAndAddInvokers(Arrays.asList(1L, 1L), invokerComposite);
 
@@ -178,6 +213,12 @@ public class BasicTestComposite extends InvocationTester {
 	@Test
 	public void testTwoLayersInvokersDifferentRamAsync()
 	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+		
 		createAndAddInvokers(Arrays.asList(2L), controller);
 		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
 

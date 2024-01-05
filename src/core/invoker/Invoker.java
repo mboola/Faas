@@ -136,7 +136,7 @@ public class Invoker implements InvokerInterface, Serializable {
 		return (this);
 	}
 
-	public void	setPolicyManager(PolicyManager policyManager)
+	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException
 	{
 	}
 

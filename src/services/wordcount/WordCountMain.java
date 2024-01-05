@@ -10,6 +10,7 @@ import core.dynamicproxy.DynamicProxy;
 import core.invoker.Invoker;
 import policymanager.RoundRobin;
 
+@SuppressWarnings({"unchecked"})
 public class WordCountMain {
 
 	public static void main(String[] args) 

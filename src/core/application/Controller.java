@@ -77,9 +77,9 @@ public class Controller {
 	 * 
 	 * @param invoker The invoker to be registered.
 	 * @throws OperationNotValid If the invoker received as a parameter is null or is already inside the list.
-	 * @throws NoPolicyManagerRegistered If no policy manager is registered with the controller.
+	 * @throws RemoteException If connection to invoker was lost.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws Exception
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException
 	{
 		if (invoker == null) throw new OperationNotValid("Invoker cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
