@@ -46,6 +46,12 @@ public class CompositeInvoker extends Invoker {
 			this.policyManager = policyManager.copy();
 	}
 
+	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+			throws NoInvokerAvailable, RemoteException
+	{
+		policyManager.prepareDistribution(invokers, size, ram, singleInvocation);
+	}
+
 	/**
 	 * Removes the implementation of InvokerInterface from the list of registered invokers.
 	 * 

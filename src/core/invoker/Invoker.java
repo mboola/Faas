@@ -26,6 +26,8 @@ public class Invoker implements InvokerInterface, Serializable {
 	private long			reservedRam;	//la que se va a usar pero aun no. Usada desde el PolicyManager
 	private long			usedRam;		//ram en uno actualmente en los invokers
 
+	private transient ExecutorService 	executor;
+
 	public long getAvailableRam()
 	{
 		return (maxRam - reservedRam);
@@ -68,9 +70,6 @@ public class Invoker implements InvokerInterface, Serializable {
 	{
 		return (maxRam);
 	}
-
-
-	private transient ExecutorService 		executor;
 	
 	/**
 	 * This method creates an Invoker.
@@ -137,6 +136,11 @@ public class Invoker implements InvokerInterface, Serializable {
 	}
 
 	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException
+	{
+	}
+
+	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+			throws NoInvokerAvailable, RemoteException
 	{
 	}
 

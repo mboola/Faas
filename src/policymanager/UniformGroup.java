@@ -1,10 +1,7 @@
 package policymanager;
 
-import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import core.exceptions.NoInvokerAvailable;
 import core.exceptions.NoPolicyManagerRegistered;
@@ -22,6 +19,7 @@ public class UniformGroup implements PolicyManager{
     private long invocationsDistributed;
 
     private int	lastInvokerAssigned;
+    private boolean ignoreNoAvailable;
 
     //values to distribute the charge in single invocations without knowing the ram it will consume
     private void setSingleUniformValues()
@@ -85,15 +83,27 @@ public class UniformGroup implements PolicyManager{
         if (averageRamAvailable * invokersRamAvailable >= numInvocations * ram)
         {
             //we will distribute the charge to only available ones.
-            
+            ignoreNoAvailable = true;
+            groupSize =  (long) Math.ceil((double) numInvocations / invokersRamAvailable);
         }
         else
         {
             //if it cannot be distributed to only available ones, we distribute it
             //to all of them (that can execute it)
-
+            ignoreNoAvailable = false;
+            groupSize =  (long) Math.ceil((double) numInvocations / invokersMaxRamUsable);
         }
+        //we do Math.ceil because at least group must be one
+        invocationsDistributed = 0;
     }
+
+    private int updatePos(int pos, int len)
+	{
+		if (pos < len)
+			return (pos + 1);
+		else
+			return (0);
+	}
 
     public UniformGroup() {
         lastInvokerAssigned = 0;
@@ -107,6 +117,7 @@ public class UniformGroup implements PolicyManager{
     }
 
     public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+            throws NoInvokerAvailable, RemoteException
     {
         //do we need to prepare the group in the most efficient distribution possible?
         if (singleInvocation && executingGroup)
@@ -119,6 +130,40 @@ public class UniformGroup implements PolicyManager{
             executingGroup = true;
             setGroupUniformValues(invokers, size, ram);
         }
+        //TODO: prepare other invokers inside each invoker
+        for (InvokerInterface invoker : invokers) {
+            invoker.setDistributionPolicyManager((int) groupSize, ram, singleInvocation);
+        }
+    }
+
+    @Override
+    public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram)
+            throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
+    {
+        InvokerInterface invoker;
+        boolean found;
+
+        if (invocationsDistributed == groupSize)
+        {
+            //here we find next invoker selected
+            found = false;
+            while (!found)
+            {
+                lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
+                if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
+                {
+                    if (ignoreNoAvailable)
+                        found = true;
+                    else if (invokers.get(lastInvokerAssigned).getAvailableRam() >= ram)
+                        found = true;
+                }
+            }
+            invocationsDistributed = 0;
+        }
+        //in theory this should never throw a NoInvokerAvailable.
+        invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
+        invocationsDistributed++;
+        return (invoker);
     }
 
 }
