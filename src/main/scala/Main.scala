@@ -17,13 +17,13 @@ object Main {
 	trait Decorator[T, R] extends JFunction[T, R]
 
 	// Concrete implementation of the interface that adds caching behavior
-	class CacheDecorator[T, R](function: T => R) extends Decorator[T, R] {
+	class CacheDecorator[T, R](function: JFunction[T, R]) extends Decorator[T, R] {
 		private val cache = collection.mutable.Map[T, R]()
 		override def apply(arg: T): R = cache.getOrElseUpdate(arg, function(arg))
 	}
 
 	class TimerDecorator[T, R](function: JFunction[T, R]) extends Decorator[T, R] {
-		override def apply(arg: T) = {
+		override def apply(arg: T): R = {
 			val startTime = System.nanoTime()
 			val result = function.apply(arg)
 			val endTime = System.nanoTime()
@@ -73,17 +73,23 @@ object Main {
 
 		controller.registerAction("computation", expensiveComputation, 1)
 
-		val timerDecoratedFunction : Decorator[Int, String] = new TimerDecorator(expensiveComputation)
-		controller.registerAction("computationTimer", timerDecoratedFunction, 1)
+		val timer1DecoratedFunction = new TimerDecorator(expensiveComputation)
+		controller.registerAction("computationTimer", timer1DecoratedFunction, 1)
 
 		val cacheDecoratedFunction = new CacheDecorator(expensiveComputation)
-		val bothDecoratedFunction : Decorator[Int, String] = new TimerDecorator(cacheDecoratedFunction)
-		controller.registerAction("computationBoth", bothDecoratedFunction, 1)
+		val both1DecoratedFunction = new TimerDecorator(cacheDecoratedFunction)
+		controller.registerAction("computationBoth1", both1DecoratedFunction, 1)
+
+		val timer2DecoratedFunction = new TimerDecorator(expensiveComputation)
+		val both2DecoratedFunction = new CacheDecorator(timer2DecoratedFunction)
+		controller.registerAction("computationBoth2", both2DecoratedFunction, 1)
 
 		controller.invoke("computation", 5)
 		controller.invoke("computationTimer", 5)
-		controller.invoke("computationBoth", 5)
-		controller.invoke("computationBoth", 5)
+		controller.invoke("computationBoth1", 5)
+		controller.invoke("computationBoth1", 5)
+		controller.invoke("computationBoth2", 5)
+		controller.invoke("computationBoth2", 5)
 	}
 }
 
