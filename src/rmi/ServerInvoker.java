@@ -108,4 +108,10 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	public void deleteInvoker(InvokerInterface invoker) throws Exception {
 		this.invoker.deleteInvoker(invoker);
 	}
+
+	@Override
+	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+			throws NoInvokerAvailable, RemoteException {
+		this.invoker.setDistributionPolicyManager(size, ram, singleInvocation);
+	}
 }

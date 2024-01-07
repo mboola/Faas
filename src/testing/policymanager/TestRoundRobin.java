@@ -1,4 +1,4 @@
-package testing.policy_manager;
+package testing.policymanager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
@@ -17,12 +17,12 @@ import core.application.Controller;
 import core.exceptions.*;
 import core.metrics.MetricSet;
 import observer.InvocationObserver;
-import policymanager.GreedyGroup;
+import policymanager.RoundRobin;
 import services.otheractions.FactorialAction;
 import testing.InvocationTester;
 
 @SuppressWarnings("unused")
-public class TestGreedyGroup extends InvocationTester {
+public class TestRoundRobin extends InvocationTester {
 
 	private Controller controller;
 
@@ -38,7 +38,7 @@ public class TestGreedyGroup extends InvocationTester {
 		MetricSet.instantiate().addObserver(new InvocationObserver());
 
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new RoundRobin());
 			initializeSleepAction("Sleep", 1, controller);
 			controller.registerAction("Add", f, 1);
 			controller.registerAction("Factorial", factorial, 2);
@@ -48,7 +48,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupExceptions()
+	public void testRoundRobinExceptions()
 	{
 		assertThrows(NoInvokerAvailable.class, () -> controller.invoke("Add", 1));
 		createAndAddInvokers(Arrays.asList(1L), controller);
@@ -56,7 +56,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupOneInvokerSyncFuncA()
+	public void testRoundRobinOneInvokerSyncFuncA()
 	{
 		createAndAddInvokers(Arrays.asList(1L), controller);
 		try {
@@ -71,7 +71,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupOneInvokerSyncFuncB()
+	public void testRoundRobinOneInvokerSyncFuncB()
 	{
 		createAndAddInvokers(Arrays.asList(2L), controller);
 		try {
@@ -86,7 +86,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupOneInvokerAsyncFuncA()
+	public void testRoundRobinOneInvokerAsyncFuncA()
 	{
 		List<String> stringsResult;
 
@@ -109,7 +109,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupOneInvokerAsyncFuncB()
+	public void testRoundRobinOneInvokerAsyncFuncB()
 	{
 		List<String> stringsResult;
 
@@ -132,7 +132,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerSameRamSyncFuncA()
+	public void testRoundRobinTwoInvokerSameRamSyncFuncA()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 1L), controller);
 		try {
@@ -143,11 +143,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0000", str);
+		assertEquals("1010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerSameRamSyncFuncB()
+	public void testRoundRobinTwoInvokerSameRamSyncFuncB()
 	{
 		createAndAddInvokers(Arrays.asList(2L, 2L), controller);
 		try {
@@ -158,11 +158,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0000", str);
+		assertEquals("1010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerSameRamAsyncFuncA()
+	public void testRoundRobinTwoInvokerSameRamAsyncFuncA()
 	{
 		List<String> stringsResult;
 
@@ -176,11 +176,11 @@ public class TestGreedyGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("011010", str);
+		assertEquals("101010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerSameRamAsyncFuncB()
+	public void testRoundRobinTwoInvokerSameRamAsyncFuncB()
 	{
 		List<String> stringsResult;
 
@@ -194,11 +194,11 @@ public class TestGreedyGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001110", str);
+		assertEquals("101010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerDifferentRamSyncFuncA()
+	public void testRoundRobinTwoInvokerDifferentRamSyncFuncA()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 2L), controller);
 		try {
@@ -209,11 +209,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0000", str);
+		assertEquals("1010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerDifferentRamSyncFuncB()
+	public void testRoundRobinTwoInvokerDifferentRamSyncFuncB()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 2L), controller);
 		try {
@@ -227,17 +227,16 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerDifferentRamAsyncFuncA()
+	public void testRoundRobinTwoInvokerDifferentRamAsyncFuncA()
 	{
 		List<String> stringsResult;
 
 		createAndAddInvokers(Arrays.asList(2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
-			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
@@ -245,25 +244,24 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerDifferentRamAsyncFuncB()
+	public void testRoundRobinTwoInvokerDifferentRamAsyncFuncB()
 	{
 		List<String> stringsResult;
 
 		createAndAddInvokers(Arrays.asList(1L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
-			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("011101", str);
+		assertEquals("101010", str);
 	}
 
 	@Test
-	public void testGreedyGroupTwoInvokerDifferentRamAsyncFuncC()
+	public void testRoundRobinTwoInvokerDifferentRamAsyncFuncC()
 	{
 		List<String> stringsResult;
 
@@ -271,10 +269,12 @@ public class TestGreedyGroup extends InvocationTester {
 		initializeSleepAction("Sleep2", 2, controller);
 
 		try {
-			stringsResult = invokeList("Sleep2", 2, 2000, controller);
+			long currentTimeMillis = System.currentTimeMillis();
+			stringsResult = invokeList("Sleep2", 2, 4000, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+			assertTrue(totalTime < 8300 && totalTime > 7800);
 		}
 		catch (Exception e) {
-			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
@@ -282,7 +282,7 @@ public class TestGreedyGroup extends InvocationTester {
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerSameRamSyncFuncA()
+	public void testRoundRobinThreeInvokerSameRamSyncFuncA()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 1L, 1L), controller);
 		try {
@@ -294,11 +294,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("000000", str);
+		assertEquals("120120", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerSameRamSyncFuncB()
+	public void testRoundRobinThreeInvokerSameRamSyncFuncB()
 	{
 		createAndAddInvokers(Arrays.asList(2L, 2L, 2L), controller);
 		try {
@@ -310,11 +310,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("000000", str);
+		assertEquals("120120", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerSameRamAsyncFuncA()
+	public void testRoundRobinThreeInvokerSameRamAsyncFuncA()
 	{
 		List<String> stringsResult;
 
@@ -328,11 +328,11 @@ public class TestGreedyGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("012120", str);
+		assertEquals("120120", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerSameRamAsyncFuncB()
+	public void testRoundRobinThreeInvokerSameRamAsyncFuncB()
 	{
 		List<String> stringsResult;
 
@@ -346,11 +346,11 @@ public class TestGreedyGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("120120", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamSyncFuncA()
+	public void testRoundRobinThreeInvokerDifferentRamSyncFuncA()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 2L, 3L), controller);
 		try {
@@ -362,11 +362,11 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("000000", str);
+		assertEquals("120120", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamSyncFuncB()
+	public void testRoundRobinThreeInvokerDifferentRamSyncFuncB()
 	{
 		createAndAddInvokers(Arrays.asList(1L, 2L, 3L), controller);
 		
@@ -377,47 +377,47 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
-		assertEquals("1111", str);
+		assertEquals("1212", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamAsyncFuncA()
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncA()
 	{
 		List<String> stringsResult;
 
 		createAndAddInvokers(Arrays.asList(1L, 2L, 3L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("011222", str);
+		assertEquals("120122", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamAsyncFuncB()
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncB()
 	{
 		List<String> stringsResult;
 
 		createAndAddInvokers(Arrays.asList(3L, 2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 10000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("211000", str);
+		assertEquals("120100", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamAsyncFuncC()
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncC()
 	{
 		List<String> stringsResult;
 
@@ -431,11 +431,11 @@ public class TestGreedyGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("200111", str);
+		assertEquals("120101", str);
 	}
 
 	@Test
-	public void testGreedyGroupThreeInvokerDifferentRamAsyncFuncD()
+	public void testRoundRobinThreeInvokerDifferentRamAsyncFuncD()
 	{
 		List<String> stringsResult;
 
@@ -444,13 +444,16 @@ public class TestGreedyGroup extends InvocationTester {
 
 		try {
 			stringsResult = invokeList("Sleep2", 4, 5000, controller);
+			for (String string : stringsResult) {
+				System.out.println(string);
+			}
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
-		assertEquals("0110", str);
+		assertEquals("1010", str);
 	}
 	
 }

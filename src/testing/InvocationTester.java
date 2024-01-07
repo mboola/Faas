@@ -62,15 +62,17 @@ public class InvocationTester {
 	protected <T, R> List<R> invokeList(String id, int numCalls, T data, Controller controller)
 	{
 		List<Future<R>> futures = new LinkedList<Future<R>>();
+		List<T> args = new LinkedList<T>();
 		List<R> result = new LinkedList<R>();
 		
 		for (int i = 0; i < numCalls; i++) {
-			try {
-				futures.add(controller.invoke_async(id, data));
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-			}
+			args.add(data);
+		}
+		try {
+			futures = controller.invoke_async(id, args);
+		} catch (Exception e) {
+			assertTrue(false);
+			e.printStackTrace();
 		}
 		for (Future<R> future : futures) {
 			try {

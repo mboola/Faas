@@ -22,8 +22,25 @@ public class UniformGroup implements PolicyManager{
     private boolean ignoreNoAvailable;
 
     //values to distribute the charge in single invocations without knowing the ram it will consume
-    private void setSingleUniformValues()
+    private void setSingleUniformValues(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable
     {
+        long    invokersMaxRamUsable;
+
+        //here I get the num of invokers that can execute the function
+        invokersMaxRamUsable = invokers.stream()
+            .filter(value -> {
+                try {
+                    return value.getMaxRam() >= ram;
+                } catch (RemoteException e) {
+                    return false;
+                }
+            })
+            .count();
+        //If not a single invoker can execute this function
+        if (invokersMaxRamUsable == 0)
+            throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
+
+        ignoreNoAvailable = false;
         groupSize = 1;
         invocationsDistributed = 0;
     }
@@ -108,7 +125,9 @@ public class UniformGroup implements PolicyManager{
     public UniformGroup() {
         lastInvokerAssigned = 0;
         executingGroup = false;
-        setSingleUniformValues();
+        ignoreNoAvailable = false;
+        groupSize = 1;
+        invocationsDistributed = 0;
     }
 
     @Override
@@ -119,18 +138,21 @@ public class UniformGroup implements PolicyManager{
     public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
             throws NoInvokerAvailable, RemoteException
     {
+        if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
         //do we need to prepare the group in the most efficient distribution possible?
         if (singleInvocation && executingGroup)
         {
             executingGroup = false;
-            setSingleUniformValues();
+            setSingleUniformValues(invokers, ram);
         }
         else if (!singleInvocation)
         {
             executingGroup = true;
             setGroupUniformValues(invokers, size, ram);
         }
-        //TODO: prepare other invokers inside each invoker
+        else    //in case we want to execute a function that cannot be executed
+            setSingleUniformValues(invokers, ram);
+        
         for (InvokerInterface invoker : invokers) {
             invoker.setDistributionPolicyManager((int) groupSize, ram, singleInvocation);
         }
@@ -143,7 +165,8 @@ public class UniformGroup implements PolicyManager{
         InvokerInterface invoker;
         boolean found;
 
-        if (invocationsDistributed == groupSize)
+        //if the first time we select an invoker the pointer is pointing to one that cannot invoke
+        if (invocationsDistributed == groupSize || invokers.get(lastInvokerAssigned).getMaxRam() < ram)
         {
             //here we find next invoker selected
             found = false;
@@ -152,7 +175,7 @@ public class UniformGroup implements PolicyManager{
                 lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
                 if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
                 {
-                    if (ignoreNoAvailable)
+                    if (!ignoreNoAvailable)
                         found = true;
                     else if (invokers.get(lastInvokerAssigned).getAvailableRam() >= ram)
                         found = true;
@@ -162,6 +185,7 @@ public class UniformGroup implements PolicyManager{
         }
         //in theory this should never throw a NoInvokerAvailable.
         invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
+        System.out.println(invoker.getId());
         invocationsDistributed++;
         return (invoker);
     }
