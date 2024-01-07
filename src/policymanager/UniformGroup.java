@@ -19,7 +19,7 @@ public class UniformGroup implements PolicyManager{
 	private long invocationsDistributed;
 
 	private int	lastInvokerAssigned;
-	private boolean ignoreNoAvailable;
+	private boolean ignoreFull;
 
 	//values to distribute the charge in single invocations without knowing the ram it will consume
 	private void setSingleUniformValues(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable
@@ -40,7 +40,7 @@ public class UniformGroup implements PolicyManager{
 		if (invokersMaxRamUsable == 0)
 			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
 
-		ignoreNoAvailable = false;
+		ignoreFull = false;
 		groupSize = 1;
 		invocationsDistributed = 0;
 	}
@@ -100,14 +100,14 @@ public class UniformGroup implements PolicyManager{
 		if (averageRamAvailable * invokersRamAvailable >= numInvocations * ram)
 		{
 			//we will distribute the charge to only available ones.
-			ignoreNoAvailable = true;
+			ignoreFull = true;
 			groupSize =  (long) Math.ceil((double) numInvocations / invokersRamAvailable);
 		}
 		else
 		{
 			//if it cannot be distributed to only available ones, we distribute it
 			//to all of them (that can execute it)
-			ignoreNoAvailable = false;
+			ignoreFull = false;
 			groupSize =  (long) Math.ceil((double) numInvocations / invokersMaxRamUsable);
 		}
 		//we do Math.ceil because at least group must be one
@@ -125,7 +125,7 @@ public class UniformGroup implements PolicyManager{
 	public UniformGroup() {
 		lastInvokerAssigned = 0;
 		executingGroup = false;
-		ignoreNoAvailable = false;
+		ignoreFull = false;
 		groupSize = 1;
 		invocationsDistributed = 0;
 	}
@@ -135,6 +135,7 @@ public class UniformGroup implements PolicyManager{
 		return (new UniformGroup());
 	}
 
+	//TODO: see executingGroup
 	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
 			throws NoInvokerAvailable, RemoteException
 	{
@@ -175,7 +176,7 @@ public class UniformGroup implements PolicyManager{
 				lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
 				if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
 				{
-					if (!ignoreNoAvailable)
+					if (!ignoreFull)
 						found = true;
 					else if (invokers.get(lastInvokerAssigned).getAvailableRam() >= ram)
 						found = true;
@@ -185,7 +186,7 @@ public class UniformGroup implements PolicyManager{
 		}
 		//in theory this should never throw a NoInvokerAvailable.
 		invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
-		System.out.println(invoker.getId());
+		//System.out.println(invoker.getId());
 		invocationsDistributed++;
 		return (invoker);
 	}

@@ -15,7 +15,7 @@ public class BigGroup implements PolicyManager {
 	private long invocationsDistributed;
 
 	private int	lastInvokerAssigned;
-	private boolean ignoreNoAvailable;
+	private boolean ignoreFull;
 
 	private void setSingleValues(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable
 	{
@@ -35,7 +35,7 @@ public class BigGroup implements PolicyManager {
 		if (invokersMaxRamUsable == 0)
 			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
 
-		ignoreNoAvailable = false;
+		ignoreFull = false;
 		groupSize = 1;
 		invocationsDistributed = 0;
 	}
@@ -106,13 +106,13 @@ public class BigGroup implements PolicyManager {
 		if (totalRamAvailable < numInvocations * ram)
 		{
 			//we separate the charge in an uniform way
-			ignoreNoAvailable = false;
+			ignoreFull = false;
 			groupSize = (long) Math.ceil((double) numInvocations / invokersMaxRamUsable);
 		}
 		//there is enough ram available to execute
 		else
 		{
-			ignoreNoAvailable = true;
+			ignoreFull = true;
 			groupSize = lessAvailableRam / ram;
 		}
 		invocationsDistributed = 0;
@@ -144,7 +144,7 @@ public class BigGroup implements PolicyManager {
 	public BigGroup() {
 		lastInvokerAssigned = 0;
 		executingGroup = false;
-		ignoreNoAvailable = false;
+		ignoreFull = false;
 		groupSize = 1;
 		invocationsDistributed = 0;
 	}
@@ -184,7 +184,7 @@ public class BigGroup implements PolicyManager {
 					lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
 					if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
 					{
-						if (!ignoreNoAvailable)
+						if (!ignoreFull)
 							found = true;
 						else if (invokers.get(lastInvokerAssigned).getAvailableRam() >= ram)
 							found = true;
