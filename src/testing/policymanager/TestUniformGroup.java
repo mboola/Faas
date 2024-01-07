@@ -171,7 +171,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -189,7 +189,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -237,7 +237,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -255,7 +255,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -324,7 +324,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 1L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 10000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -342,7 +342,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 2L, 2L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 7000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -391,7 +391,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L, 2L, 3L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -409,7 +409,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(3L, 2L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 6000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -427,7 +427,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep", 6, 3000, controller);
+			stringsResult = invokeList("Sleep", 6, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -446,7 +446,7 @@ public class TestUniformGroup extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
 
 		try {
-			stringsResult = invokeList("Sleep2", 4, 5000, controller);
+			stringsResult = invokeList("Sleep2", 4, 1000, controller);
 		}
 		catch (Exception e) {
 			assertTrue(false);
@@ -454,6 +454,80 @@ public class TestUniformGroup extends InvocationTester {
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("0011", str);
+	}
+
+	@Test
+	public void testUniformGroupThreeInvokerDifferentRamAsyncFuncE()
+	{
+		List<String> stringsResult;
+
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep", 4, 1000, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		assertEquals("0011", str);
+	}
+
+	@Test
+	public void testUniformGroupThreeInvokerDifferentRamAsyncFuncF()
+	{
+		List<String> stringsResult;
+
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep", 5, 1000, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		assertEquals("00112", str);
+	}
+
+	@Test
+	public void testUniformGroupFiveInvokerDifferentRamAsyncFuncA()
+	{
+		List<String> stringsResult;
+
+		initializeSleepAction("Sleep2", 2, controller);
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L, 2L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep2", 9, 1000, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
+		assertEquals("000111333", str);
+	}
+
+	@Test
+	public void testUniformGroupFiveInvokerDifferentRamAsyncFuncB()
+	{
+		List<String> stringsResult;
+
+		initializeSleepAction("Sleep2", 2, controller);
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L, 2L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep2", 10, 1000, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
+		assertEquals("0000111133", str);
 	}
 	
 }
