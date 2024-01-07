@@ -14,25 +14,25 @@ import observer.InvocationObserver;
 import policymanager.RoundRobin;
 
 /*
- * This class is different from ServerInvoker. ServerInvoker only creates an invoker but doesn't
- * register invokers to his list.
- * This class will register Invokers to his list.
- */
+* This class is different from ServerInvoker. ServerInvoker only creates an invoker but doesn't
+* register invokers to his list.
+* This class will register Invokers to his list.
+*/
 public class ServerMasterInvoker {
 
 	private static String serializeToString(Object obj) {
-        try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos)) {
 
-            oos.writeObject(obj);
-            byte[] bytes = bos.toByteArray();
-            return Base64.getEncoder().encodeToString(bytes);
+			oos.writeObject(obj);
+			byte[] bytes = bos.toByteArray();
+			return Base64.getEncoder().encodeToString(bytes);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 	public static void main(String[] args) {
 

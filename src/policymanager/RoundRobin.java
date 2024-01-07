@@ -88,8 +88,8 @@ public class RoundRobin implements PolicyManager, Serializable {
 
 	@Override
 	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
-            throws NoInvokerAvailable, RemoteException
+			throws NoInvokerAvailable, RemoteException
 	{
 	}
-    
+	
 }

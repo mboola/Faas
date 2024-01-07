@@ -10,13 +10,12 @@ import core.exceptions.NoInvokerAvailable;
 import core.invoker.InvokerInterface;
 import policymanager.RoundRobin;
 
-
 /**
  * This class will locate all servers that have an invoker ready and will use them to
  * invoke functions. If
  */
 public class ClientController {
-	 public static void main(String[] args) {
+	public static void main(String[] args) {
 
 		Controller controller = Controller.instantiate();
 
@@ -47,7 +46,7 @@ public class ClientController {
 		} catch (Exception e) {
 			System.err.println("Excepción del cliente: " + e.toString());
 			e.printStackTrace();
-        }
+		}
 
 		try {
 			int result = (Integer) controller.invoke("suma", Map.of("x", 1, "y", 2));
@@ -62,5 +61,5 @@ public class ClientController {
 		catch (Exception e) {
 			System.out.println(e.getMessage());
 		}
-    }
+	}
 }

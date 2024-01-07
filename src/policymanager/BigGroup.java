@@ -1,98 +1,203 @@
 package policymanager;
 
+import java.rmi.RemoteException;
 import java.util.List;
 
 import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
 import core.invoker.InvokerInterface;
 
-public class BigGroup implements PolicyManager{
+public class BigGroup implements PolicyManager {
 
-    private int maxRetries;            
-    private int groupSize;
-    private int lastInvokerAssigned;
-    private int count;
-    private int retryCount;
-    private long totalRamConsumed; // Variable global que almacena la RAM consumida total del grupo anterior
+	private boolean executingGroup;
 
-    public BigGroup(int maxRetries, int groupSize) {
-        this.maxRetries = maxRetries;
-        this.groupSize = groupSize;
-        lastInvokerAssigned = 0;
-        count = 0;
-        retryCount = 0;
-        totalRamConsumed = 0;
-    }
-    
-    @Override
-    public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram) throws Exception {
+	private long groupSize;
+	private long invocationsDistributed;
 
-        if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+	private int	lastInvokerAssigned;
+	private boolean ignoreNoAvailable;
 
-        InvokerInterface invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
-        
-        if (invoker.getMaxRam() >= ram) {
-            count++;
-            totalRamConsumed = totalRamConsumed + ram;
-            if (count == groupSize) {
-                if (invoker.getAvailableRam() < totalRamConsumed) {
-                    lastInvokerAssigned = (lastInvokerAssigned + 1) % invokers.size();
-                }
-                totalRamConsumed = 0;
-                count = 0; 
-            }
-            retryCount = 0;
-            return invoker;
-        }
-
-        lastInvokerAssigned = (lastInvokerAssigned + 1) % invokers.size();
-        count = 0;
-        totalRamConsumed = 0;
-        retryCount++;
-
-        if (retryCount > maxRetries) {
-            retryCount = 0; 
-            throw new NoInvokerAvailable("Unable to find a suitable invoker after"+maxRetries+" tries.");
-        }
-
-        return getInvoker(invokers, ram);                                                   // Función recursiva, hará una serie de #MAX_RETRIES intentos antes hacer el throw. 
-    }
-    
-    /**
-     * Sets group size for the BigGroup.
-     *
-     * @param newSize The new group size to set. Must be greater than 0.
-     * @throws IllegalArgumentException If the provided group size is not greater than 0.
-     */
-    public void setSize(int newSize) throws IllegalArgumentException {                      // No se si esto lo necesitaremos, pero no está de más tenerlo.  
-        if (newSize > 0) {
-            this.groupSize = newSize;
-        } else {
-            throw new IllegalArgumentException("Group size must be greater than 0.");
-        }
-    }
-
-    /**
-     * Sets the maximum number of retries allowed to find a suitable Invoker.
-     *
-     * @param newMaxRetries The new value for maxRetries.
-     * @throws IllegalArgumentException If the provided value is less than 0.
-     */
-    public void setMaxRetries(int newMaxRetries) throws IllegalArgumentException {   // Esto tampoco se si hará falta, pero sería interesante
-        if (newMaxRetries >= 0) {                                                           // de cara a que la función se adaptara si necesitara hacer
-            maxRetries = newMaxRetries;                                                     // más retries. 
-        } else {
-            throw new IllegalArgumentException("Max retries must be greater than or equal to 0.");
-        }
-    }
-
-    @Override
-    public PolicyManager copy() {
-        return (new BigGroup(this.maxRetries, this.groupSize));
-    }
-
-    @Override
-	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	private void setSingleValues(List<InvokerInterface> invokers, long ram) throws NoInvokerAvailable
 	{
-		//set the num of elements for each group
+		long    invokersMaxRamUsable;
+
+		//here I get the num of invokers that can execute the function
+		invokersMaxRamUsable = invokers.stream()
+			.filter(value -> {
+				try {
+					return value.getMaxRam() >= ram;
+				} catch (RemoteException e) {
+					return false;
+				}
+			})
+			.count();
+		//If not a single invoker can execute this function
+		if (invokersMaxRamUsable == 0)
+			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
+
+		ignoreNoAvailable = false;
+		groupSize = 1;
+		invocationsDistributed = 0;
 	}
+
+	private void setGroupValues(List<InvokerInterface> invokers, int numInvocations, long ram) throws NoInvokerAvailable
+	{
+		//get the average of invokers ram available, num of invokers, and how may invokers can execute the function
+		long    invokersMaxRamUsable;
+		long	lessAvailableRam;
+		long 	totalRamAvailable;
+
+		//get the invoker with less available ram, and define groups based on that invoker
+		
+		//here I get the num of invokers that can execute the function
+		invokersMaxRamUsable = invokers.stream()
+			.filter(value -> {
+				try {
+					return value.getMaxRam() >= ram;
+				} catch (RemoteException e) {
+					return false;
+				}
+			})
+			.count();
+		
+		//If not a single invoker can execute this function
+		if (invokersMaxRamUsable == 0)
+			throw new NoInvokerAvailable("No Invoker Avaiable with at least " + ram + " RAM.");
+		
+		//we get the invoker with less ram available
+		lessAvailableRam = invokers.stream()
+			.filter(value -> {
+				try {
+					return value.getMaxRam() >= ram;
+				} catch (RemoteException e) {
+					return false;
+				}
+			})
+			.mapToLong(invoker -> {
+				try {
+					return invoker.getAvailableRam();
+				} catch (RemoteException e) {
+					return Long.MAX_VALUE; // Handle the exception appropriately
+				}
+			})
+			.min()
+			.orElse(0);
+
+		//and here I get the average of those who have available ram
+		totalRamAvailable = invokers.stream()
+			.filter(value -> {
+				try {
+					return value.getMaxRam() >= ram;
+				} catch (RemoteException e) {
+					return false;
+				}
+			})
+			.mapToLong(value -> {
+				try {
+					return value.getAvailableRam();
+				} catch (RemoteException e) {
+					return 0;
+				}
+			})
+			.sum();
+		
+		//if all invokers are being used (totalRamAvailable == 0) or
+		//if not all invokers are being used but there is not enough available ram
+		if (totalRamAvailable < numInvocations * ram)
+		{
+			//we separate the charge in an uniform way
+			ignoreNoAvailable = false;
+			groupSize = (long) Math.ceil((double) numInvocations / invokersMaxRamUsable);
+		}
+		//there is enough ram available to execute
+		else
+		{
+			ignoreNoAvailable = true;
+			groupSize = lessAvailableRam / ram;
+		}
+		invocationsDistributed = 0;
+	}
+
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+			throws NoInvokerAvailable, RemoteException
+	{
+		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+		//do we need to prepare the group in the most efficient distribution possible?
+		if (singleInvocation && executingGroup)
+		{
+			executingGroup = false;
+			setSingleValues(invokers, ram);
+		}
+		else if (!singleInvocation)
+		{
+			executingGroup = true;
+			setGroupValues(invokers, size, ram);
+		}
+		else    //in case we want to execute a function that cannot be executed
+			setSingleValues(invokers, ram);
+        
+		for (InvokerInterface invoker : invokers) {
+			invoker.setDistributionPolicyManager((int) groupSize, ram, singleInvocation);
+		}
+	}
+
+	public BigGroup() {
+		lastInvokerAssigned = 0;
+		executingGroup = false;
+		ignoreNoAvailable = false;
+		groupSize = 1;
+		invocationsDistributed = 0;
+	}
+
+	@Override
+	public PolicyManager copy() {
+		return (new BigGroup());
+	}
+
+	private int updatePos(int pos, int len)
+	{
+		if (pos < len)
+			return (pos + 1);
+		else
+			return (0);
+	}
+
+	@Override
+	public InvokerInterface getInvoker(List<InvokerInterface> invokers, long ram)
+			throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
+	{
+		InvokerInterface invoker;
+		boolean found;
+
+		//if the first time we select an invoker the pointer is pointing to one that cannot invoke
+		if (invocationsDistributed == groupSize || invokers.get(lastInvokerAssigned).getMaxRam() < ram)
+		{
+			//do we need to assign another invoker or this has space for another group?
+			if ( Math.ceil((double)invokers.get(lastInvokerAssigned).getAvailableRam() / ram ) >= groupSize)
+				invocationsDistributed = 0;
+			else
+			{
+				//here we find next invoker selected
+				found = false;
+				while (!found)
+				{
+					lastInvokerAssigned = updatePos(lastInvokerAssigned, invokers.size() - 1);
+					if (invokers.get(lastInvokerAssigned).getMaxRam() >= ram)
+					{
+						if (!ignoreNoAvailable)
+							found = true;
+						else if (invokers.get(lastInvokerAssigned).getAvailableRam() >= ram)
+							found = true;
+					}
+				}
+				invocationsDistributed = 0;
+			}
+		}
+		//in theory this should never throw a NoInvokerAvailable.
+		invoker = invokers.get(lastInvokerAssigned).selectInvoker(ram);
+		System.out.println(invoker.getId());
+		invocationsDistributed++;
+		return (invoker);
+	}
+
 }

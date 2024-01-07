@@ -15,5 +15,5 @@ public interface PolicyManager {
 	public PolicyManager	copy();
 
 	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
-            throws NoInvokerAvailable, RemoteException;
+			throws NoInvokerAvailable, RemoteException;
 }

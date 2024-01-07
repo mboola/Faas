@@ -80,12 +80,12 @@ public class ServerHandler {
 
 		try (ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(args[0]))))
 		{
-            controllerSet = (InvocationSet) inputStream.readObject();
-            System.out.println("Object deserialized successfully.");
-        }
+			controllerSet = (InvocationSet) inputStream.readObject();
+			System.out.println("Object deserialized successfully.");
+		}
 		catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+			e.printStackTrace();
+		}
 
 		if (controllerSet == null)
 			return ;
