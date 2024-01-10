@@ -26,4 +26,9 @@ public class MemoryObserver extends Observer {
 			MetricSet.instantiate().addMetric(metricId, metric);
 	}
 
+	@Override
+	public MemoryObserver copy() {
+		return new MemoryObserver();
+	}
+
 }

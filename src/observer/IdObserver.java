@@ -27,4 +27,9 @@ public class IdObserver extends Observer {
 			MetricSet.instantiate().addMetric(metricId, metric);
 	}
 
+	@Override
+	public IdObserver copy() {
+		return new IdObserver();
+	}
+
 }

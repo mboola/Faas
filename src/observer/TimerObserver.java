@@ -2,8 +2,6 @@ package observer;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import core.metrics.Metric;
 import core.metrics.MetricSet;
@@ -17,7 +15,7 @@ public class TimerObserver extends Observer {
 	public void execution() {
 		metric = new Metric<Long>(id, System.nanoTime());
 	}
-	
+
 	@Override
 	public void update() {
 		Long time = metric.getDataType();
@@ -27,12 +25,37 @@ public class TimerObserver extends Observer {
 		MetricSet.instantiate().addMetric(metricId, metric);
 	}
 
+	@Override
+	public TimerObserver copy() {
+		return new TimerObserver();
+	}
+
 	public Long calculateMaxTime(String functionId) {
 		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
-			
-		Optional<Long> max = calculateMaxMetric(list, Comparator.comparingLong(value -> value));
-		if (max.isPresent()) return max.get();
-		else return null;
+		if (list == null) return null;
+
+		return calculateMaxMetric(list, Comparator.comparingLong(value -> value));
+	}
+
+	public Long calculateMinTime(String functionId) {
+		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
+		if (list == null) return null;
+
+		return calculateMinMetric(list, Comparator.comparingLong(value -> value));
+	}
+
+	public Long calculateAverageTime(String functionId) {
+		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
+		if (list == null) return null;
+
+		return (long) calculateAverageMetric(list, (var) -> var);
+	}
+
+	public Long calculateAllTime(String functionId) {
+		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
+		if (list == null) return null;
+
+		return (long) calculateAccumulativeMetric(list, 0L, (x, y) -> x + y);
 	}
 	
 }

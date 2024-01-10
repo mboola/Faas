@@ -18,5 +18,7 @@ public interface ObserverInterface {
 	 * Called after execution.
 	 */
 	public void update();
+
+	public Observer copy();
 	
 }

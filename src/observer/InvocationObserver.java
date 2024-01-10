@@ -19,4 +19,9 @@ public class InvocationObserver extends Observer {
 		}
 	}
 
+	@Override
+	public InvocationObserver copy() {
+		return new InvocationObserver();
+	}
+
 }
