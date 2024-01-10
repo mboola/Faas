@@ -104,6 +104,7 @@ public class DynamicProxy implements InvocationHandler {
 	 * @throws OperationNotValid    if the ID is null
 	 * @throws NoActionRegistered   if no action is registered with the specified ID
 	 */
+	@SuppressWarnings({"unchecked","rawtypes"})
 	public static Object getActionProxy(String id, boolean isSync) throws OperationNotValid, NoActionRegistered
 	{
 		Controller controller = Controller.instantiate();
