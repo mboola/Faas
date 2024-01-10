@@ -15,7 +15,7 @@ import org.junit.Test;
 import core.application.Action;
 import core.application.Controller;
 import core.exceptions.*;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 import observer.InvocationObserver;
 import policymanager.GreedyGroup;
 import services.otheractions.FactorialAction;
@@ -36,7 +36,7 @@ public class TestGreedyGroup extends InvocationTester {
 		Action factorial = new FactorialAction();
 
 		try {
-			MetricSet.instantiate().addObserver(new InvocationObserver());
+			MetricCollection.instantiate().addObserver(new InvocationObserver());
 			controller.setPolicyManager(new GreedyGroup());
 			initializeSleepAction("Sleep", 1, controller);
 			controller.registerAction("Add", f, 1);
@@ -65,7 +65,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0", str);
 	}
 
@@ -80,7 +80,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0", str);
 	}
 
@@ -103,7 +103,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 0 0", str);
 	}
 
@@ -126,7 +126,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 0 0", str);
 	}
 
@@ -141,7 +141,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0", str);
 	}
 
@@ -156,7 +156,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0", str);
 	}
 
@@ -174,7 +174,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 1 1 0 1 0", str);
 	}
 
@@ -192,7 +192,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 0 1 1 1 0", str);
 	}
 
@@ -207,7 +207,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0", str);
 	}
 
@@ -221,7 +221,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Factorial");
 		assertEquals("1 1", str);
 	}
 
@@ -239,7 +239,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("1 0 0 1 0 1", str);
 	}
 
@@ -257,7 +257,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 1 1 1 0 1", str);
 	}
 
@@ -276,7 +276,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("0 0", str);
 	}
 
@@ -292,7 +292,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0 0 0", str);
 	}
 
@@ -308,7 +308,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0 0 0", str);
 	}
 
@@ -326,7 +326,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 1 2 1 2 0", str);
 	}
 
@@ -344,7 +344,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 0 1 1 2 2", str);
 	}
 
@@ -360,7 +360,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("0 0 0 0 0 0", str);
 	}
 
@@ -375,7 +375,7 @@ public class TestGreedyGroup extends InvocationTester {
 		catch (Exception e){
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Factorial");
 		assertEquals("1 1 1 1", str);
 	}
 
@@ -393,7 +393,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("0 1 1 2 2 2", str);
 	}
 
@@ -411,7 +411,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("2 1 1 0 0 0", str);
 	}
 
@@ -429,7 +429,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("2 0 0 1 1 1", str);
 	}
 
@@ -448,7 +448,7 @@ public class TestGreedyGroup extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("0 1 1 0", str);
 	}
 	

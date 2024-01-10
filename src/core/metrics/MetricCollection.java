@@ -6,26 +6,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import core.exceptions.NoResultAvailable;
 import core.exceptions.OperationNotValid;
 import observer.Observer;
 
-public class MetricSet {
+public class MetricCollection {
 
 	private Map<String, Map<String, List<Metric<Object>>>> dataCollected;
 
 	private List<Observer>				observers;
 
-	private static volatile MetricSet	uniqueInstance = null;
+	private static volatile MetricCollection	uniqueInstance = null;
 	private static Object				mutex = new Object();
 
 	/**
-	 * Checks if the MetricSet is instanciated, creates one if it isn't.
+	 * Checks if the MetricCollection is instanciated, creates one if it isn't.
 	 * This method is thread-safe.
 	 * 
-	 * @return The Singleton instance of MetricSet. 
+	 * @return The Singleton instance of MetricCollection. 
 	 */
-	public static MetricSet instantiate() {
-		MetricSet instance;
+	public static MetricCollection instantiate() {
+		MetricCollection instance;
 
 		instance = uniqueInstance;
 		if (uniqueInstance == null)
@@ -34,16 +35,16 @@ public class MetricSet {
 			{
 				instance = uniqueInstance;
 				if (instance == null)
-					instance = uniqueInstance = new MetricSet();
+					instance = uniqueInstance = new MetricCollection();
 			}
 		}
 		return (instance);
 	}
 
 	/**
-	 * Constructs a new instance of MetricSet and instantiates all the structs it uses.
+	 * Constructs a new instance of MetricCollection and instantiates all the structs it uses.
 	 */
-	private MetricSet() {
+	private MetricCollection() {
 		dataCollected = new HashMap<String, Map<String, List<Metric<Object>>>>();
 		observers = new LinkedList<Observer>();
 	}
@@ -75,15 +76,15 @@ public class MetricSet {
 		return (str);
 	}
 
-	public <T> List<T> getList(String metricId, String functionId)
+	public <T> List<T> getList(String metricId, String functionId) throws NoResultAvailable
 	{
 		Map<String, List<Metric<Object>>> metricMap;
 		List<Metric<Object>> nonCastedMetrics;
 
-		if (!dataCollected.containsKey(metricId)) return null;
+		if (!dataCollected.containsKey(metricId)) throw new NoResultAvailable("No dictionary of metrics for that observer.");
 		metricMap = dataCollected.get(metricId);
 
-		if (!metricMap.containsKey(functionId)) return null;
+		if (!metricMap.containsKey(functionId)) throw new NoResultAvailable("No metrics stored with that function ID.");
 		nonCastedMetrics = metricMap.get(functionId);
 
 		List<T> castedMetrics = nonCastedMetrics.stream()

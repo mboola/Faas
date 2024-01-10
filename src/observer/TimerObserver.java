@@ -3,8 +3,9 @@ package observer;
 import java.util.Comparator;
 import java.util.List;
 
+import core.exceptions.NoResultAvailable;
 import core.metrics.Metric;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 
 public class TimerObserver extends Observer {
 
@@ -22,7 +23,7 @@ public class TimerObserver extends Observer {
 		time = System.nanoTime() - time;
 		metric.setDataType(time);
 
-		MetricSet.instantiate().addMetric(metricId, metric);
+		MetricCollection.instantiate().addMetric(metricId, metric);
 	}
 
 	@Override
@@ -31,31 +32,43 @@ public class TimerObserver extends Observer {
 	}
 
 	public Long calculateMaxTime(String functionId) {
-		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
-		if (list == null) return null;
-
-		return calculateMaxMetric(list, Comparator.comparingLong(value -> value));
+		try {
+			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
+			return calculateMaxMetric(list, Comparator.comparingLong(value -> value));
+		}
+		catch (NoResultAvailable e) {
+			return null;
+		}
 	}
 
 	public Long calculateMinTime(String functionId) {
-		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
-		if (list == null) return null;
-
-		return calculateMinMetric(list, Comparator.comparingLong(value -> value));
+		try {
+			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
+			return calculateMinMetric(list, Comparator.comparingLong(value -> value));
+		}
+		catch (NoResultAvailable e) {
+			return null;
+		}
 	}
 
 	public Long calculateAverageTime(String functionId) {
-		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
-		if (list == null) return null;
-
-		return (long) calculateAverageMetric(list, (var) -> var);
+		try {
+			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
+			return (long) calculateAverageMetric(list, (var) -> var);
+		}
+		catch (NoResultAvailable e) {
+			return null;
+		}
 	}
 
 	public Long calculateAllTime(String functionId) {
-		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
-		if (list == null) return null;
-
-		return (long) calculateAccumulativeMetric(list, 0L, (x, y) -> x + y);
+		try {
+			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
+			return (long) calculateAccumulativeMetric(list, 0L, (x, y) -> x + y);
+		}
+		catch (NoResultAvailable e) {
+			return null;
+		}
 	}
 	
 }

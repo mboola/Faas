@@ -111,7 +111,7 @@ public class DynamicProxy implements InvocationHandler {
 		//If id is not valid or doesn't exist this will throw OperationNotValid or NoActionRegistered
 		Invokable invokable = controller.retrieveInvokable(id);
 		//Get the function that will return an instantiated class in resultClass
-		Function<Object, Class<?>>	actionProxyFunction = (Function<Object, Class<?>>) invokable.getInvokable();
+		Function<Object, Class<?>>	actionProxyFunction = (Function<Object, Class<?>>) invokable.retrieveInvokable();
 		Object resultClass = actionProxyFunction.apply(null);
 		//I get the metadata of the class the proxy will be created to intercept invocation calls
 		Class<?> actionProxyClass = resultClass.getClass();

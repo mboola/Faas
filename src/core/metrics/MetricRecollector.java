@@ -28,7 +28,7 @@ public class MetricRecollector {
 		this.id = id;
 		this.invoker = invoker;
 
-		List<Observer> obs = MetricSet.instantiate().getObservers();
+		List<Observer> obs = MetricCollection.instantiate().getObservers();
 
 		// Initialize observers with the ones available in MetricSet
 		//here I must create a deep copy

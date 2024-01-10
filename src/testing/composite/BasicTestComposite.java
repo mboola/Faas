@@ -16,7 +16,7 @@ import core.application.Action;
 import core.application.Controller;
 import core.exceptions.*;
 import core.invoker.CompositeInvoker;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 import observer.InvocationObserver;
 import policymanager.RoundRobin;
 import services.otheractions.FactorialAction;
@@ -45,7 +45,7 @@ public class BasicTestComposite extends InvocationTester {
 		invokerComposite = CompositeInvoker.createInvoker(1);
 		
 		try {
-			MetricSet.instantiate().addObserver(new InvocationObserver());
+			MetricCollection.instantiate().addObserver(new InvocationObserver());
 			controller.registerInvoker(invokerComposite);
 			controller.registerAction("Add", f, 1);
 			initializeSleepAction("Sleep", 1, controller);
@@ -95,7 +95,7 @@ public class BasicTestComposite extends InvocationTester {
 		catch (Exception e) {
 			assertTrue(false);
 		}
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("1 0 1 0", str);
 	}
 
@@ -122,7 +122,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("1 0 1", str);
 	}
 
@@ -153,7 +153,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 		
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
 		assertEquals("1 3 1 2", str);
 	}
 
@@ -177,7 +177,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Factorial");
 		assertEquals("1 3 1 3", str);
 	}
 
@@ -202,7 +202,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("1 3 2 0 1 0", str);
 	}
 
@@ -227,7 +227,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("1 3 1 2 3 0 1", str);
 	}
 

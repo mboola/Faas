@@ -9,7 +9,7 @@ import java.util.List;
 
 import core.application.Controller;
 import core.invoker.InvokerInterface;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 import observer.InvocationObserver;
 import policymanager.RoundRobin;
 
@@ -61,7 +61,7 @@ public class ServerMasterInvoker {
 		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 
 		try {
-			MetricSet.instantiate().addObserver(new InvocationObserver());
+			MetricCollection.instantiate().addObserver(new InvocationObserver());
 			Integer result = controller.invoke("add1", 10);
 			System.out.println(result);
 		}
@@ -69,7 +69,7 @@ public class ServerMasterInvoker {
 			e.printStackTrace();
 		}
 
-		String str = MetricSet.instantiate().getData("InvocationObserver", "add1");
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "add1");
 		System.out.println(str);
 	}
 

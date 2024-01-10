@@ -33,7 +33,7 @@ public class Invokable<T, R> implements Serializable {
      *
      * @return the invokable function
      */
-	public Function<T, R> getInvokable()
+	public Function<T, R> retrieveInvokable()
 	{
 		return (this.invokable);
 	}

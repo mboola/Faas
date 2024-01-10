@@ -1,13 +1,15 @@
 package observer;
 
 import java.rmi.RemoteException;
+import java.util.List;
 
+import core.exceptions.NoResultAvailable;
 import core.metrics.Metric;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 
 public class IdObserver extends Observer {
 
-	private final String		metricId	= "IdObserver";
+	private final String		metricId = "IdObserver";
 	private Metric<String>		metric;
 
 	@Override
@@ -24,12 +26,22 @@ public class IdObserver extends Observer {
 	@Override
 	public void update() {
 		if (metric != null)
-			MetricSet.instantiate().addMetric(metricId, metric);
+			MetricCollection.instantiate().addMetric(metricId, metric);
 	}
 
 	@Override
 	public IdObserver copy() {
 		return new IdObserver();
+	}
+
+	public Long calculateAllTimesInvoked(String functionId, String invokerID) {
+		try {
+			List<String> list = MetricCollection.instantiate().getList(metricId, functionId);
+			return list.stream().filter((value) -> value.equals(invokerID)).count();
+		}
+		catch (NoResultAvailable e) {
+			return 0L;
+		}
 	}
 
 }

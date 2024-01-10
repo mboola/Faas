@@ -3,7 +3,7 @@ package observer;
 import java.rmi.RemoteException;
 
 import core.metrics.Metric;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 
 public class MemoryObserver extends Observer {
 
@@ -23,7 +23,7 @@ public class MemoryObserver extends Observer {
 	@Override
 	public void update() {
 		if (metric != null)
-			MetricSet.instantiate().addMetric(metricId, metric);
+			MetricCollection.instantiate().addMetric(metricId, metric);
 	}
 
 	@Override

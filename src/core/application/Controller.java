@@ -175,7 +175,7 @@ public class Controller {
 	public Object getAction(String id)
 	{
 		if (id == null) return (null);
-		return (invokables.get(id).getInvokable());
+		return (invokables.get(id).retrieveInvokable());
 	}
 
 	/**

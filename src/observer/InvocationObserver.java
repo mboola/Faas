@@ -4,7 +4,7 @@ import java.rmi.RemoteException;
 
 import core.invoker.InvokerInterface;
 import core.metrics.Metric;
-import core.metrics.MetricSet;
+import core.metrics.MetricCollection;
 
 public class InvocationObserver extends Observer {
 
@@ -14,7 +14,7 @@ public class InvocationObserver extends Observer {
 	public void initialize(String id, InvokerInterface invoker) {
 		super.initialize(id, invoker);
 		try {
-			MetricSet.instantiate().addMetric(metricId, new Metric<String>(id, invoker.getId()));
+			MetricCollection.instantiate().addMetric(metricId, new Metric<String>(id, invoker.getId()));
 		} catch (RemoteException e) {
 		}
 	}

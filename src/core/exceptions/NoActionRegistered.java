@@ -5,6 +5,8 @@ package core.exceptions;
  * This exception can only be thrown by the Controller when attempting to retrieve an action with an ID
  * that has not been registered, or other methods that use this method.
  * This particular method is: {@link core.application.Controller#getInvokable(String)}.
+ * <p>
+ * This exception extends the standard Java {@link Exception} class.
  *
  * @see core.application.Controller
  * @see Exception
