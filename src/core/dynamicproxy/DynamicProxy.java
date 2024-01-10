@@ -113,6 +113,8 @@ public class DynamicProxy implements InvocationHandler {
 			try {
 				controller.registerAction(method.getName(), convertMethodToFunction(resultClass, method.getName(), parameterTypes[0], returnType), invokable.getRam());
 			}
+			catch (OperationNotValid e) {
+			}
 			catch (Exception e) {
 				//TODO: if action couldnt be registered something weird happened.
 				e.printStackTrace();
