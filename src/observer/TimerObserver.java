@@ -14,7 +14,7 @@ public class TimerObserver extends Observer {
 
 	@Override
 	public void execution() {
-		metric = new Metric<Long>(id, System.nanoTime());
+		metric = new Metric<Long>(functionId, System.nanoTime());
 	}
 
 	@Override

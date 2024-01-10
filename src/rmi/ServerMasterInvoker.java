@@ -18,6 +18,7 @@ import policymanager.RoundRobin;
 * register invokers to his list.
 * This class will register Invokers to his list.
 */
+@SuppressWarnings("unused")
 public class ServerMasterInvoker {
 
 	private static String serializeToString(Object obj) {

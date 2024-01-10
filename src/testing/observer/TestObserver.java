@@ -24,6 +24,7 @@ import observer.MemoryObserver;
 import observer.TimerObserver;
 import policymanager.RoundRobin;
 
+@SuppressWarnings("unused")
 public class TestObserver {
 
 	private Controller controller;
@@ -87,7 +88,7 @@ public class TestObserver {
 			List<Integer> result = controller.invoke("Add", 
 				Arrays.asList(Map.of("x", 2, "y", 1), Map.of("x", 4, "y", 2), Map.of("x", 7, "y", 3)));
 		}
-		catch (Exception e){
+		catch (Exception e) {
 			assertTrue(false);
 		}
 		String str = MetricCollection.instantiate().getData("TimerObserver", "Add");
@@ -100,9 +101,7 @@ public class TestObserver {
 
 		str = MetricCollection.instantiate().getData("MemoryObserver", "Add");
 		if (str != null)
-		{
 			assertEquals("1 1 1", str);
-		}
 		else assertTrue(false);
 	}
 

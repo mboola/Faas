@@ -76,6 +76,7 @@ public class MetricCollection {
 		return (str);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <T> List<T> getList(String metricId, String functionId) throws NoResultAvailable
 	{
 		Map<String, List<Metric<Object>>> metricMap;

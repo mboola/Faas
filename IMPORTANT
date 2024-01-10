@@ -1,3 +1,44 @@
-1-PolicyManager should always be assigned before adding an invoker to the list of invokers.
-2-The proxies classes that the DynamicProxy uses are encapsulated in Invokable, and will crash if tried to invoke.
-3-REMOVE println in RoundRobin
+-src
+	-core
+		-application
+			-Action: ✔️
+			-Controller:
+			-Invokable: ✔️
+		-dynamicproxy
+			-DynamicProxy: ✔️
+		-exceptions
+			-NoActionRegistered: ✔️
+			-NoInvokerAvailable:
+			-NoPolicyManagerRegistered:
+			-NoResultAvailable: ✔️
+			-OperationNotValid: ✔️
+		-invoker
+			-CompositeInvoker:
+			-Invoker:
+			-InvokerInterface:
+		-metrics:
+			-Metric: ✔️
+			-MetricCollection:
+			-MetricRecollector: ✔️
+	-decorator:
+		-Cache: ✔️
+		-CacheDecorator: ✔️
+		-Decorator: ✔️
+		-TimerDecorator: ✔️
+	-observer:
+		-IdObserver: ✔️
+		-InvocationObserver: ✔️
+		-MemoryObserver: ✔️
+		-Observer: ✔️
+		-ObserverInterface:
+		-TimeObserver:
+
+Things left to do:
+1-Test big group
+2-Refactor Controller and invoker
+3-Test composite with all PolicyManagers
+4-Test rmi
+5-Refactor rmi
+6-Javadoc all exceptions
+7-Javadoc whats left
+8-Javadoc tests

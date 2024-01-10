@@ -3,16 +3,20 @@ package decorator;
 import java.util.function.Function;
 
 /**
- * A decorator class that measures execution time.
+ * A decorator class that measures the execution time of a function.
+ * <p>
+ * This decorator extends the {@link decorator.Decorator} class.
+ * 
+ * @param <T> The type of the input to the function.
+ * @param <R> The type of the result of the function.
  */
 public class TimerDecorator<T, R> extends Decorator<T, R>{
 
-	
-    /**
-     * Constructs a timer decorator with the specified function to be wrapped.
-     *
-     * @param function The function to be wrapped by the timer decorator.
-     */
+	/**
+	 * Constructs a TimerDecorator with the specified function to be decorated.
+	 *
+	 * @param function The function to be decorated.
+	 */
 	public TimerDecorator(Function<T, R> function) {
 		super(function);
 	}
@@ -21,7 +25,7 @@ public class TimerDecorator<T, R> extends Decorator<T, R>{
 	 * Applies the timer decorator logic to the given argument, measuring the execution time of the underlying function.
 	 *
 	 * @param t The argument to be passed to the decorated function.
-	 * @return The result of applying the timer decorator logic to the provided argument.
+	 * @return The result of the invocation of the decorated function.
 	 */
 	@Override
 	public R apply(T t) {

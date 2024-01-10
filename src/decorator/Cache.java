@@ -19,8 +19,8 @@ public class Cache {
 	 * Checks if the Cache is instanciated, creates one if it isn't.
 	 * This method is thread safe.
 	* 
-	 * @return The Singleton instance of Cache. 
-	 */
+	* @return The Singleton instance of Cache. 
+	*/
 	public static Cache instantiate() {
 		Cache instance;
 
@@ -63,39 +63,39 @@ public class Cache {
 
 	/**
 	 * Caches the result of a function call based on the provided id, arguments, and result.
-     *
-     * @param id     The identifier for the function.
-     * @param args   The arguments used in the function call.
-     * @param result The result of the function call.
-     * @param <T>    The type of the arguments.
-     * @param <R>    The type of the result.
-     */
-    public <T, R> void cacheResult(String id, T args, R result) {
-        String key = args.toString();
-        Map<String, Object> innerMap = cacheDecorator.computeIfAbsent(id, k -> new HashMap<>());
-        if (!innerMap.containsKey(key)) {
-            innerMap.put(key, result);
-        }
-    }
+	 *
+	 * @param id     The identifier for the function.
+	 * @param args   The arguments used in the function call.
+	 * @param result The result of the function call.
+	 * @param <T>    The type of the arguments.
+	 * @param <R>    The type of the result.
+	 */
+	public <T, R> void cacheResult(String id, T args, R result) {
+		String key = args.toString();
+		Map<String, Object> innerMap = cacheDecorator.computeIfAbsent(id, k -> new HashMap<>());
+		if (!innerMap.containsKey(key)) {
+			innerMap.put(key, result);
+		}
+	}
 
-    /**
-     * Retrieves the cached result of a function call based on the provided id and arguments.
-     *
-     * @param id   The identifier for the function.
-     * @param args The arguments used in the function call.
-     * @param <T>  The type of the arguments.
-     * @param <R>  The type of the result.
-     * @return The cached result.
-     * @throws NoResultAvailable If no matching arguments have been found in the cache.
-     */
+	/**
+	 * Retrieves the cached result of a function call based on the provided id and arguments.
+	 *
+	 * @param id   The identifier for the function.
+	 * @param args The arguments used in the function call.
+	 * @param <T>  The type of the arguments.
+	 * @param <R>  The type of the result.
+	 * @return The cached result.
+	 * @throws NoResultAvailable If no matching arguments have been found in the cache.
+	 */
 	@SuppressWarnings({"unchecked"})
-    public <T, R> R getCacheResult(String id, T args) throws NoResultAvailable {
-        String key = args.toString();
-        Map<String, Object> innerMap = cacheDecorator.get(id);
-        if (innerMap == null || !innerMap.containsKey(key)) {
-            throw new NoResultAvailable("No matching arguments have been found");
-        }
-        return (R) innerMap.get(key);
-    }
+	public <T, R> R getCacheResult(String id, T args) throws NoResultAvailable {
+		String key = args.toString();
+		Map<String, Object> innerMap = cacheDecorator.get(id);
+		if (innerMap == null || !innerMap.containsKey(key)) {
+			throw new NoResultAvailable("No matching arguments have been found");
+		}
+		return (R) innerMap.get(key);
+	}
 
 }
