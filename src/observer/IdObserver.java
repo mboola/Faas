@@ -1,26 +1,30 @@
 package observer;
 
-import core.invoker.InvokerInterface;
+import java.rmi.RemoteException;
+
 import core.metrics.Metric;
 import core.metrics.MetricSet;
 
-public class IdObserver implements Observer {
+public class IdObserver extends Observer {
 
-	private String		metricId	= "IdObserver";
+	private final String		metricId	= "IdObserver";
+	private Metric<String>		metric;
 
-	public <T> void initialize(String id, InvokerInterface invoker) throws Exception
-	{}
-
-	@SuppressWarnings({"unchecked"})
 	@Override
-	public <T> Metric<T> execution(String id, InvokerInterface invoker) throws Exception
+	public void execution()
 	{
-		return (Metric<T>) (new Metric<String>(id, invoker.getId()));
+		try {
+			metric = new Metric<String>(id, invoker.getId());
+		}
+		catch (RemoteException e) {
+			metric = null;
+		}
 	}
 
 	@Override
-	public <T> void update(Metric<T> metric) {
-		MetricSet.instantiate().addMetric(metricId, metric);
+	public void update() {
+		if (metric != null)
+			MetricSet.instantiate().addMetric(metricId, metric);
 	}
 
 }

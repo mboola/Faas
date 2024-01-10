@@ -1,23 +1,29 @@
 package observer;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 import core.invoker.InvokerInterface;
-import core.metrics.Metric;
 
-public interface Observer {
+public abstract class Observer implements ObserverInterface {
 
-	/*
-	 * Called when assigned.
-	 */
-	public <T> void initialize(String id, InvokerInterface invoker) throws Exception;
+	protected InvokerInterface	invoker;
+	protected String			id;
 
-	/*
-	 * Called before execution.
-	 */
-	public <T> Metric<T> execution(String id, InvokerInterface invoker) throws Exception;
+	public void initialize(String id, InvokerInterface invoker)	{
+		this.invoker = invoker;
+		this.id = id;
+	}
 
-	/*
-	 * Called after execution.
-	 */
-	public <T> void update(Metric<T> metric);
+	public void execution() {
+	}
+
+	public void update() {
+	}
+	
+	protected <T> Optional<T> calculateMaxMetric(List<T> list, Comparator<T> comparator) {
+		return list.stream().max(comparator);
+	}
 
 }

@@ -1,27 +1,29 @@
 package observer;
 
-import core.invoker.InvokerInterface;
+import java.rmi.RemoteException;
+
 import core.metrics.Metric;
 import core.metrics.MetricSet;
 
-public class MemoryObserver implements Observer {
+public class MemoryObserver extends Observer {
 
-	private String		metricId	= "MemoryObserver";
-
-	public <T> void initialize(String id, InvokerInterface invoker) throws Exception
-	{
-	}
-
-	@SuppressWarnings({"unchecked"})
-	@Override
-	public <T> Metric<T> execution(String id, InvokerInterface invoker) throws Exception
-	{
-		return (Metric<T>) (new Metric<Long>(id, invoker.getUsedRam()));
-	}
+	private final String		metricId	= "MemoryObserver";
+	private Metric<Long>		metric;
 
 	@Override
-	public <T> void update(Metric<T> metric) {
-		MetricSet.instantiate().addMetric(metricId, metric);
+	public void execution() {
+		try {
+			metric = new Metric<Long>(id, invoker.getUsedRam());
+		}
+		catch (RemoteException e) {
+			metric = null;
+		}
+	}
+
+	@Override
+	public void update() {
+		if (metric != null)
+			MetricSet.instantiate().addMetric(metricId, metric);
 	}
 
 }

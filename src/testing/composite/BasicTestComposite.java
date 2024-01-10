@@ -43,10 +43,9 @@ public class BasicTestComposite extends InvocationTester {
 		Action factorial = new FactorialAction();
 
 		invokerComposite = CompositeInvoker.createInvoker(1);
-
-		MetricSet.instantiate().addObserver(new InvocationObserver());
 		
 		try {
+			MetricSet.instantiate().addObserver(new InvocationObserver());
 			controller.registerInvoker(invokerComposite);
 			controller.registerAction("Add", f, 1);
 			initializeSleepAction("Sleep", 1, controller);
@@ -97,7 +96,7 @@ public class BasicTestComposite extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("1010", str);
+		assertEquals("1 0 1 0", str);
 	}
 
 	@Test
@@ -113,10 +112,10 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 3, 3000, controller);
+			List<String> stringsResult = invokeList("Sleep", 3, 1000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
+			if (totalTime > 2200 || totalTime < 1800) assertTrue(false);
 			else assertTrue(true);
 		}
 		catch (Exception e) {
@@ -124,7 +123,7 @@ public class BasicTestComposite extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("101", str);
+		assertEquals("1 0 1", str);
 	}
 
 
@@ -155,7 +154,7 @@ public class BasicTestComposite extends InvocationTester {
 		}
 		
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("1312", str);
+		assertEquals("1 3 1 2", str);
 	}
 
 	@Test
@@ -179,7 +178,7 @@ public class BasicTestComposite extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
-		assertEquals("1313", str);
+		assertEquals("1 3 1 3", str);
 	}
 
 	@Test
@@ -196,18 +195,15 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 6, 6000, controller);
+			List<String> stringsResult = invokeList("Sleep", 6, 1000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
-
-			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
-			//else assertTrue(true);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("132010", str);
+		assertEquals("1 3 2 0 1 0", str);
 	}
 
 	@Test
@@ -224,18 +220,15 @@ public class BasicTestComposite extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			List<String> stringsResult = invokeList("Sleep", 7, 7000, controller);
+			List<String> stringsResult = invokeList("Sleep", 7, 1000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
-
-			//if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
-			//else assertTrue(true);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("1312301", str);
+		assertEquals("1 3 1 2 3 0 1", str);
 	}
 
 }

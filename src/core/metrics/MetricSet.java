@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import core.exceptions.OperationNotValid;
 import observer.Observer;
 
 public class MetricSet {
@@ -67,9 +69,28 @@ public class MetricSet {
 		if (metricMap == null)
 			return (str);
 		for (Metric<Object> metric : metricMap.get(functionId)) {
-			str += metric.getDataStr();
+			str += metric.getDataStr() + " ";
 		}
+		str = str.trim();
 		return (str);
+	}
+
+	public <T> List<T> getList(String metricId, String functionId)
+	{
+		Map<String, List<Metric<Object>>> metricMap;
+		List<Metric<Object>> nonCastedMetrics;
+
+		if (!dataCollected.containsKey(metricId)) return null;
+		metricMap = dataCollected.get(metricId);
+
+		if (!metricMap.containsKey(functionId)) return null;
+		nonCastedMetrics = metricMap.get(functionId);
+
+		List<T> castedMetrics = nonCastedMetrics.stream()
+			.map(metric -> ((Metric<T>) metric).getDataType())
+			.collect(Collectors.toList());
+
+        return castedMetrics;
 	}
 
 	/**
@@ -104,9 +125,15 @@ public class MetricSet {
 	 * 
 	 * @param observer Observer that will be notified when a function is invoked.
 	 */
-	public void addObserver(Observer observer)
+	public void addObserver(Observer observer) throws OperationNotValid
 	{
-		//TODO: check if the observer is already added
+		if (observer == null) throw new OperationNotValid("Observer cannot be null.");
+
+		Class<?> classType = observer.getClass();
+		for (Observer obs : observers) {
+			if (classType.isInstance(obs))
+			throw new OperationNotValid("Observer is already registered.");
+		}
 		observers.add(observer);
 	}
 
@@ -115,9 +142,10 @@ public class MetricSet {
 	 * 
 	 * @param observer Observer that won't be notified when a function is invoked.
 	 */
-	public void removeObserver(Observer observer)
+	public void removeObserver(Observer observer) throws OperationNotValid
 	{
-		//TODO: check of the observer is on the list
+		if (observer == null) throw new OperationNotValid("Observer to delete cannot be null.");
+		if (!observers.contains(observer)) throw new OperationNotValid("Observer is already registered.");
 		observers.remove(observer);
 	}
 

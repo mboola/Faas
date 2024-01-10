@@ -1,32 +1,38 @@
 package observer;
 
-import core.invoker.InvokerInterface;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import core.metrics.Metric;
 import core.metrics.MetricSet;
 
-public class TimerObserver implements Observer {
+public class TimerObserver extends Observer {
 
-	private String		metricId	= "TimerObserver";
+	private final String		metricId	= "TimerObserver";
+	private Metric<Long>		metric;
+
+	@Override
+	public void execution() {
+		metric = new Metric<Long>(id, System.nanoTime());
+	}
 	
-	public <T> void initialize(String id, InvokerInterface invoker) throws Exception {
-	}
-
-	@SuppressWarnings({"unchecked"})
 	@Override
-	public <T> Metric<T> execution(String id, InvokerInterface invoker)
-	{
-		return (Metric<T>) (new Metric<Long>(id, System.nanoTime()));
-	}
-
-	@SuppressWarnings({"unchecked"})
-	@Override
-	public <T> void update(Metric<T> metric) {
-		Metric<Long> timeMetric = (Metric<Long>)metric;
-		Long time = timeMetric.getDataType();
+	public void update() {
+		Long time = metric.getDataType();
 		time = System.nanoTime() - time;
-		timeMetric.setDataType(time);
+		metric.setDataType(time);
 
-		MetricSet.instantiate().addMetric(metricId, timeMetric);
+		MetricSet.instantiate().addMetric(metricId, metric);
+	}
+
+	public Long calculateMaxTime(String functionId) {
+		List<Long> list = MetricSet.instantiate().getList(metricId, functionId);
+			
+		Optional<Long> max = calculateMaxMetric(list, Comparator.comparingLong(value -> value));
+		if (max.isPresent()) return max.get();
+		else return null;
 	}
 	
 }

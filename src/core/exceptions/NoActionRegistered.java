@@ -6,6 +6,7 @@ package core.exceptions;
  * that has not been registered, or other methods that use this method.
  * This particular method is: {@link core.application.Controller#getInvokable(String)}.
  *
+ * @see core.application.Controller
  * @see Exception
  */
 public class NoActionRegistered extends Exception {

@@ -1,37 +1,42 @@
 package core.metrics;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 import core.invoker.InvokerInterface;
 import observer.Observer;
 
+/**
+ * A class responsible for collecting and managing metrics using observers.
+ * The metrics are associated with specific observers and are collected through an invoker.
+ */
 public class MetricRecollector {
     
-	private HashMap<Observer, Metric<Object>> metrics;
-	private InvokerInterface	invoker;
-	private List<Observer>		observers;
-	private String				id;
+	private InvokerInterface invoker;
+	private List<Observer> observers;
+	private String id;
 
 	/**
-	 * Constructs a new instance of MetricsRecollector and instantiates all the structs it uses.
-	 */
+     * Constructs a MetricRecollector with the specified ID and invoker.
+     * This constructor initializes the MetricRecollector with the given function ID
+     * and the invoker responsible for invoking that function.
+     *
+     * @param id      the identifier for the MetricRecollector, typically representing a function to collect metrics from
+     * @param invoker the invoker to be used for metric collection
+     */
 	public MetricRecollector(String id, InvokerInterface invoker) {
 		this.id = id;
 		this.invoker = invoker;
 
-		metrics = new HashMap<Observer, Metric<Object>>();
-
-		//here I copy this list of observers from MetricSet
+		// Initialize observers with the ones available in MetricSet
 		observers = new LinkedList<>(MetricSet.instantiate().getObservers());
 	}
 
-	/*
-	 * This stores all the metrics necessary inmediatly after the Invoker gets selected by the PolicyManager.
-	 * //TODO: maybe also initialize things
-	 */
-	public void initializeObservers() throws Exception 
+	/**
+     * Called when the function gets assigned to an invoker.
+     * Initializes all registered observers with the specified ID and invoker.
+     */
+	public void initializeObservers() 
 	{
 		for (Observer observer : observers) {
 			observer.initialize(id, invoker);
@@ -39,37 +44,26 @@ public class MetricRecollector {
 	}
 
 	/**
-	 * This 
-	 * 
-	 * @param id Id of the function. Needed by the observers to update the content of a dictionary in the controller.
-	 * @return Map of metrics initialized. These metrics will be modified by 'notifyAllObservers' to create final metrics.
-	 * @throws Exception
-	 */
-	public void executeObservers() throws Exception 
+     * Called before the invoker executes the function. This doesn't necessarily mean that it will be called after initializeObservers.
+     * If the invoker is full, there may be a waiting time until the invoker has space to execute.
+     * Executes all registered observers, allowing them to perform actions before the function execution.
+     */
+	public void executeObservers()
 	{
 		for (Observer observer : observers) {
-			metrics.put(observer, observer.execution(id, invoker));
+			observer.execution();
 		}
 	}
 
 	/**
-	 * This modifies all the values of the metrics created by 'initializeAllObservers'
-	 * 
-	 * @param metrics Map of all the metrics to be updated by the observers
-	 * 
-	 * <p><strong>Note:</strong> If the list of observers changed between initialization and this method,
-	 * two things can happen:
-	 * <ul>
-	 * 		<li> If observers were added, the new observers will not be notified.</li>
-	 * 		<li> If observers were removed, the removed observers will not be notified.</li>
-	 * </ul>
-	 * This is to ensure a correct funcionality of the observers.
-	 * </p>
-	 */
+     * Called after the invoker ends the execution.
+     * Notifies all registered observers about the completion of the execution.
+     */
 	public void notifyObservers()
 	{
 		for (Observer observer : observers) {
-			observer.update(metrics.get(observer));
+			observer.update();
 		}
 	}
+
 }

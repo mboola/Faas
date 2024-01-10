@@ -160,10 +160,17 @@ public class Invoker implements InvokerInterface, Serializable {
 
 		metricsRecollector = new MetricRecollector(id, this);
 		metricsRecollector.initializeObservers();
+
+		this.reserveRam(invokable.getRam());
+		usedRam += invokable.getRam();
+
 		metricsRecollector.executeObservers();
 
 		result = ((Function<T, R>)invokable.getInvokable()).apply(args);
 
+		usedRam -= invokable.getRam();
+		this.reserveRam(-invokable.getRam());
+		
 		metricsRecollector.notifyObservers();
 
 		return (result);

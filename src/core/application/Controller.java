@@ -185,7 +185,7 @@ public class Controller {
 	 * @return The invokable or null if none was found.
 	 * @throws NoActionRegistered //TODO this
 	 */
-	public <T, R> Invokable<T,R> getInvokable(String id) throws OperationNotValid, NoActionRegistered
+	public <T, R> Invokable<T,R> retrieveInvokable(String id) throws OperationNotValid, NoActionRegistered
 	{
 		if (id == null) throw new OperationNotValid("Id cannot be null.");
 		if (invokables.isEmpty()) throw new NoActionRegistered("Map of actions is empty.");
@@ -265,7 +265,7 @@ public class Controller {
 		Invokable<T, R> invokable;
 		long			ram;
 
-		invokable = getInvokable(id);
+		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram, true);
 		return (getResult(invokable, id, args));
@@ -293,7 +293,7 @@ public class Controller {
 		List<R> 	result;
 		long		ram;
 
-		invokable = getInvokable(id);
+		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 
 		//prepare policy manager with args.size() and ram
@@ -326,10 +326,10 @@ public class Controller {
 		Invokable<T, R> invokable;
 		long			ram;
 
-		invokable = getInvokable(id);
+		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram, true);
-		return (getResult_async(getInvokable(id), id, args));
+		return (getResult_async(retrieveInvokable(id), id, args));
 	}
 
 	/**
@@ -355,7 +355,7 @@ public class Controller {
 		List<Future<R>>	result;
 		long			ram;
 
-		invokable = getInvokable(id);
+		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 
 		//prepare policy manager with args.size() and ram

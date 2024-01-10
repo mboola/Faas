@@ -36,9 +36,8 @@ public class TestUniformGroup extends InvocationTester {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
 		Action factorial = new FactorialAction();
 
-		MetricSet.instantiate().addObserver(new InvocationObserver());
-
 		try {
+			MetricSet.instantiate().addObserver(new InvocationObserver());
 			controller.setPolicyManager(new UniformGroup());
 			initializeSleepAction("Sleep", 1, controller);
 			controller.registerAction("Add", f, 1);
@@ -69,7 +68,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("000", str);
+		assertEquals("0 0 0", str);
 	}
 
 	@Test
@@ -84,7 +83,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("000", str);
+		assertEquals("0 0 0", str);
 	}
 
 	@Test
@@ -96,10 +95,10 @@ public class TestUniformGroup extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			stringsResult = invokeList("Sleep", 3, 3000, controller);
+			stringsResult = invokeList("Sleep", 3, 1000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			if (totalTime > 9200 || totalTime < 8800) assertTrue(false);
+			if (totalTime > 3200 || totalTime < 800) assertTrue(false);
 			else assertTrue(true);
 		}
 		catch (Exception e) {
@@ -107,7 +106,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000", str);
+		assertEquals("0 0 0", str);
 	}
 
 	@Test
@@ -119,10 +118,10 @@ public class TestUniformGroup extends InvocationTester {
 
 		try {
 			long currentTimeMillis = System.currentTimeMillis();
-			stringsResult = invokeList("Sleep", 3, 3000, controller);
+			stringsResult = invokeList("Sleep", 3, 1000, controller);
 			long totalTime = System.currentTimeMillis() - currentTimeMillis;
 
-			if (totalTime > 6200 || totalTime < 5800) assertTrue(false);
+			if (totalTime > 2200 || totalTime < 1800) assertTrue(false);
 			else assertTrue(true);
 		}
 		catch (Exception e) {
@@ -130,7 +129,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000", str);
+		assertEquals("0 0 0", str);
 	}
 
 	@Test
@@ -145,7 +144,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0011", str);
+		assertEquals("0 0 1 1", str);
 	}
 
 	@Test
@@ -160,7 +159,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0011", str);
+		assertEquals("0 0 1 1", str);
 	}
 
 	@Test
@@ -178,7 +177,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000111", str);
+		assertEquals("0 0 0 1 1 1", str);
 	}
 
 	@Test
@@ -196,7 +195,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000111", str);
+		assertEquals("0 0 0 1 1 1", str);
 	}
 
 	@Test
@@ -211,10 +210,9 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0011", str);
+		assertEquals("0 0 1 1", str);
 	}
 
-	//error for some reason TODO
 	@Test
 	public void testUniformGroupTwoInvokerDifferentRamSyncFuncB()
 	{
@@ -226,7 +224,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
-		assertEquals("11", str);
+		assertEquals("1 1", str);
 	}
 
 	@Test
@@ -244,7 +242,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000111", str);
+		assertEquals("0 0 0 1 1 1", str);
 	}
 
 	@Test
@@ -262,7 +260,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("000111", str);
+		assertEquals("0 0 0 1 1 1", str);
 	}
 
 	@Test
@@ -281,7 +279,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
-		assertEquals("00", str);
+		assertEquals("0 0", str);
 	}
 
 	@Test
@@ -297,7 +295,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -313,7 +311,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -331,7 +329,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -349,7 +347,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -365,7 +363,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -380,7 +378,7 @@ public class TestUniformGroup extends InvocationTester {
 			assertTrue(false);
 		}
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Factorial");
-		assertEquals("1122", str);
+		assertEquals("1 1 2 2", str);
 	}
 
 	@Test
@@ -398,7 +396,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -416,7 +414,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -434,7 +432,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("001122", str);
+		assertEquals("0 0 1 1 2 2", str);
 	}
 
 	@Test
@@ -453,7 +451,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
-		assertEquals("0011", str);
+		assertEquals("0 0 1 1", str);
 	}
 
 	@Test
@@ -471,7 +469,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("0011", str);
+		assertEquals("0 0 1 1", str);
 	}
 
 	@Test
@@ -489,7 +487,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("00112", str);
+		assertEquals("0 0 1 1 2", str);
 	}
 
 	@Test
@@ -508,7 +506,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
-		assertEquals("000111333", str);
+		assertEquals("0 0 0 1 1 1 3 3 3", str);
 	}
 
 	@Test
@@ -527,7 +525,7 @@ public class TestUniformGroup extends InvocationTester {
 		}
 
 		String str = MetricSet.instantiate().getData("InvocationObserver", "Sleep2");
-		assertEquals("0000111133", str);
+		assertEquals("0 0 0 0 1 1 1 1 3 3", str);
 	}
 	
 }

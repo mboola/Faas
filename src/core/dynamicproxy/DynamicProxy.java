@@ -109,7 +109,7 @@ public class DynamicProxy implements InvocationHandler {
 	{
 		Controller controller = Controller.instantiate();
 		//If id is not valid or doesn't exist this will throw OperationNotValid or NoActionRegistered
-		Invokable invokable = controller.getInvokable(id);
+		Invokable invokable = controller.retrieveInvokable(id);
 		//Get the function that will return an instantiated class in resultClass
 		Function<Object, Class<?>>	actionProxyFunction = (Function<Object, Class<?>>) invokable.getInvokable();
 		Object resultClass = actionProxyFunction.apply(null);

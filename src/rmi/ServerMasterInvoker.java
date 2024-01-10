@@ -58,11 +58,10 @@ public class ServerMasterInvoker {
 		ServerHandler.main(argServerHandler);
 		System.out.println("Servers created");
 
-		MetricSet.instantiate().addObserver(new InvocationObserver());
-
 		List<InvokerInterface> invokers = controller.getRegisteredInvokers();
 
 		try {
+			MetricSet.instantiate().addObserver(new InvocationObserver());
 			Integer result = controller.invoke("add1", 10);
 			System.out.println(result);
 		}
