@@ -4,8 +4,13 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 /**
- * A class that represents an invokable function with a unique identifier, the invokable function itself,
- * and the allocated RAM for execution.
+ * Represents an invokable function with the allocated RAM memory needed to execute
+ * and the function itself.
+ *
+ * @param <T> the type of the input to the invokable function
+ * @param <R> the type of the result of the invokable function
+ *
+ * @see Serializable
  */
 public class Invokable<T, R> implements Serializable {
 
@@ -13,11 +18,10 @@ public class Invokable<T, R> implements Serializable {
 	private long ram;
 
 	/**
-     * Constructs an Invokable instance with the specified ID, invokable function, and allocated RAM.
+     * Constructs an Invokable instance with the specified invokable function and allocated RAM.
      *
-     * @param id        The unique identifier for the invokable function.
-     * @param invokable The invokable function.
-     * @param ram       The allocated RAM for the invokable function.
+     * @param invokable the invokable function to be associated with this object
+     * @param ram the amount of RAM (in bytes) associated with the invokable function
      */
 	public Invokable(Function<T, R> invokable, long ram) {
 		this.ram = ram;
@@ -27,17 +31,17 @@ public class Invokable<T, R> implements Serializable {
 	/**
      * Gets the invokable function.
      *
-     * @return The invokable function.
+     * @return the invokable function
      */
-    public Function<T, R> getInvokable()
+	public Function<T, R> getInvokable()
 	{
 		return (this.invokable);
 	}
 
 	/**
-     * Gets the allocated RAM for the invokable function.
+     * Gets the amount of RAM allocated (in megabytes) for the invokable function.
      *
-     * @return The allocated RAM.
+     * @return the amount of RAM
      */
 	public long getRam()
 	{

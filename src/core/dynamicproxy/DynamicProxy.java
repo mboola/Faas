@@ -7,20 +7,35 @@ import java.util.function.Function;
 
 import core.application.Controller;
 import core.application.Invokable;
-import core.exceptions.*;
+import core.exceptions.OperationNotValid;
+import core.exceptions.NoActionRegistered;
 
+/**
+ * A dynamic proxy class that implements the {@link InvocationHandler} interface.
+ * It allows the creation of proxy instances for objects and handles method invocations on those objects.
+ *
+ * @see InvocationHandler
+ */
 public class DynamicProxy implements InvocationHandler {
 
-	//The instance which this proxy intercepts methods from.
+	/** Flag indicating whether the proxy should operate in a synchronous manner. */
 	private boolean isSync;
 
-	/** TODO change this definition
-	 * This DynamicProxy will intercept the invocations of the methods called from target
-	 * What we will do is search the method to call in the controller and send it to the controller
-	 * But from the view of the Client, it will call the methods direcly from object obtained
-	 * from the controller with getFunction or smtg.
-	 * @param target Object referenced when method invoke is called. IT IS NOT CONTROLLER
-	 * @return The proxy
+	/**
+	 * Instantiates a DynamicProxy with the specified synchronization flag.
+	 *
+	 * @param isSync a boolean flag indicating whether the proxy should operate in a synchronous manner
+	 */
+	private DynamicProxy(boolean isSync) {
+		this.isSync = isSync;
+	}
+
+	/**
+	 * Creates a proxy instance for the specified target object with the given synchronization flag.
+	 *
+	 * @param target the target object for which a proxy is to be created
+	 * @param isSync a boolean flag indicating whether the proxy should operate in a synchronous manner
+	 * @return a proxy instance for the target object
 	 */
 	public static Object instantiate(Object target, boolean isSync) {
 		Class<?> targetClass = target.getClass();
@@ -30,41 +45,48 @@ public class DynamicProxy implements InvocationHandler {
 				interfaces, new DynamicProxy(isSync));
 	}
 
-	private DynamicProxy(boolean isSync) {
-		this.isSync = isSync;
-	}
-	  
-	/** TODO: change this definition
-	 * This interceptes the method when called. If the method name is registerAction,
-	 * we create a new interface with the method passed as a parameter and we define
-	 * an implementation (the method passed as a parameter). Then we redefine proxyObject,
-	 * If the name is removeAction, we substact the method from the list of interfaces and
-	 * redefine proxyObject. Else, we call the method normally.
+	/**
+	 * Handles method invocations on the proxy object.
+	 *
+	 * @param proxy  the proxy object
+	 * @param method the method being invoked
+	 * @param args   the arguments passed to the method
+	 * @return the result of the method invocation
+	 * @throws Exception if an error occurs during method invocation
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Exception
 	{
 		String	id = method.getName();
-		Controller	controller;
-		controller = Controller.instantiate();
-		Object result;
+		Controller	controller = Controller.instantiate();
+
 		if (!isSync)
-			result = controller.invoke_async(id, args[0]);
+			return controller.invoke_async(id, args[0]);
 		else
-			result = controller.invoke(id, args[0]);
-		return result;
+			return controller.invoke(id, args[0]);
 	}
 
+	/**
+	 * Converts a method of an object into a {@link Function} that can be used as an invokable action.
+	 *
+	 * @param instance    the object instance
+	 * @param methodName  the name of the method to convert
+	 * @param inputType   the input type of the method
+	 * @param returnType  the return type of the method
+	 * @param <T>         the type of the input
+	 * @param <R>         the type of the output
+	 * @return a {@link Function} representing the converted method
+	 * @throws NoSuchMethodException if the specified method is not found
+	 * @throws SecurityException    if there is a security violation
+	 */
 	private static <T, R> Function<T, R> convertMethodToFunction(Object instance, String methodName, Class<?> inputType, Class<R> returnType) throws NoSuchMethodException, SecurityException
 	{
 		Method method = instance.getClass().getMethod(methodName, inputType);
 
 		return input -> {
 			try {
-				// Invoke the method on the instance with the provided input
 				Object result = method.invoke(instance, input);
 
-				// Cast the result to the desired return type
 				return returnType.cast(result);
 			}
 			catch (Exception e) {
@@ -74,52 +96,43 @@ public class DynamicProxy implements InvocationHandler {
 	}
 
 	/**
-	 * Retrieves a proxy object for an action with the specified ID.
+	 * Gets the proxy for a specified action based on its ID.
 	 *
-	 * @param id Identifier of the action.
-	 * @return Proxy object for the action.
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 * 	<li>The id passed as a parameter is null.</li>
-	 * 	<li>There is no action found with the id passed as a parameter.</li>
-	 * </ul>
-	 * //TODO: Specify more details about the potential exceptions.
+	 * @param id     the ID of the action
+	 * @param isSync a boolean flag indicating whether the action should operate in a synchronous manner
+	 * @return a proxy for the specified ID action
+	 * @throws OperationNotValid    if the ID is null
+	 * @throws NoActionRegistered   if no action is registered with the specified ID
 	 */
 	public static Object getActionProxy(String id, boolean isSync) throws OperationNotValid, NoActionRegistered
 	{
-		Controller	controller;
-		Invokable	invokable;
-		Function<Object, Class<?>>	actionProxyFunction;
-
-		controller = Controller.instantiate();
-		invokable = controller.getInvokable(id);
-
-		//get the function that will return an instantiated class
-		actionProxyFunction = (Function<Object, Class<?>>) invokable.getInvokable();
-
-		//here I get the class
+		Controller controller = Controller.instantiate();
+		//If id is not valid or doesn't exist this will throw OperationNotValid or NoActionRegistered
+		Invokable invokable = controller.getInvokable(id);
+		//Get the function that will return an instantiated class in resultClass
+		Function<Object, Class<?>>	actionProxyFunction = (Function<Object, Class<?>>) invokable.getInvokable();
 		Object resultClass = actionProxyFunction.apply(null);
-
-		//the metadata of the class
+		//I get the metadata of the class the proxy will be created to intercept invocation calls
 		Class<?> actionProxyClass = resultClass.getClass();
-
-		//and all his methods
 		Method[] methods = actionProxyClass.getDeclaredMethods();
 
+		Class<?>[] parameterTypes;
+		Class<?> returnType;
 		for (Method method : methods) {
-			//if there is not an action with this name
-			Class<?>[] parameterTypes = method.getParameterTypes();
-			Class<?> returnType = method.getReturnType();
+			parameterTypes = method.getParameterTypes();
+			returnType = method.getReturnType();
 			try {
 				controller.registerAction(method.getName(), convertMethodToFunction(resultClass, method.getName(), parameterTypes[0], returnType), invokable.getRam());
 			}
 			catch (OperationNotValid e) {
+				//This means a function with the method name as an ID has already been registered. In this case we don't care
+				//but there could be flag to override the function (deleting the function with that ID and registering the new one).
 			}
-			catch (Exception e) {
-				//TODO: if action couldnt be registered something weird happened.
+			catch (NoSuchMethodException | SecurityException e) {
 				e.printStackTrace();
 			}
 		}
+
 		return (DynamicProxy.instantiate(resultClass, isSync));
 	}
 }
