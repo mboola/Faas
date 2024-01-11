@@ -41,7 +41,7 @@
 	-rmi:
 		-ClientController:
 		-InvocationSet:
-		-SerializedFunction:
+		-SerializedFunction: ✔️
 		-ServerHandler:
 		-ServerInvoker:
 		-ServerMasterInvoker:

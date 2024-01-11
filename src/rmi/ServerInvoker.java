@@ -27,22 +27,24 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 			invoker = Invoker.createInvoker(ram);
 	}
 
+	/**
+	 * This gets the data as a String[] to create a invoker (composite or not) and the port it will be hosted.
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
-		//creates the struct of the network
 		
 		ServerInvoker server;
 		try {
-			//ServerInvoker server = new ServerInvoker(1L);
 			server = new ServerInvoker(Long.valueOf(args[1]), Integer.parseInt(args[2]) == 1);
 
-			//Registry registry = LocateRegistry.createRegistry(1099);
 			Registry registry = LocateRegistry.createRegistry(Integer.valueOf(args[0]));
 
 			registry.rebind("Invoker", server);
 
 			System.out.println("Invoker with id " + server.getId() + " created and ready.");
 		} catch (Exception e) {
-			System.err.println("Excepcion del servidor: " + e.toString());
+			System.err.println("Excepcion del servidor.");
 			e.printStackTrace();
 		}
 	}
@@ -74,7 +76,6 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 
 	@Override
 	public <T, R> R invoke(Invokable<T, R> invokable, T args, String id) throws Exception {
-		System.out.println("testing");
 		return (invoker.invoke(invokable, args, id));
 	}
 

@@ -1,12 +1,10 @@
 package rmi;
 
-import java.io.NotSerializableException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Map;
 
 import core.application.Controller;
-import core.exceptions.NoInvokerAvailable;
 import core.invoker.InvokerInterface;
 import policymanager.RoundRobin;
 
@@ -25,7 +23,7 @@ public class ClientController {
 			controller.registerAction("suma", f1, 1);
 		}
 		catch (Exception e) {
-
+			e.printStackTrace();
 		}
 
 		//here get all invokers and add them to contoller
@@ -44,7 +42,6 @@ public class ClientController {
 				System.out.println("Invoker " + ((Integer)i).toString() + " registered.");
 			}
 		} catch (Exception e) {
-			System.err.println("Excepción del cliente: " + e.toString());
 			e.printStackTrace();
 		}
 
@@ -52,14 +49,8 @@ public class ClientController {
 			int result = (Integer) controller.invoke("suma", Map.of("x", 1, "y", 2));
 			System.out.println(result);
 		}
-		catch (NoInvokerAvailable e) {
-			System.out.println(e.getMessage());
-		}
-		catch (NotSerializableException e) {
-			System.out.println(e.getMessage());
-		}
 		catch (Exception e) {
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 }

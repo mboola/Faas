@@ -74,10 +74,10 @@ public class ComplexTestController {
 		Action<Map<String, Integer>, Integer> action = new AddAction();
 		try {
 			controller.registerAction("addAction", action, ram);
+			assertSame(action, controller.getAction("addAction"));
 		} catch (OperationNotValid e) {
 			assertTrue(false);
 		}
-		assertSame(action, controller.getAction("addAction"));
 
 		Integer result = 0;
 		try {
@@ -95,10 +95,10 @@ public class ComplexTestController {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		try {
 			controller.registerAction("sub", f, ram);
+			assertSame(f, controller.getAction("sub"));
 		} catch (OperationNotValid e) {
 			assertTrue(false);
 		}
-		assertSame(f, controller.getAction("sub"));
 
 		Integer result = 0;
 		try {

@@ -8,41 +8,35 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 
+import java.util.logging.Logger;
+
 import core.exceptions.*;
 import core.invoker.InvokerInterface;
 import policymanager.PolicyManager;
 
 public class Controller {
 
-	/**
-	 * List of invokers used for executing functions. This will be implementations of the interface InvokerInterface and can be either simple or composite.
-	 *  The implementations of InvokerInterface can be:
-	 * 	An Invoker that executes functions.
-	 *	An Invoker that executes functions and has invokers inside of him that executes functions.
-	 *	A ServerInvoker that executes functions remotly.
-	 */
 	private List<InvokerInterface>	invokers;
 
 	/**
-	 * A map containing Invokable functions associated with an unique identifiers in the Controller.
-	 * An invokable function encapsulates a predefined functionality and is represented by an instance of the {@link Invokable} class.
+	 * A map containing Invokable functions associated with an unique ID.
+	 * @see {@link Invokable} class.
 	 */
-	private Map<String, Invokable<Object, Object>>	invokables;
+	private Map<String, Invokable<Object, Object>> invokables;
+
+	private PolicyManager policyManager;
 
 	/**
-	 * Determines what policy will be used to select an invoker.
+	 * The instance used to limit the instantiation of Controller class,
+	 * following the Singleton design pattern.
 	 */
-	private PolicyManager	policyManager;
+	private static Controller uniqueInstance = null;
 
 	/**
-	 * The instance used to limit the instantiation of Controller class, following the Singleton design pattern.
-	 */
-	private static Controller	uniqueInstance = null;
-
-	/**
-	 * Checks if the Controller is instanciated, creates one if it isn't.
-	 * 
-	 * @return The Singleton instance of Controller. 
+	 * Instantiates a single instance of the Controller class using the Singleton design pattern.
+	 * If the instance does not exist, a new Controller instance is created; otherwise, the existing instance is returned.
+	 *
+	 * @return The unique instance of the Controller class.
 	 */
 	public static Controller instantiate() {
 		if (uniqueInstance == null)
@@ -51,25 +45,35 @@ public class Controller {
 	}
 
 	/**
-	 * Constructs a new instance of Controller and instantiates all the structs it uses.
+	 * Constructs a new instance of Controller class, initializing its internal data structures.
 	 */
 	private Controller() {
 		invokers = new LinkedList<InvokerInterface>();
 		invokables = new HashMap<String, Invokable<Object, Object>>();
 	}
 
+
 	/**
-	 * Sets the Policy Manager for the Controller and propagates it to registered invokers.
-	 * 
+	 * Sets the PolicyManager for the Controller, affecting the invocation policy for registered actions.
+	 * The provided PolicyManager must not be null; otherwise, an OperationNotValid exception is thrown.
+	 * If the PolicyManager is successfully set, it is applied to each registered invoker associated with the Controller.
+	 *
 	 * @param policyManager The Policy Manager to be set for the Controller and invokers.
-	 * @throws OperationNotValid If the Policy Manager is null.
+	 * @throws OperationNotValid If the provided PolicyManager is null.
+	 *
+	 * @see PolicyManager
 	 */
-	public void	setPolicyManager(PolicyManager policyManager) throws Exception
-	{
+	public void	setPolicyManager(PolicyManager policyManager) throws OperationNotValid {
 		if (policyManager == null) throw new OperationNotValid("Policy Manager cannot be null");
+		Logger logger = Logger.getLogger(Controller.class.getName());
 		this.policyManager = policyManager;
-		for (InvokerInterface invoker : invokers)
-			invoker.setPolicyManager(policyManager);
+		for (InvokerInterface invoker : invokers) {
+			try {
+				invoker.setPolicyManager(policyManager);
+			} catch (RemoteException e) {
+				logger.warning("RemoteException: PolicyManager couldn't be set to " + invoker.toString());
+			}
+		}
 	}
 
 	/**
@@ -77,14 +81,17 @@ public class Controller {
 	 * 
 	 * @param invoker The invoker to be registered.
 	 * @throws OperationNotValid If the invoker received as a parameter is null or is already inside the list.
-	 * @throws RemoteException If connection to invoker was lost.
 	 */
-	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException
-	{
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid {
 		if (invoker == null) throw new OperationNotValid("Invoker cannot be null.");
 		if (invokers.contains(invoker)) throw new OperationNotValid("Invoker is already registered.");
+		Logger logger = Logger.getLogger(Controller.class.getName());
 		invokers.add(invoker);
-		invoker.setPolicyManager(policyManager);
+		try {
+			invoker.setPolicyManager(policyManager);
+		} catch (RemoteException e) {
+			logger.warning("RemoteException: PolicyManager couldn't be set to " + invoker.toString());
+		}
 	}
 
 	/**
@@ -93,8 +100,7 @@ public class Controller {
 	 * @param invoker The InvokerInterface to be removed.
 	 * @throws OperationNotValid If the invoker passed as a parameter is null or is not inside the list.
 	 */
-	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid
-	{
+	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid {
 		if (invoker == null) throw new OperationNotValid("Invoker to delete cannot be null.");
 		if (!invokers.contains(invoker)) throw new OperationNotValid("Invoker is not registered.");
 		invokers.remove(invoker);
@@ -105,44 +111,37 @@ public class Controller {
 	 *
 	 * @return The list of registered invokers.
 	 */
-	public List<InvokerInterface> getRegisteredInvokers()
-	{
+	public List<InvokerInterface> getRegisteredInvokers() {
 		return (invokers);
 	}
 	
 	/**
-	 * Checks if the id of an action that we are trying to register is already registered.
-	 * 
-	 * @param id The id of the action we are trying to register.
-	 * @return False if the map is empty or the id doesn't exists in it. True if it does.
+	 * Checks whether an action with the specified unique identifier (ID) is already registered in the Controller.
+	 *
+	 * @param id The unique identifier to check for registration.
+	 * @return {@code true} if an action with the specified ID is already registered, {@code false} otherwise.
 	 */
-	private boolean	isAlreadyRegistered(String id)
-	{
+	private boolean	isAlreadyRegistered(String id) {
 		if (invokables.isEmpty()) return (false);
 		return (invokables.get(id) != null);
 	}
 
-	/** //TODO: Redo this one
-	 * Tries to register an action.
-	 * 
-	 * <p>The action to register can be:</p>
-	 * <ul>
-	 * 	<li>A Function<T, R>.</li>
-	 * 	<li>An implementation of the interface Action<T, R>.</li>
-	 * 	<li>A class with methods that will be used in reflection. TODO: change this case explanation</li>
-	 * </ul>
-	 * @param id The id of the object to be registered.
-	 * @param invokable The object that can be invoked.
-	 * @param ram The ram in MegaBytes this invokation will consume.
-	 * @throws OperationNotValid The exception can be caused because:
-	 * <ul>
-	 * 	<li>The object we are tring to register is null.</li>
-	 * 	<li>The id we are tring to register is null.</li>
-	 * 	<li>The id we are tring to register already exists.</li>
-	 * </ul>
+	/**
+	 * Registers an action with the Controller, associating it with a unique identifier (ID),
+	 * a function (invokable), and the amount of RAM required for the invocation.
+	 *
+	 * @param <T>       The type of the input parameter for the invokable function.
+	 * @param <R>       The type of the result returned by the invokable function.
+	 * @param id        The unique identifier for the registered action.
+	 * @param invokable The function to be registered as an invokable action.
+	 * @param ram       The amount of RAM required for the invocation of the action.
+	 * @throws OperationNotValid If the provided invokable is null, the ID is null, or if the action is already registered.
+	 *
+	 * @see Invokable
+	 * @see Function
 	 */
-	public <T, R> void registerAction(String id, Function<T, R> invokable, long ram) throws OperationNotValid
-	{
+	@SuppressWarnings("unchecked")
+	public <T, R> void registerAction(String id, Function<T, R> invokable, long ram) throws OperationNotValid {
 		if (invokable == null) throw new OperationNotValid("Action registered cannot be null.");
 		if (id == null)	throw new OperationNotValid("ID cannot be null.");
 		if (isAlreadyRegistered(id)) throw new OperationNotValid("Action already registered.");
@@ -150,258 +149,203 @@ public class Controller {
 	}
 
 	/**
-	 * Tries to delete an action.
-	 * 
-	 * @param id The id of the object to be deleted.
-	 * @throws OperationNotValid The exception can be caused because:
-	 * <ul>
-	 * 	<li>The id of the object we are tring to delete is null.</li>
-	 * 	<li>The id of the object we are tring to delete doesn't exists in the map.</li>
-	 * </ul>
+	 * Deletes a registered action from the Controller based on its unique identifier (ID).
+	 *
+	 * @param id The unique identifier of the action to be deleted.
+	 * @throws OperationNotValid If the provided ID is null or if no action is registered with the specified ID.
 	 */
-	public void deleteAction(String id) throws OperationNotValid
-	{
+	public void deleteAction(String id) throws OperationNotValid {
 		if (id == null)	throw new OperationNotValid("Id cannot be null.");
 		if (!isAlreadyRegistered(id)) throw new OperationNotValid("There are no actions with the id" + id);
 		invokables.remove(id);
 	}
 
 	/**
-	 * Gets the action stored with the ID passed as a parameter.
-	 * 
-	 * @param id ID of the action to get.
-	 * @return The action or null if none was found.
+	 * Retrieves the invokable action associated with the specified unique identifier (ID).
+	 * Returns the invokable action as an Object. <p> **Used for testing reasons**.
+	 *
+	 * @param id The unique identifier of the action to be retrieved.
+	 * @return The invokable action associated with the specified ID.
+	 * @throws OperationNotValid If the provided ID is null or if no action is registered with the specified ID.
 	 */
-	public Object getAction(String id)
-	{
-		if (id == null) return (null);
-		return (invokables.get(id).retrieveInvokable());
+	public Object getAction(String id) throws OperationNotValid {
+		if (id == null)	throw new OperationNotValid("Id cannot be null.");
+		if (!isAlreadyRegistered(id)) throw new OperationNotValid("There are no actions with the id" + id);
+		return invokables.get(id).retrieveInvokable();
 	}
 
 	/**
-	 * Method used by actions to get the invokable.
-	 * 
-	 * @param id Identifier of the action.
-	 * @return The invokable or null if none was found.
-	 * @throws NoActionRegistered //TODO this
+	 * Retrieves and returns the Invokable associated with the specified unique identifier (ID).
+	 * The type parameters T and R indicate the input and result types of the retrieved Invokable.
+	 *
+	 * @param <T> The type of the input parameter for the retrieved Invokable.
+	 * @param <R> The type of the result returned by the retrieved Invokable.
+	 * @param id The unique identifier of the action whose Invokable is to be retrieved.
+	 * @return The Invokable associated with the specified ID.
+	 * @throws OperationNotValid If the provided ID is null.
+	 * @throws NoActionRegistered If the map of actions is empty or if no action is registered with the specified ID.
+	 *
+	 * @see Invokable
 	 */
-	public <T, R> Invokable<T,R> retrieveInvokable(String id) throws OperationNotValid, NoActionRegistered
-	{
+	@SuppressWarnings("unchecked")
+	public <T, R> Invokable<T,R> retrieveInvokable(String id) throws OperationNotValid, NoActionRegistered {
 		if (id == null) throw new OperationNotValid("Id cannot be null.");
 		if (invokables.isEmpty()) throw new NoActionRegistered("Map of actions is empty.");
 		if (!invokables.containsKey(id)) throw new NoActionRegistered("There is no action registered with that id.");
 		return ((Invokable<T, R>)invokables.get(id));
 	}
 
-	//TODO: Generic throws is ugly maybe fix later? Applies for most below.
-
 	/**
-	 * Method used to select a invoker to execute a function based on the ram it consumes and the policy we have assigned.
-	 * @param ram
-	 * @return
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 * 	<li>NoPolicyManagerRegistered: There is no policyManager registered.</li>
-	 * 	<li>NoInvokerAvailable: There is no invoker with enough max ram to execute the invokable.</li>
-	 *  <li>Exeption: something goes wrong with RMI.</li>
-	 * </ul>
+	 * Selects and returns an InvokerInterface based on the specified RAM requirement using the registered PolicyManager.
+	 * The selected Invoker is determined by the PolicyManager's strategy.
+	 *
+	 * @param ram The amount of RAM required for the invocation.
+	 * @return The selected InvokerInterface based on the PolicyManager's strategy.
+	 * @throws NoPolicyManagerRegistered If there is no PolicyManager registered with the Controller.
+	 * @throws RemoteException If a remote communication-related exception occurs.
+	 * @throws NoInvokerAvailable If no suitable Invoker is available based on the PolicyManager's strategy.
+	 *
+	 * @see PolicyManager
+	 * @see InvokerInterface
 	 */
-	private InvokerInterface selectInvoker(long ram) throws Exception
-	{
+	private InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, RemoteException, NoInvokerAvailable {
 		if (policyManager == null) throw new NoPolicyManagerRegistered("There isn't a policy manager registered.");
 		return (policyManager.getInvoker(invokers, ram));
 	}
 
 	/**
-	 * Method used by invokations to get an invoker to execute code and then execute it.
-	 * 
-	 * @param <T> Datatype of the parameters of the function to be invoked.
-	 * @param <R> Datatype of the return of the function to be invoked.
-	 * @param invokable Function to be invoked.
-	 * @param id Identifier of the invokable to be invoked.
-	 * @param args Parameters of the invokable.
-	 * @return Result of the invokation of the invokable.
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 * 	<li>There is no invoker with enough max ram to execute the invokable.</li>
-	 * 	<li>Something goes wrong when executing the invokable.</li>
-	 * </ul>
+	 * Synchronously invokes the specified Invokable action using the selected Invoker, passing the provided arguments.
+	 *
+	 * @param <T>       The type of the input parameter for the Invokable.
+	 * @param <R>       The type of the result returned by the Invokable.
+	 * @param invokable The Invokable action to be invoked.
+	 * @param id        The unique identifier associated with the action.
+	 * @param args      The input arguments for the Invokable action.
+	 * @return The result of invoking the specified Invokable action.
+	 * @throws Exception If an exception occurs during the invocation process.
 	 */
-	private <T, R> R getResult(Invokable<T, R> invokable, String id, T args) throws Exception
-	{
-		InvokerInterface	invoker;
-
-		invoker = selectInvoker(invokable.getRam());
+	private <T, R> R getResult(Invokable<T, R> invokable, String id, T args) throws Exception {
+		InvokerInterface invoker = selectInvoker(invokable.getRam());
 		return (invoker.invoke(invokable, args, id));
 	}
 
-	//TODO: javadoc this
-	private <T, R> Future<R> getResult_async(Invokable<T, R> invokable, String id, T args) throws Exception
-	{
-		InvokerInterface	invoker;
-
-		invoker = selectInvoker(invokable.getRam());
+	/**
+	 * Asynchronously invokes the specified Invokable action using the selected Invoker, passing the provided arguments.
+	 *
+	 * @param <T>       The type of the input parameter for the Invokable.
+	 * @param <R>       The type of the result returned by the Invokable.
+	 * @param invokable The Invokable action to be asynchronously invoked.
+	 * @param id        The unique identifier associated with the action.
+	 * @param args      The input arguments for the Invokable action.
+	 * @return A Future representing the asynchronous result of invoking the specified Invokable action.
+	 * @throws Exception If an exception occurs during the asynchronous invocation process.
+	 */
+	private <T, R> Future<R> getResult_async(Invokable<T, R> invokable, String id, T args) throws Exception {
+		InvokerInterface invoker = selectInvoker(invokable.getRam());
 		return (invoker.invokeAsync(invokable, args, id));
 	}
 
 	/**
-	 * Searches an action with the ID passed as a parameter and invokes it with args as a parameters.
-	 * 
-	 * @param <T> Datatype of the parameters of the function to be invoked.
-	 * @param <R> Datatype of the return of the function to be invoked.
-	 * @param id Identifier of the action to be invoked.
-	 * @param args Parameters of the action.
-	 * @return Result of the invokation of the action.
-	 * @throws Exception <p>The exception can be caused because:</p>
-	 * <ul>
-	 *  <li>The id passed as a parameter is null.</li>
-	 *  <li>There is no action found with the id passed as a parameter.</li>
-	 * 	<li>There is no invoker with enough max ram to run execute the action.</li>
-	 * 	<li>Something goes wrong when executing the action.</li>
-	 * </ul>
+	 * Prepares the policy manager and invokes synchronously an Invokable.
+	 *
+	 * @param <T>  The type of the input parameter for the action.
+	 * @param <R>  The type of the result returned by the action.
+	 * @param id   The unique identifier associated with the action.
+	 * @param args The input arguments for the action.
+	 * @return The result of invoking the action.
+	 * @throws Exception If an exception occurs during the invocation process.
 	 */
-	public <T, R> R invoke(String id, T args) throws Exception
-	{
-		Invokable<T, R> invokable;
-		long			ram;
-
-		invokable = retrieveInvokable(id);
-		ram = invokable.getRam();
+	public <T, R> R invoke(String id, T args) throws Exception {
+		Invokable<T, R> invokable = retrieveInvokable(id);
+		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram);
 		return (getResult(invokable, id, args));
 	}
-
+	
 	/**
-	 * Searches an action with the ID passed as a parameter and invokes it for each argument of list args as a parameters.
-	 * 
-	 * @param <T> Datatype of the parameters of the function to be invoked.
-	 * @param <R> Datatype of the return of the function to be invoked.
-	 * @param id Identifier of the action to be invoked.
-	 * @param args List of parameters of the action.
-	 * @return List of results of the invokation of the action.
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 *  <li>The id passed as a parameter is null.</li>
-	 *  <li>There is no action found with the id passed as a parameter.</li>
-	 * 	<li>There is no invoker with enough max ram to run execute the invokable.</li>
-	 * 	<li>Something goes wrong when executing the action.</li>
-	 * </ul>
-	 */
-	public <T, R> List<R> invoke(String id, List<T> args) throws Exception
-	{
-		Invokable	invokable;
-		List<R> 	result;
-		long		ram;
-
+	* Synchronously invokes the action with the specified unique identifier (ID) using the Controller in a group invocation,
+	* passing a list of input arguments.
+	*
+	* @param <T>  The type of the input parameter for the action.
+	* @param <R>  The type of the result returned by the action.
+	* @param id   The unique identifier associated with the action.
+	* @param args The list of input arguments for the group invocation.
+	* @return A list of results corresponding to the invocation of the action for each input element.
+	* @throws OperationNotValid If the provided list of input arguments is null or empty.
+	* @throws Exception         If an exception occurs during the invocation process.
+	*/
+	public <T, R> List<R> invoke(String id, List<T> args) throws Exception {
 		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
 		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
 
-		invokable = retrieveInvokable(id);
-		ram = invokable.getRam();
-
-		//prepare policy manager with args.size() and ram
+		Invokable<T, R> invokable = retrieveInvokable(id);
+		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, args.size(), ram);
 
-		result = new LinkedList<R>();
+		List<R> result = new LinkedList<R>();
 		for (T element : args)
-			result.add((R)getResult(invokable, id, element));
+			result.add(getResult(invokable, id, element));
 		return (result);
 	}
 
 	/**
-	 * Searches an action with the ID passed as a parameter and invokes it for each argument of list args as a parameters using asynchronous invokations.
-	 * 
-	 * @param <T> Datatype of the parameters of the function to be invoked.
-	 * @param <R> Datatype of the return of the function to be invoked.
-	 * @param id Identifier of the action to be invoked.
-	 * @param args Parameters of the action.
-	 * @return Future result of the invokation of the action.
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 *  <li>The id passed as a parameter is null.</li>
-	 *  <li>There is no action found with the id passed as a parameter.</li>
-	 * 	<li>There is no invoker with enough max ram to run execute the action.</li>
-	 * 	<li>Something goes wrong when executing the action.</li>
-	 * </ul>
+	 * Prepares the policy manager and invokes asynchronously an Invokable.
+	 *
+	 * @param <T>  The type of the input parameter for the action.
+	 * @param <R>  The type of the result returned by the action.
+	 * @param id   The unique identifier associated with the action.
+	 * @param args The input arguments for the action.
+	 * @return The result of invoking the action.
+	 * @throws Exception If an exception occurs during the invocation process.
 	 */
-	public <T, R> Future<R> invoke_async(String id, T args) throws Exception
-	{
-		Invokable<T, R> invokable;
-		long			ram;
-
-		invokable = retrieveInvokable(id);
-		ram = invokable.getRam();
+	public <T, R> Future<R> invoke_async(String id, T args) throws Exception {
+		Invokable<T, R> invokable = retrieveInvokable(id);
+		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram);
-		return (getResult_async(retrieveInvokable(id), id, args));
+		return (getResult_async(invokable, id, args));
 	}
 
 	/**
-	 * Invokes an action with the specified ID asynchronously, providing a list of arguments for each invocation.
+	 * Asynchronously invokes the action with the specified unique identifier (ID) using the Controller in a group invocation,
+	 * passing a list of input arguments.
 	 *
-	 * @param <T>  Datatype of the parameters of the function to be invoked.
-	 * @param <R>  Datatype of the return of the function to be invoked.
-	 * @param id   Identifier of the action to be invoked.
-	 * @param args List of parameters for each asynchronous invocation.
-	 * @return List of Future results of the invocations of the action.
-	 * @throws Exception The exception can be caused because:
-	 * <ul>
-	 *   <li>The id passed as a parameter is null.</li>
-	 *   <li>There is no action found with the id passed as a parameter.</li>
-	 *   <li>There is no invoker with enough max ram to run execute the action.</li>
-	 *   <li>Something goes wrong when executing one or more actions.</li>
-	 * </ul>
-	 * //TODO: Specify more details about the potential exceptions.
+	 * @param <T>  The type of the input parameter for the action.
+	 * @param <R>  The type of the result returned by the action.
+	 * @param id   The unique identifier associated with the action.
+	 * @param args The list of input arguments for the group invocation.
+	 * @return A list of Future objects representing the asynchronous results of invoking the action for each input element.
+	 * @throws OperationNotValid If the provided list of input arguments is null or empty.
+	 * @throws Exception         If an exception occurs during the asynchronous invocation process.
 	 */
-	public <T, R> List<Future<R>> invoke_async(String id, List<T> args) throws Exception
-	{
-		Invokable		invokable;
-		List<Future<R>>	result;
-		long			ram;
-
+	public <T, R> List<Future<R>> invoke_async(String id, List<T> args) throws Exception {
 		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
 		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
 
-		invokable = retrieveInvokable(id);
-		ram = invokable.getRam();
-
-		//prepare policy manager with args.size() and ram
+		Invokable<T, R> invokable = retrieveInvokable(id);
+		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, args.size(), ram);
 
-		result = new LinkedList<Future<R>>();
+		List<Future<R>> result = new LinkedList<Future<R>>();
 		for (T element : args)
 			result.add(getResult_async(invokable, id, element));
 		return (result);
 	}
 
 	/**
- 	 * Lists the available actions along with their allocated RAM.
- 	 */
-	public void listActions() 
-	{
+	 * Lists the available actions along with their allocated RAM.
+	*/
+	@SuppressWarnings("rawtypes")
+	public void listActions()  {
 		if (invokables.isEmpty()) {
 			System.out.println("No actions found:");
-			return;
+			return ;
 		}
 		System.out.println("List of Actions and their RAM value:");
 		for (Map.Entry<String, Invokable<Object, Object>> entry : invokables.entrySet()) {
 			String key = entry.getKey();
 			Invokable invokable = entry.getValue();
 			long ram = invokable.getRam();
-			System.out.println("Action with ID: " + key + " | Allocated RAM: " + ram + " bytes"); //TODO: is it in bytes?
-		}
-	}
-
-	/**
- 	 * Lists the available invokers and their available RAM.
-	 *
-	 * @throws RemoteException If a remote communication error occurs while accessing an invoker's RAM. //TODO: is this because of RMI?
- 	 */
-	public void listInvokersRam() throws RemoteException 
-	{
-		int i = 1;
-		for (InvokerInterface invoker:invokers) {
-			System.out.println("Invoker "+i+" ram: "+invoker.getAvailableRam());
-			i++;
+			System.out.println("Action with ID: " + key + " | Allocated RAM: " + ram + " megabytes");
 		}
 	}
 
@@ -412,8 +356,13 @@ public class Controller {
 	 */
 	public void shutdownAllInvokers() throws RemoteException 
 	{
-		for (InvokerInterface invoker:invokers) {
-			invoker.shutdownInvoker();
+		Logger logger = Logger.getLogger(Controller.class.getName());
+		for (InvokerInterface invoker : invokers) {
+			try {
+				invoker.shutdownInvoker();
+			} catch (RemoteException e) {
+				logger.warning("RemoteException: PolicyManager couldn't be set to " + invoker.toString());
+			}
 		}
 	}
 
