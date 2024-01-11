@@ -33,9 +33,9 @@
 		-ObserverInterface: ✔️
 		-TimeObserver: ✔️
 	-policymanager:
-		-BigGroup: 
-		-GreedyGroup: 
-		-PolicyManager: 
+		-BigGroup: ✔️
+		-GreedyGroup: ✔️
+		-PolicyManager: ✔️
 		-RoundRobin: ✔️
 		-UniformGroup: ✔️
 	-rmi:
@@ -47,7 +47,7 @@
 		-ServerMasterInvoker:
 
 Things left to do:
-1-Test big group
+1-Test big group ✔️
 2-Refactor Controller and invoker
 3-Test composite with all PolicyManagers
 4-Test rmi

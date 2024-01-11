@@ -18,12 +18,14 @@ public class UniformGroup implements PolicyManager, Serializable {
 	private long groupSize;
 	private long invocationsDistributed;
 
+	/** Index of last invoker selected from the list */
 	private int	lastInvokerAssigned;
+	/** Flag to check if a invoker that is full should be ignored when selecting invokers to assgin */
 	private boolean ignoreFull;
 
 	/**
-     * Initializes a new instance of the UniformGroup class.
-     */
+	 * Initializes a new instance of the UniformGroup class.
+	 */
 	public UniformGroup() {
 		lastInvokerAssigned = 0;
 		ignoreFull = false;
@@ -115,6 +117,7 @@ public class UniformGroup implements PolicyManager, Serializable {
 		// Determine whether to ignore full invokers if charge can be distributed
 		// between the available invokers and their ram
 		if (averageRamAvailable * invokersRamAvailable >= numInvocations * ram) {
+			//if there is not enough ram we separate the charge in an uniform way
 			ignoreFull = true;
 			groupSize =  (long) Math.ceil((double) numInvocations / invokersRamAvailable);
 		} else {
@@ -161,7 +164,7 @@ public class UniformGroup implements PolicyManager, Serializable {
 			setSingleUniformValues(invokers, ram);
 		} else if (!(size == 1)) {
 			setGroupUniformValues(invokers, size, ram);
-		} else {
+		} else { //in case we try to execute a function that cannot be executed
 			setSingleUniformValues(invokers, ram);
 		}
 		
@@ -172,7 +175,8 @@ public class UniformGroup implements PolicyManager, Serializable {
 	}
 
 	/**
-	 * Retrieves an invoker from the provided list based on the specified RAM requirement.
+	 * Retrieves an invoker from the provided list based on the specified RAM requirement
+	 * using the GroupSize set by {@link UniformGroup#prepareDistribution}.
 	 *
 	 * @param invokers The list of available invokers.
 	 * @param ram      The RAM requirement for the invoker selection.
