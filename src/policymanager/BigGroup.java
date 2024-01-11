@@ -116,6 +116,7 @@ public class BigGroup implements PolicyManager {
 			groupSize = lessAvailableRam / ram;
 		}
 		invocationsDistributed = 0;
+		System.out.println("Groupsize: " + groupSize);
 	}
 
 	@Override

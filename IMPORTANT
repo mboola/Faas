@@ -38,6 +38,13 @@
 		-PolicyManager: 
 		-RoundRobin: ✔️
 		-UniformGroup: ✔️
+	-rmi:
+		-ClientController:
+		-InvocationSet:
+		-SerializedFunction:
+		-ServerHandler:
+		-ServerInvoker:
+		-ServerMasterInvoker:
 
 Things left to do:
 1-Test big group
