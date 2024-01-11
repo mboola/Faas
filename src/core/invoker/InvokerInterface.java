@@ -66,7 +66,7 @@ public interface InvokerInterface extends Remote {
 	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException;
 
 	//TODO: javadoc this
-	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+	public void setDistributionPolicyManager(int size, long ram)
 			throws NoInvokerAvailable, RemoteException;
 	/**
 	 * This shuts down the executor of the Invoker. Must be called when the application finishes.

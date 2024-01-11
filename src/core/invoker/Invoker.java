@@ -139,7 +139,7 @@ public class Invoker implements InvokerInterface, Serializable {
 	{
 	}
 
-	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+	public void setDistributionPolicyManager(int size, long ram)
 			throws NoInvokerAvailable, RemoteException
 	{
 	}

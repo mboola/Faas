@@ -267,7 +267,7 @@ public class Controller {
 
 		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
-		policyManager.prepareDistribution(invokers, 1, ram, true);
+		policyManager.prepareDistribution(invokers, 1, ram);
 		return (getResult(invokable, id, args));
 	}
 
@@ -293,11 +293,14 @@ public class Controller {
 		List<R> 	result;
 		long		ram;
 
+		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
+		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
+
 		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 
 		//prepare policy manager with args.size() and ram
-		policyManager.prepareDistribution(invokers, args.size(), ram, false);
+		policyManager.prepareDistribution(invokers, args.size(), ram);
 
 		result = new LinkedList<R>();
 		for (T element : args)
@@ -328,7 +331,7 @@ public class Controller {
 
 		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
-		policyManager.prepareDistribution(invokers, 1, ram, true);
+		policyManager.prepareDistribution(invokers, 1, ram);
 		return (getResult_async(retrieveInvokable(id), id, args));
 	}
 
@@ -355,11 +358,14 @@ public class Controller {
 		List<Future<R>>	result;
 		long			ram;
 
+		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
+		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
+
 		invokable = retrieveInvokable(id);
 		ram = invokable.getRam();
 
 		//prepare policy manager with args.size() and ram
-		policyManager.prepareDistribution(invokers, args.size(), ram, false);
+		policyManager.prepareDistribution(invokers, args.size(), ram);
 
 		result = new LinkedList<Future<R>>();
 		for (T element : args)

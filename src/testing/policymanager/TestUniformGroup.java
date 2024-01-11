@@ -47,7 +47,6 @@ public class TestUniformGroup extends InvocationTester {
 		}
 	}
 
-	//TODO: infinite loop for some reason
 	@Test
 	public void testUniformGroupExceptions()
 	{
@@ -526,6 +525,26 @@ public class TestUniformGroup extends InvocationTester {
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep2");
 		assertEquals("0 0 0 0 1 1 1 1 3 3", str);
+	}
+
+	@Test
+	public void testUniformGroupTwoInvocationsFiveInvokerDifferentRamAsyncFuncB()
+	{
+		List<String> stringsResult;
+
+		initializeSleepAction("Sleep2", 2, controller);
+		createAndAddInvokers(Arrays.asList(2L, 3L, 1L, 2L, 1L), controller);
+
+		try {
+			stringsResult = invokeList("Sleep2", 10, 1000, controller);
+			stringsResult = invokeList("Sleep2", 10, 1000, controller);
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep2");
+		assertEquals("0 0 0 0 1 1 1 1 3 3 3 3 3 3 0 0 0 0 1 1", str);
 	}
 	
 }

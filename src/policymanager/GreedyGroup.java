@@ -92,7 +92,7 @@ public class GreedyGroup implements PolicyManager{
 	}
 
 	@Override
-	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram)
             throws NoInvokerAvailable, RemoteException
 	{
 		

@@ -118,17 +118,18 @@ public class BigGroup implements PolicyManager {
 		invocationsDistributed = 0;
 	}
 
-	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram, boolean singleInvocation)
+	@Override
+	public void	prepareDistribution(List<InvokerInterface> invokers, int size, long ram)
 			throws NoInvokerAvailable, RemoteException
 	{
 		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
 		//do we need to prepare the group in the most efficient distribution possible?
-		if (singleInvocation && executingGroup)
+		if (size == 1 && executingGroup)
 		{
 			executingGroup = false;
 			setSingleValues(invokers, ram);
 		}
-		else if (!singleInvocation)
+		else if (!(size == 1))
 		{
 			executingGroup = true;
 			setGroupValues(invokers, size, ram);
@@ -137,7 +138,7 @@ public class BigGroup implements PolicyManager {
 			setSingleValues(invokers, ram);
         
 		for (InvokerInterface invoker : invokers) {
-			invoker.setDistributionPolicyManager((int) groupSize, ram, singleInvocation);
+			invoker.setDistributionPolicyManager((int) groupSize, ram);
 		}
 	}
 

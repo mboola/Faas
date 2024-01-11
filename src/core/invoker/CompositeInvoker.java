@@ -46,10 +46,11 @@ public class CompositeInvoker extends Invoker {
 			this.policyManager = policyManager.copy();
 	}
 
-	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+	@Override
+	public void setDistributionPolicyManager(int size, long ram)
 			throws NoInvokerAvailable, RemoteException
 	{
-		policyManager.prepareDistribution(invokers, size, ram, singleInvocation);
+		policyManager.prepareDistribution(invokers, size, ram);
 	}
 
 	/**

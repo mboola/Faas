@@ -110,8 +110,8 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public void setDistributionPolicyManager(int size, long ram, boolean singleInvocation)
+	public void setDistributionPolicyManager(int size, long ram)
 			throws NoInvokerAvailable, RemoteException {
-		this.invoker.setDistributionPolicyManager(size, ram, singleInvocation);
+		this.invoker.setDistributionPolicyManager(size, ram);
 	}
 }
