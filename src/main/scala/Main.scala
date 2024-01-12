@@ -1,6 +1,7 @@
 package scala
 
 import java.util.function.{Function => JFunction}
+import scala.io.Source
 
 import core.application.Controller;
 import core.invoker.Invoker;
@@ -43,6 +44,13 @@ object Main {
 		}
 	}
 
+	class CountWordsAction extends Action[String, Map[String, Int]] {
+		override def apply(text: String): Map[String, Int] = {
+			val words = text.split("\\s+")
+			Map("total" -> words.length)
+		}
+	}
+
 	def wordCount(text: String): Map[String, Int] = {
 		val words = text.toLowerCase.split("\\W+").filter(_.nonEmpty)	//aqui el \\W+ místico lo que hace es separar por carácteres que NO sean palabras.
 		words.groupBy(identity).view.mapValues(_.length).toMap			//el filter se le pasa una funcion sin todos los parámetros, que básicamente serán todas las palabras y nos guaradará
@@ -60,7 +68,7 @@ object Main {
 		val controller = Controller.instantiate()
 		val policyManager = new RoundRobin()
 		controller.setPolicyManager(policyManager)
-		val invoker = Invoker.createInvoker(1);
+		val invoker = Invoker.createInvoker(1, 4);
 		controller.registerInvoker(invoker)
 
 		controller.registerAction("computation", expensiveComputation, 1)
@@ -87,10 +95,38 @@ object Main {
 		controller.registerAction("wordCount", actionWordCounts, 1)
 		println(controller.invoke("wordCount", "hola que tal"))
 
-		val calculator : Function[T, R] = (cal: CalculatorProxy) => new Calculator()
+		val actionCountWords = new CountWordsAction()
+		controller.registerAction("countWords", actionCountWords, 1)
+		println(controller.invoke("countWords", "hola que tal tal"))
+
+		//val calculator : Function[T, R] = (cal: CalculatorProxy) => new Calculator()
 		//controller.registerAction("calculatorProxy", calculator, 1)
 		//val calculatorProxy : CalculatorProxy = DynamicProxy.getActionProxy("calculatorProxy", true)
 		//println(calculatorProxy.suma(Map(("x", 2), ("y", 1))))
+
+		var endLoop = false
+
+		while (!endLoop) {
+			println("select an option:")
+			println("1 - execute wordCount")
+			println("2 - execute countWord")
+			println("3 - end program")
+
+			var intValue = scala.io.StdIn.readInt()
+
+			intValue match {
+				case 1 =>
+					var fileContents : String = Source.fromFile("src/main/scala/input.txt").mkString
+					println(controller.invoke("wordCount", fileContents))
+				case 2 => 
+					var fileContents : String = Source.fromFile("src/main/scala/input.txt").mkString
+					println(controller.invoke("countWords", fileContents))
+				case 3 =>
+					println("Program ended")
+					endLoop = true
+				case _ => println("Invalid option, please try again.")
+			}
+		}
 	}
 }
 
