@@ -35,7 +35,7 @@ public class BasicTestDecorator extends InvocationTester {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker invokerSimple = Invoker.createInvoker(1);
+		Invoker invokerSimple = Invoker.createInvoker(1, 4);
 		try {
 			controller.setPolicyManager(new RoundRobin());
 			controller.registerInvoker(invokerSimple);

@@ -28,7 +28,7 @@ public class DynamicProxyTest {
 	public void	testThrows()
 	{
 		Controller controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(200);
+		Invoker invoker = Invoker.createInvoker(200, 4);
 
 		Function<Object, Object> calculator = 
 			(obj) -> {
@@ -67,7 +67,7 @@ public class DynamicProxyTest {
 	public void	testDynamicProxySyncFunction()
 	{
 		Controller controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(200);
+		Invoker invoker = Invoker.createInvoker(200, 4);
 
 		Function<Object, Object> calculator = 
 			(obj) -> {
@@ -100,7 +100,7 @@ public class DynamicProxyTest {
 	public void	testDynamicProxyAsyncFunction()
 	{
 		Controller controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(200);
+		Invoker invoker = Invoker.createInvoker(200, 4);
 
 		Function<Object, Object> timer = 
 			(obj) -> {

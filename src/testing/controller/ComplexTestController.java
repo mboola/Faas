@@ -43,7 +43,7 @@ public class ComplexTestController {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(1);
+		Invoker invoker = Invoker.createInvoker(1, 4);
 		try {
 			controller.registerInvoker(invoker);
 			controller.setPolicyManager(new RoundRobin());
@@ -113,7 +113,7 @@ public class ComplexTestController {
 	public void	functionInvokedCorrectly()
 	{
 		Controller controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(1);
+		Invoker invoker = Invoker.createInvoker(1, 4);
 
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 

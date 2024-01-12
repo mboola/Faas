@@ -2,7 +2,7 @@
 	-core
 		-application
 			-Action: ✔️
-			-Controller:
+			-Controller: ✔️
 			-Invokable: ✔️
 		-dynamicproxy
 			-DynamicProxy: ✔️
@@ -14,8 +14,8 @@
 			-OperationNotValid: ✔️
 		-invoker
 			-CompositeInvoker:
-			-Invoker:
-			-InvokerInterface:
+			-Invoker: ✔️
+			-InvokerInterface: ✔️
 		-metrics:
 			-Metric: ✔️
 			-MetricCollection:
@@ -39,12 +39,11 @@
 		-RoundRobin: ✔️
 		-UniformGroup: ✔️
 	-rmi:
-		-ClientController:
-		-InvocationSet:
+		-InvocationSet: ✔️
+		-MainRmi: ✔️
 		-SerializedFunction: ✔️
 		-ServerHandler:
 		-ServerInvoker:
-		-ServerMasterInvoker:
 
 Things left to do:
 1-Test big group ✔️

@@ -37,7 +37,7 @@ public class InvocationTester {
 	{
 		Invoker invoker;
 		for (Long ram : ramInvokers) {
-			invoker = Invoker.createInvoker(ram);
+			invoker = Invoker.createInvoker(ram, 4);
 			try {
 				controller.registerInvoker(invoker);
 			}
@@ -50,7 +50,7 @@ public class InvocationTester {
 	{
 		Invoker invoker;
 		for (Long ram : ramInvokers) {
-			invoker = Invoker.createInvoker(ram);
+			invoker = Invoker.createInvoker(ram, 4);
 			try {
 				composite.registerInvoker(invoker);
 			}

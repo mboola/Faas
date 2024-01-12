@@ -10,8 +10,6 @@ import java.util.Base64;
 import core.application.Controller;
 import core.invoker.InvokerInterface;
 
-
-
 /**
  * Class used to define multiple invokers as a servers.
  * This desirializes the information on 

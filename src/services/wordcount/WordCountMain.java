@@ -16,7 +16,7 @@ public class WordCountMain {
 	public static void main(String[] args) 
 	{
 		Controller controller = Controller.instantiate();
-		Invoker invoker = Invoker.createInvoker(200);
+		Invoker invoker = Invoker.createInvoker(200, 4);
 
 		Function<Object, Object> countWords = 
 			(obj) -> {

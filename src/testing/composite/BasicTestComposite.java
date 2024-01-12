@@ -42,7 +42,7 @@ public class BasicTestComposite extends InvocationTester {
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") - x.get("y");
 		Action factorial = new FactorialAction();
 
-		invokerComposite = CompositeInvoker.createInvoker(1);
+		invokerComposite = CompositeInvoker.createInvoker(1, 4);
 		
 		try {
 			MetricCollection.instantiate().addObserver(new InvocationObserver());

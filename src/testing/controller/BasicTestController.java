@@ -51,7 +51,7 @@ public class BasicTestController {
 	public void	testRegisterInvokerCorrecly()
 	{
 		assertThrows(OperationNotValid.class, () -> controller.registerInvoker(null));
-		Invoker invoker = Invoker.createInvoker(1);
+		Invoker invoker = Invoker.createInvoker(1, 4);
 		try {
 			controller.registerInvoker(invoker);
 			assertThrows(OperationNotValid.class, () -> controller.registerInvoker(invoker));
@@ -70,7 +70,7 @@ public class BasicTestController {
 	public void	testDeleteInvokerCorrecly()
 	{
 		assertThrows(OperationNotValid.class, () -> controller.deleteInvoker(null));
-		Invoker invoker = Invoker.createInvoker(1);
+		Invoker invoker = Invoker.createInvoker(1, 4);
 		assertThrows(OperationNotValid.class, () -> controller.deleteInvoker(invoker));
 		try {
 			controller.registerInvoker(invoker);

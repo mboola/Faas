@@ -33,8 +33,8 @@ public class TestObserver {
 	public void	controllerInitialization()
 	{
 		controller = Controller.instantiate();
-		Invoker invoker1 = Invoker.createInvoker(5);
-		Invoker invoker2 = Invoker.createInvoker(5);
+		Invoker invoker1 = Invoker.createInvoker(5, 4);
+		Invoker invoker2 = Invoker.createInvoker(5, 4);
 
 		Function<Map<String, Integer>, Integer> f = x -> x.get("x") + x.get("y");
 

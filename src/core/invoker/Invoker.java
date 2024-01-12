@@ -1,6 +1,5 @@
 package core.invoker;
 
-
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutorService;
@@ -9,30 +8,122 @@ import java.util.concurrent.Future;
 import java.util.function.Function;
 
 import core.application.Invokable;
-import core.exceptions.*;
+import core.exceptions.NoInvokerAvailable;
+import core.exceptions.NoPolicyManagerRegistered;
+import core.exceptions.OperationNotValid;
 import core.metrics.MetricRecollector;
 import policymanager.PolicyManager;
 
+/**
+ * The {@code Invoker} class represents a computing resource capable of executing functions with specified RAM requirements.
+ * It implements the {@link InvokerInterface} interface and provides functionality for synchronous and asynchronous function invocation.
+ * Each instance of the Invoker class is associated with a unique identifier, maximum RAM capacity, and usage statistics.
+ *
+ * <p><strong>Note:</strong> The constructor is protected to ensure instances are created using the {@link #createInvoker(long, int)} method.</p>
+ *
+ * @see Invokable
+ * @see MetricRecollector
+ * @see PolicyManager
+ */
 public class Invoker implements InvokerInterface, Serializable {
 
-	//all good here
-	private static final int 		MAX_THREADS = 8; //TODO: talk about this 
-	//TODO: change this to dynamically reserved or parameter
-	private static long				numInvokers = 0;
+	/** The ExecutorService responsible for managing the threads used by the Invoker for asynchronous function execution. */
+	private final transient ExecutorService executor;
 
-	private final String	id;
-	private final long		maxRam;			//lo maximo que podemos usar para ejecutar funciones: ej si tenemos 5 y queremos ejecutar algo de 6 no se podra //TODO; wtf
+	/** A counter to keep track of the total number of Invoker instances created. */
+	private static long numInvokers = 0;
+
+	/** The unique identifier for the Invoker instance. */
+	private final String id;
 	
-	private long			reservedRam;	//la que se va a usar pero aun no. Usada desde el PolicyManager
-	private long			usedRam;		//ram en uno actualmente en los invokers
+	/**
+	 * The maximum amount of RAM that this Invoker can use to execute functions.
+	 * Note: If an Invokable function requires more RAM than specified here, it cannot be executed on this Invoker.
+	 */
+	private final long maxRam;
 
-	private transient ExecutorService 	executor;
+	/** The amount of RAM in use the invoker has to outside classes. */
+	private long reservedRam;
 
-	public long getAvailableRam()
-	{
-		return (maxRam - reservedRam);
+	/** The current amount of RAM actively in use by the Invoker. */
+	private long usedRam;
+
+	/**
+	 * Constructs a new instance of the Invoker.
+	 *
+	 * @param ram     The maximum RAM capacity of the Invoker.
+	 * @param threads The number of threads to be used by the Invoker's executor service.
+	 */
+	protected Invoker(long ram, int threads){
+		int cores = Runtime.getRuntime().availableProcessors();
+
+		if (threads > cores)
+			executor = Executors.newFixedThreadPool(cores);
+		else
+			executor = Executors.newFixedThreadPool(threads);
+
+		this.maxRam = ram;
+		usedRam = 0;
+		reservedRam = 0;
+
+		id = ((Long)numInvokers).toString();
+		numInvokers++;
 	}
 
+	/**
+	 * Creates an Invoker with the specified RAM capacity and thread count.
+	 *
+	 * @param ram     The maximum RAM capacity of the Invoker.
+	 * @param threads The number of threads to be used by the Invoker's executor service.
+	 * @return The created Invoker instance, or null if the RAM or thread count is less than or equal to zero.
+	 */
+	public static Invoker createInvoker(long ram, int threads) {
+		if (ram <= 0 || threads <= 0)
+			return (null);
+		else
+			return new Invoker(ram, threads);
+	}
+	
+	/**
+	 * Returns the unique identifier of the Invoker.
+	 *
+	 * @return The Invoker's identifier.
+	 */
+	@Override
+	public String getId() {
+		return id;
+	}
+
+	/**
+	 * Returns the amount of RAM currently in use by the Invoker.
+	 *
+	 * @return The used RAM.
+	 */
+	@Override
+	public long	getUsedRam()
+	{
+		return usedRam;
+	}
+
+	/**
+	 * Returns the available RAM that can be reserved for function execution. This method is accessed by the policy manager
+	 * to distribute the invocation load. It represents the difference between the maximum RAM allowed (maxRam) and the
+	 * currently reserved RAM (reservedRam). To get actual ram being used by the Invoker, refeer to {@link Invoker#getUsedRam()}.
+	 *
+	 * @return The available RAM that can be reserved for execution.
+	 */
+	@Override
+	public long getAvailableRam()
+	{
+		return maxRam - reservedRam;
+	}
+
+	/**
+	 * Reserves a specified amount of RAM for execution.
+	 *
+	 * @param ram The amount of RAM to reserve.
+	 */
+	@Override
 	public void reserveRam(long ram)
 	{
 		if (reservedRam + ram > maxRam) reservedRam = maxRam;
@@ -40,125 +131,53 @@ public class Invoker implements InvokerInterface, Serializable {
 		else reservedRam += ram;
 	}
 
-	//invoker
-	public long getUnusedRam()
-	{
-		return (maxRam - usedRam);
-	}
-
 	/**
-	 * Getter of the ram being used.
-	 * 
-	 * @return Ram being used.
-	 */
-	public long	getUsedRam()
-	{
-		return (usedRam);
-	}
-
-	public long	getReservedRam()
-	{
-		return (reservedRam);
-	}
-	
-	/**
-	 * Getter of the max ram of the Invoker.
-	 * 
-	 * @return Max ram to be used by this invoker.
-	 */
-	public long	getMaxRam()
-	{
-		return (maxRam);
-	}
-	
-	/**
-	 * This method creates an Invoker.
-	 * 
-	 * @param ram The max ram of the Invoker.
-	 * @return The Invoker created, or null if ram is lesser or equal to zero.
-	 */
-	public static Invoker createInvoker(long ram)
-	{
-		if (ram <= 0)
-			return (null);
-		else
-			return (new Invoker(ram));
-	}
-
-	/**
-	 * Constructs a new instance of Invoker.
-	 * 
-	 * @param ram The max ram of the Invoker.
-	 * 
-	 * <p><strong>Note:</strong> Constuctor will only be called from 'createInvoker' to ensure no Invokers with invalid parameters are created.</p>
-	 */
-	protected Invoker(long ram)
-	{
-		this.maxRam = ram;
-		usedRam = 0;
-		reservedRam = 0;
-
-		executor = Executors.newFixedThreadPool(MAX_THREADS);
-
-		id = ((Long)numInvokers).toString();
-		numInvokers++;
-	}
-
-	public String getId()
-	{
-		return (id);
-	}
-
-	/**
-	 * This selects an invoker to invoke a function.
-	 */
-	public Invoker getInvoker()
-	{
-		return (this);
-	}
-
-	/**
-	 * Method used to select a invoker to execute a function based on the ram it consumes and the policy we have assigned.
-	 * @param ram
-	 * @return
-	 * @throws Exception <p>The exception can be caused because:</p>
-	 * <ul>
-	 * 	<li>NoPolicyManagerRegistered: There is no policyManager registered.</li>
-	 * 	<li>NoInvokerAvailable: There is no invoker with enough max ram to execute the invokable.</li>
-	 *  <li>Exeption: something goes wrong with RMI.</li>
-	 * </ul>
+	 * Returns the maximum RAM capacity of the Invoker.
+	 *
+	 * @return The maximum RAM capacity.
 	 */
 	@Override
-	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException
-	{
-		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
-		return (this);
-	}
-
-	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException
-	{
-	}
-
-	public void setDistributionPolicyManager(int size, long ram)
-			throws NoInvokerAvailable, RemoteException
-	{
+	public long	getMaxRam() {
+		return (maxRam);
 	}
 
 	/**
-	 * This method is called to execute a sync function passed by reference, applying all the observers and decorators.
-	 * 
-	 * @param action Function to be executed and the ram it consumes.
-	 * @param args Arguments needed by the function, of type T
-	 * @param id Identifier of the function. Needed by the observers and decorators to store data correctly.
-	 * @return The result of the function invoked, of type R
-	 * @throws Exception //TODO: i dont remember
+	 * Returns the amount of unused RAM on the Invoker.
+	 *
+	 * @return The unused RAM.
 	 */
-	public <T, R> R invoke(Invokable<T,R> invokable, T args, String id) throws Exception
-	{
-		MetricRecollector	metricsRecollector;
-		R									result;
+	public long getUnusedRam() {
+		return maxRam - usedRam;
+	}
 
-		metricsRecollector = new MetricRecollector(id, this);
+	/**
+	 * Selects the Invoker to execute a function based on the required RAM.
+	 *
+	 * @param ram The required RAM for the function execution.
+	 * @return The selected Invoker.
+	 * @throws NoPolicyManagerRegistered It will never be thrown.
+	 * @throws NoInvokerAvailable       If there is no Invoker with enough max RAM to execute the Invokable.
+	 * @throws RemoteException          If an exception occurs during RMI communication.
+	 */
+	@Override
+	public InvokerInterface selectInvoker(long ram) throws NoPolicyManagerRegistered, NoInvokerAvailable, RemoteException {
+		if (this.maxRam < ram) throw new NoInvokerAvailable("Not enough ram to assign this invoker.");
+		return this;
+	}
+
+	/**
+	 * Executes a synchronous function passed by reference, applying observers and decorators.
+	 *
+	 * @param invokable The Invokable function to be executed along with its RAM requirement.
+	 * @param args      The arguments needed by the function.
+	 * @param id        The identifier of the function.
+	 * @param <T>       The type of input argument.
+	 * @param <R>       The type of the result.
+	 * @return The result of the function invocation.
+	 * @throws Exception If an exception occurs during execution.
+	 */
+	public <T, R> R invoke(Invokable<T,R> invokable, T args, String id) throws Exception {
+		MetricRecollector metricsRecollector = new MetricRecollector(id, this);
 		metricsRecollector.initializeObservers();
 
 		this.reserveRam(invokable.getRam());
@@ -166,37 +185,41 @@ public class Invoker implements InvokerInterface, Serializable {
 
 		metricsRecollector.executeObservers();
 
-		result = ((Function<T, R>)invokable.retrieveInvokable()).apply(args);
+		R result = ((Function<T, R>)invokable.retrieveInvokable()).apply(args);
 
 		usedRam -= invokable.getRam();
 		this.reserveRam(-invokable.getRam());
 		
 		metricsRecollector.notifyObservers();
 
-		return (result);
+		return result;
 	}
 
-	//TODO: javadoc this
-	// This function tries to execute the function passed by parameter.
-	// If there is no space in the pool, it waits and then it gets invoked.
-	public <T, R> Future<R> invokeAsync(Invokable<T,R> invokable, T args, String id) throws Exception
-	{
-		Function<T, R>	function;
-		MetricRecollector	metricsRecollector;
-		Future<R>		futureResult;
-
-		metricsRecollector = new MetricRecollector(id, this);
+	/**
+	 * Attempts to execute a function asynchronously.
+	 * If there is no available RAM, it will wait until it gets a notification that it can be executed.
+	 * If the pool of threads is full, it will also wait.
+	 *
+	 * @param invokable The Invokable function to be executed asynchronously along with its RAM requirement.
+	 * @param args      The arguments needed by the function.
+	 * @param id        The identifier of the function.
+	 * @param <T>       The type of input argument.
+	 * @param <R>       The type of the result.
+	 * @return A Future representing the asynchronous result of the function invocation.
+	 * @throws Exception If an exception occurs during execution.
+	 */
+	public <T, R> Future<R> invokeAsync(Invokable<T,R> invokable, T args, String id) throws Exception {
+		MetricRecollector metricsRecollector = new MetricRecollector(id, this);
 		metricsRecollector.initializeObservers();
-		function = (Function<T, R>)invokable.retrieveInvokable();
+		Function<T, R> function = (Function<T, R>)invokable.retrieveInvokable();
 
 		this.reserveRam(invokable.getRam());
 
-		futureResult = executor.submit( 
+		Future<R> futureResult = executor.submit( 
 			() -> {
-				R	result;
+				R result;
 
-				synchronized (this)
-				{
+				synchronized (this) {
 					while (getUnusedRam() - invokable.getRam() < 0)
 					{
 						try {
@@ -209,32 +232,52 @@ public class Invoker implements InvokerInterface, Serializable {
 					metricsRecollector.executeObservers();
 				}
 				result = function.apply(args);
-				synchronized (this)
-				{
+				synchronized (this) {
 					usedRam -= invokable.getRam();
 					this.reserveRam(-invokable.getRam());
 					metricsRecollector.notifyObservers();
 					notify();
 				}
-				return (result);
+				return result;
 			}
 		);
-		return (futureResult);
+		return futureResult;
 	}
 
 	/**
-	 * This shuts down the executor of the Invoker. Must be called when the application finishes.
+	 * Shuts down the executor of the Invoker. Must be called when the application finishes.
 	 */
-	public void shutdownInvoker()
-	{
+	@Override
+	public void shutdownInvoker() {
 		executor.shutdown();
 	}
 
+	/**
+	 * Does nothing. Needed to implement because the contract specifies it.
+	 */
 	@Override
-	public void registerInvoker(InvokerInterface invoker) throws Exception {
+	public void	setPolicyManager(PolicyManager policyManager) throws RemoteException {
 	}
 
+	/**
+	 * Does nothing. Needed to implement because the contract specifies it.
+	 */
 	@Override
-	public void deleteInvoker(InvokerInterface invoker) throws Exception {
+	public void setDistributionPolicyManager(int size, long ram) throws RemoteException, NoInvokerAvailable {
 	}
+
+	/**
+	 * Does nothing. Needed to implement because the contract specifies it.
+	 */
+	@Override
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException {
+	}
+
+	/**
+	 * Does nothing. Needed to implement because the contract specifies it.
+	 */
+	@Override
+	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException {
+	}
+	
 }

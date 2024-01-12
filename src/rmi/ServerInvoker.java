@@ -9,6 +9,7 @@ import java.util.concurrent.Future;
 import core.application.Invokable;
 import core.exceptions.NoInvokerAvailable;
 import core.exceptions.NoPolicyManagerRegistered;
+import core.exceptions.OperationNotValid;
 import core.invoker.CompositeInvoker;
 import core.invoker.Invoker;
 import core.invoker.InvokerInterface;
@@ -22,9 +23,9 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	protected ServerInvoker(Long ram, boolean isComposite) throws RemoteException {
 		super();
 		if (isComposite)
-			invoker = CompositeInvoker.createInvoker(ram);
+			invoker = CompositeInvoker.createInvoker(ram, 4);
 		else
-			invoker = Invoker.createInvoker(ram);
+			invoker = Invoker.createInvoker(ram, 4);
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public long getMaxRam() {
+	public long getMaxRam() throws RemoteException {
 		return (invoker.getMaxRam());
 	}
 
@@ -95,24 +96,22 @@ public class ServerInvoker extends UnicastRemoteObject implements InvokerInterfa
 	}
 
 	@Override
-	public void shutdownInvoker() {
+	public void shutdownInvoker() throws RemoteException {
 		invoker.shutdownInvoker();
 	}
 
-	//TODO exceptions?
 	@Override
-	public void registerInvoker(InvokerInterface invoker) throws Exception {
+	public void registerInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException {
 		this.invoker.registerInvoker(invoker);
 	}
 
 	@Override
-	public void deleteInvoker(InvokerInterface invoker) throws Exception {
+	public void deleteInvoker(InvokerInterface invoker) throws OperationNotValid, RemoteException {
 		this.invoker.deleteInvoker(invoker);
 	}
 
 	@Override
-	public void setDistributionPolicyManager(int size, long ram)
-			throws NoInvokerAvailable, RemoteException {
+	public void setDistributionPolicyManager(int size, long ram) throws NoInvokerAvailable, RemoteException {
 		this.invoker.setDistributionPolicyManager(size, ram);
 	}
 }
