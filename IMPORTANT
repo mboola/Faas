@@ -8,12 +8,12 @@
 			-DynamicProxy: ✔️
 		-exceptions
 			-NoActionRegistered: ✔️
-			-NoInvokerAvailable:
-			-NoPolicyManagerRegistered:
+			-NoInvokerAvailable: ✔️
+			-NoPolicyManagerRegistered: ✔️
 			-NoResultAvailable: ✔️
 			-OperationNotValid: ✔️
 		-invoker
-			-CompositeInvoker:
+			-CompositeInvoker: ✔️
 			-Invoker: ✔️
 			-InvokerInterface: ✔️
 		-metrics:
@@ -43,14 +43,14 @@
 		-MainRmi: ✔️
 		-SerializedFunction: ✔️
 		-ServerHandler:
-		-ServerInvoker:
+		-ServerInvoker: ✔️
 
 Things left to do:
 1-Test big group ✔️
-2-Refactor Controller and invoker
+2-Refactor Controller and invoker ✔️
 3-Test composite with all PolicyManagers
 4-Test rmi
-5-Refactor rmi
-6-Javadoc all exceptions
-7-Javadoc whats left
+5-Refactor rmi ✔️
+6-Javadoc all exceptions ✔️
+7-Javadoc whats left ✔️
 8-Javadoc tests
