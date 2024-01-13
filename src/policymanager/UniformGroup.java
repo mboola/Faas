@@ -170,7 +170,11 @@ public class UniformGroup implements PolicyManager, Serializable {
 		
 		//TODO try catch? NoInvokerAvailable
 		for (InvokerInterface invoker : invokers) {
-			invoker.setDistributionPolicyManager((int) groupSize, ram);
+			try {
+				invoker.setDistributionPolicyManager((int) groupSize, ram);
+			} catch (NoInvokerAvailable e) {
+
+			}
 		}
 	}
 
@@ -192,6 +196,8 @@ public class UniformGroup implements PolicyManager, Serializable {
 		InvokerInterface invoker;
 		boolean found;
 
+		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+		
 		// if the first time we select an invoker the pointer is pointing to one that cannot invoke
 		// or we have reached the end of this group size
 		if (invocationsDistributed == groupSize || invokers.get(lastInvokerAssigned).getMaxRam() < ram)
