@@ -95,22 +95,24 @@ public class ServerHandler {
 		Controller controller = Controller.instantiate();
 		
 		//here I add all invokers to controller
-		for (Long ram : controllerSet.getInvokers()) {
-			argsInvoker[0] = ((Integer)currentPort).toString();
-			argsInvoker[1] = ram.toString();
-			argsInvoker[2] = "0";
-			ServerInvoker.main(argsInvoker);
-
-			try {
-				registry = LocateRegistry.getRegistry("localhost", currentPort);
-				stub = (InvokerInterface) registry.lookup("Invoker");
-				controller.registerInvoker(stub);
+		if (controllerSet.getInvokers() != null) {
+			for (Long ram : controllerSet.getInvokers()) {
+				argsInvoker[0] = ((Integer)currentPort).toString();
+				argsInvoker[1] = ram.toString();
+				argsInvoker[2] = "0";
+				ServerInvoker.main(argsInvoker);
+	
+				try {
+					registry = LocateRegistry.getRegistry("localhost", currentPort);
+					stub = (InvokerInterface) registry.lookup("Invoker");
+					controller.registerInvoker(stub);
+				}
+				catch (Exception e) {
+					System.err.println("Excepción del cliente: " + e.toString());
+					e.printStackTrace();
+				}
+				currentPort++;
 			}
-			catch (Exception e) {
-				System.err.println("Excepción del cliente: " + e.toString());
-				e.printStackTrace();
-			}
-			currentPort++;
 		}
 
 		//and here for each composite I create all the servers needed.
