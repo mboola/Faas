@@ -25,20 +25,6 @@ import policymanager.RoundRobin;
  */
 public class MainRmi {
 
-	private static String serializeToString(Object obj) {
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-
-			oos.writeObject(obj);
-			byte[] bytes = bos.toByteArray();
-			return Base64.getEncoder().encodeToString(bytes);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
 	public static void main(String[] args) {
 
 		// Here we define the Controller without his invokers
@@ -58,7 +44,7 @@ public class MainRmi {
 		InvocationSet controllerSet = new InvocationSet(Arrays.asList(2L), Arrays.asList(composite), null);
 
 		// And we serialize all the data needed to create the servers and create them
-		String serializedControllerInformation = serializeToString(controllerSet);
+		String serializedControllerInformation = InvocationSet.serializeToString(controllerSet);
 		ServerHandler.main(new String[]{serializedControllerInformation});
 
 		// We try to invoke a simple function that adds one to the input

@@ -1,6 +1,10 @@
 package rmi;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.List;
 
 /**
@@ -63,5 +67,19 @@ public class InvocationSet implements Serializable{
 	public List<Long> getInvokers()
 	{
 		return (invokers);
+	}
+
+	public static String serializeToString(Object obj) {
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+
+			oos.writeObject(obj);
+			byte[] bytes = bos.toByteArray();
+			return Base64.getEncoder().encodeToString(bytes);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }
