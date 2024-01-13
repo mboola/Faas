@@ -31,6 +31,5 @@ public class InvokerTest {
 		inv = Invoker.createInvoker(-1, 4);
 		assertEquals(inv, null);
 	}
-
-	//TODO: more tests?
+	
 }

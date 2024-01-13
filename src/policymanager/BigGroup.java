@@ -3,6 +3,7 @@ package policymanager;
 import java.io.Serializable;
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.logging.Logger;
 
 import core.exceptions.NoInvokerAvailable;
 import core.exceptions.NoPolicyManagerRegistered;
@@ -177,9 +178,14 @@ public class BigGroup implements PolicyManager, Serializable {
 			setSingleValues(invokers, ram);
 		}
 
-		//TODO try catch? NoInvokerAvailable
+		Logger logger = Logger.getLogger(PolicyManager.class.getName());
+		
 		for (InvokerInterface invoker : invokers) {
-			invoker.setDistributionPolicyManager((int) groupSize, ram);
+			try {
+				invoker.setDistributionPolicyManager((int) groupSize, ram);
+			} catch (NoInvokerAvailable e) {
+				logger.warning("NoInvokerAvailable: Distribution could not be set to: " + invoker.toString());
+			}
 		}
 	}
 
