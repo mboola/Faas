@@ -23,7 +23,7 @@ import services.otheractions.FactorialAction;
 import testing.InvocationTester;
 
 @SuppressWarnings("unused")
-public class BasicTestComposite extends InvocationTester {
+public class TestRoundRobinComposite extends InvocationTester {
 
 	private Controller			controller;
 	private CompositeInvoker	invokerComposite;
@@ -229,6 +229,71 @@ public class BasicTestComposite extends InvocationTester {
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
 		assertEquals("1 3 1 2 3 0 1", str);
+	}
+
+	//Controller has one CompositeInvoker (ID: 0) and one Invoker (ID: 1) with 2 RAM and
+	//This CompositeInvoker (ID: 0) has one Invoker (ID: 2) with 1 ram, another Invoker with 2 ram (ID: 3), and a CompositeInvoker (ID: 4).
+	//So 7 invocations should go in the order:
+	//We start selecting the second Invoker of Controller (ID:1). Next we will select the next, and because it is a CompositeInvoker we select
+	//an invoker inside of it. Because it also follows a RoundRobin, the second of the list will be selected (ID:3).
+	//next the (ID:1) gets selected again at the first level, becoming full
+	//then it selects another invoker from invoker composite (ID:4)
+	//because the invoker (ID:1) is full, it tries to search an invoker available at composite, and it gets (ID:2)
+	//it does the same, getting the invoker (ID:3)
+	//because all of them are full, now it gets the composite to invoke (ID:0)
+	@Test
+	public void testThreeLayersInvokersDifferentRamAsync()
+	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
+		createAndAddInvokers(Arrays.asList(2L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
+		CompositeInvoker invokerComposite2 = CompositeInvoker.createInvoker(1, 4);
+
+		try {
+			invokerComposite.registerInvoker(invokerComposite2);
+			long currentTimeMillis = System.currentTimeMillis();
+			List<String> stringsResult = invokeList("Sleep", 7, 1000, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
+		assertEquals("1 3 1 4 2 3 0", str);
+	}
+
+	@Test
+	public void testThreeLayersInvokersDifferentRamAsyncB()
+	{
+		try {
+			controller.setPolicyManager(new RoundRobin());
+		} catch (Exception e) {
+			assertTrue(false);
+		}
+
+		createAndAddInvokers(Arrays.asList(2L), controller);
+		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite);
+		CompositeInvoker invokerComposite2 = CompositeInvoker.createInvoker(1, 4);
+		createAndAddInvokers(Arrays.asList(1L, 2L), invokerComposite2);
+
+		try {
+			invokerComposite.registerInvoker(invokerComposite2);
+			long currentTimeMillis = System.currentTimeMillis();
+			List<String> stringsResult = invokeList("Sleep", 10, 1000, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+		}
+		catch (Exception e) {
+			assertTrue(false);
+		}
+
+		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
+		assertEquals("1 3 1 6 2 3 5 6 4 0", str);
 	}
 
 }

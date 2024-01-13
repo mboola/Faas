@@ -256,6 +256,7 @@ public class Controller {
 	 * @throws Exception If an exception occurs during the invocation process.
 	 */
 	public <T, R> R invoke(String id, T args) throws Exception {
+		if (policyManager == null) throw new NoPolicyManagerRegistered("No PolicyManager registered");
 		Invokable<T, R> invokable = retrieveInvokable(id);
 		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram);
@@ -277,6 +278,7 @@ public class Controller {
 	public <T, R> List<R> invoke(String id, List<T> args) throws Exception {
 		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
 		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
+		if (policyManager == null) throw new NoPolicyManagerRegistered("No PolicyManager registered");
 
 		Invokable<T, R> invokable = retrieveInvokable(id);
 		long ram = invokable.getRam();
@@ -299,6 +301,7 @@ public class Controller {
 	 * @throws Exception If an exception occurs during the invocation process.
 	 */
 	public <T, R> Future<R> invoke_async(String id, T args) throws Exception {
+		if (policyManager == null) throw new NoPolicyManagerRegistered("No PolicyManager registered");
 		Invokable<T, R> invokable = retrieveInvokable(id);
 		long ram = invokable.getRam();
 		policyManager.prepareDistribution(invokers, 1, ram);
@@ -320,6 +323,7 @@ public class Controller {
 	public <T, R> List<Future<R>> invoke_async(String id, List<T> args) throws Exception {
 		if (args == null) throw new OperationNotValid("List of input in a group invocation cannot be null.");
 		if (args.isEmpty()) throw new OperationNotValid("List of input in a group invocation cannot be empty.");
+		if (policyManager == null) throw new NoPolicyManagerRegistered("No PolicyManager registered");
 
 		Invokable<T, R> invokable = retrieveInvokable(id);
 		long ram = invokable.getRam();
