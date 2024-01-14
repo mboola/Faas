@@ -6,7 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class CountWords implements CountWordsProxy{
+public class CountWords implements CountWordsProxy {
 	
 	@Override
 	public Object mapFile(String pathName) throws IOException
