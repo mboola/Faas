@@ -7,6 +7,7 @@ import java.util.concurrent.Future;
 import core.application.Action;
 import core.dynamicproxy.DynamicProxy;
 
+@SuppressWarnings("unchecked")
 public class CountWordsAction implements Action<String, Object> {
 
 	//This returns a Long
