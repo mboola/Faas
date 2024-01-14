@@ -16,8 +16,8 @@ import core.invoker.InvokerInterface;
  */
 public abstract class Observer implements ObserverInterface {
 
-	protected InvokerInterface	invoker;
-	protected String			functionId;
+	protected InvokerInterface invoker;
+	protected String functionId;
 
 	/**
 	 * Initializes the observer with a function identifier of the function which invokation will observe

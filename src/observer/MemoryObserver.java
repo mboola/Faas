@@ -13,8 +13,8 @@ import core.metrics.MetricCollection;
  */
 public class MemoryObserver extends Observer {
 
-	private final String	metricId	= "MemoryObserver";
-	private Metric<Long>	metric;
+	private final String metricId = "MemoryObserver";
+	private Metric<Long> metric;
 
 	/**
 	 * Executes the memory observation by capturing the RAM being used 

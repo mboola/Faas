@@ -16,8 +16,8 @@ import core.metrics.MetricCollection;
  */
 public class IdObserver extends Observer {
 
-	private final String	metricId = "IdObserver";
-	private Metric<String>	metric;
+	private final String metricId = "IdObserver";
+	private Metric<String> metric;
 
 	/**
      * Executes before the function is invoked. Initializes the metric with the function and invoker IDs.

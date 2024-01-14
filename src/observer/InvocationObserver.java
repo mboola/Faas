@@ -17,7 +17,7 @@ import core.metrics.MetricCollection;
  */
 public class InvocationObserver extends Observer {
 
-	private final String	metricId = "InvocationObserver";
+	private final String metricId = "InvocationObserver";
 
 	/**
 	 * Initializes the observer with the provided ID and invoker, adding a metric to the collection.

@@ -7,10 +7,11 @@ import core.application.Controller;
 import core.invoker.Invoker;
 import core.dynamicproxy.DynamicProxy;
 import policymanager.PolicyManager;
-import policymanager.RoundRobin;
+import policymanager._;
 import core.application.Action;
 import services.proxies.Calculator;
 import services.proxies.CalculatorProxy;
+import scala.jdk.CollectionConverters._
 
 object Main {
 	
@@ -61,12 +62,42 @@ object Main {
 		Map("total" -> words.length)
 	}
 
+	def splitFileIntoParts(filePath: String, numParts: Int): List[String] = {
+    val fileContents = Source.fromFile(filePath).mkString
+    val partLength = Math.ceil(fileContents.length.toDouble / numParts).toInt
+    fileContents.grouped(partLength).toList
+  }
+
+	def reduceWordCounts(list: List[Map[String, Int]]): Map[String, Int] = {
+	list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
+		acc ++ map.map { case (word, count) => 
+			word -> (acc.getOrElse(word, 0) + count)
+			}
+		}
+	}
+
+	def reduceCountWords(list: List[Map[String, Int]]): Map[String, Int] = {
+	list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
+		acc ++ map.map { case (key, value) =>
+			key -> (acc.getOrElse(key, 0) + value)
+			}
+		}
+	}
+
 
 	def main(args: Array[String]): Unit = {
 
-		//configure Controller
+		val policyManagerName = "RoundRobin"
+
+		val policyManager: PolicyManager = policyManagerName match {
+		case "RoundRobin"   => new RoundRobin()
+		case "GreedyGroup"  => new GreedyGroup()
+		case "UniformGroup" => new UniformGroup()
+		case "BigGroup"     => new BigGroup()
+		case _              => new RoundRobin() // Por defecto, usa RoundRobin
+		}
+		
 		val controller = Controller.instantiate()
-		val policyManager = new RoundRobin()
 		controller.setPolicyManager(policyManager)
 		val invoker = Invoker.createInvoker(1, 4);
 		controller.registerInvoker(invoker)
@@ -84,20 +115,28 @@ object Main {
 		val both2DecoratedFunction = new CacheDecorator(timer2DecoratedFunction)
 		controller.registerAction("computationBoth2", both2DecoratedFunction, 1)
 
+		System.out.println("======AUTOMATIC TEST START========")
 		controller.invoke("computation", 5)
 		controller.invoke("computationTimer", 5)
 		controller.invoke("computationBoth1", 5)
 		controller.invoke("computationBoth1", 5)
 		controller.invoke("computationBoth2", 5)
 		controller.invoke("computationBoth2", 5)
-
+		System.out.println("REDUCE TESTS:")
 		val actionWordCounts = new WordCountAction()
-		controller.registerAction("wordCount", actionWordCounts, 1)
-		println(controller.invoke("wordCount", "hola que tal"))
+		val decorated1 = new CacheDecorator(actionWordCounts)
+		val decorated = new TimerDecorator(decorated1)
+		controller.registerAction("wordCountDecorated", decorated, 1)
+		System.out.println("Sin Cachear:")
+		println(controller.invoke("wordCountDecorated", "hola que tal"))
+		System.out.println("Cacheada:")
+		println(controller.invoke("wordCountDecorated", "hola que tal"))
 
 		val actionCountWords = new CountWordsAction()
 		controller.registerAction("countWords", actionCountWords, 1)
 		println(controller.invoke("countWords", "hola que tal tal"))
+		System.out.println("======AUTOMATIC TEST END========")
+
 
 		//val calculator : Function[T, R] = (cal: CalculatorProxy) => new Calculator()
 		//controller.registerAction("calculatorProxy", calculator, 1)
@@ -116,17 +155,22 @@ object Main {
 
 			intValue match {
 				case 1 =>
-					var fileContents : String = Source.fromFile("src/main/scala/input.txt").mkString
-					println(controller.invoke("wordCount", fileContents))
+					var content = splitFileIntoParts("src/main/scala/input.txt",10)
+					val result: List[Map[String, Int]] = controller.invoke("wordCount", content.asJava).asScala.toList
+					val reduced = reduceWordCounts(result)
+					println(reduced)
 				case 2 => 
-					var fileContents : String = Source.fromFile("src/main/scala/input.txt").mkString
-					println(controller.invoke("countWords", fileContents))
+					var content = splitFileIntoParts("src/main/scala/input.txt",10)
+					val result: List[Map[String, Int]] = controller.invoke("countWords", content.asJava).asScala.toList
+					val reduced = reduceCountWords(result)
+					println(reduced)
 				case 3 =>
 					println("Program ended")
 					endLoop = true
 				case _ => println("Invalid option, please try again.")
 			}
 		}
+
 	}
 }
 

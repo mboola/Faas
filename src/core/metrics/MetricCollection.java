@@ -14,10 +14,10 @@ public class MetricCollection {
 
 	private Map<String, Map<String, List<Metric<Object>>>> dataCollected;
 
-	private List<Observer>				observers;
+	private List<Observer> observers;
 
-	private static volatile MetricCollection	uniqueInstance = null;
-	private static Object				mutex = new Object();
+	private static volatile MetricCollection uniqueInstance = null;
+	private static Object mutex = new Object();
 
 	/**
 	 * Checks if the MetricCollection is instanciated, creates one if it isn't.

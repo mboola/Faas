@@ -15,8 +15,8 @@ import core.metrics.MetricCollection;
  */
 public class TimerObserver extends Observer {
 
-	private final String		metricId	= "TimerObserver";
-	private Metric<Long>		metric;
+	private final String metricId = "TimerObserver";
+	private Metric<Long> metric;
 
 	/**
      * Captures the start time before the execution of the observed function.
