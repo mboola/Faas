@@ -2,6 +2,7 @@ package observer;
 
 import java.rmi.RemoteException;
 
+import core.invoker.InvokerInterface;
 import core.metrics.Metric;
 import core.metrics.MetricCollection;
 
@@ -16,6 +17,25 @@ public class MemoryObserver extends Observer {
 	private final String metricId = "MemoryObserver";
 	private Metric<Long> metric;
 
+	public MemoryObserver() {
+	}
+
+	private MemoryObserver(String id, InvokerInterface invoker) {
+		super(id, invoker);
+	}
+
+	/**
+	 * Creates a copy of the MemoryObserver.
+	 *
+	 * @param functionId The unique identifier for the MemoryObserver.
+	 * @param invoker 	 The invoker to be observed.
+	 * @return A new MemoryObserver instance.
+	 */
+	@Override
+	public MemoryObserver copy(String id, InvokerInterface invoker) {
+		return new MemoryObserver(id, invoker);
+	}
+
 	/**
 	 * Executes the memory observation by capturing the RAM being used 
 	 * and updating the MetricCollection with the observed memory metric.
@@ -29,16 +49,6 @@ public class MemoryObserver extends Observer {
 		catch (RemoteException e) {
 			metric = null;
 		}
-	}
-
-	/**
-	 * Creates a copy of the MemoryObserver.
-	 *
-	 * @return A new instance of MemoryObserver.
-	 */
-	@Override
-	public MemoryObserver copy() {
-		return new MemoryObserver();
 	}
 
 }

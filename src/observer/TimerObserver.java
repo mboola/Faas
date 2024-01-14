@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import core.exceptions.NoResultAvailable;
+import core.invoker.InvokerInterface;
 import core.metrics.Metric;
 import core.metrics.MetricCollection;
 
@@ -18,17 +19,36 @@ public class TimerObserver extends Observer {
 	private final String metricId = "TimerObserver";
 	private Metric<Long> metric;
 
+	public TimerObserver() {
+	}
+
+	private TimerObserver(String id, InvokerInterface invoker) {
+		super(id, invoker);
+	}
+
 	/**
-     * Captures the start time before the execution of the observed function.
-     */
+	 * Creates a copy of the TimerObserver.
+	 *
+	 * @param functionId The unique identifier for the TimerObserver.
+	 * @param invoker 	 The invoker to be observed.
+	 * @return A new TimerObserver instance.
+	 */
+	@Override
+	public TimerObserver copy(String id, InvokerInterface invoker) {
+		return new TimerObserver(id, invoker);
+	}
+
+	/**
+	 * Captures the start time before the execution of the observed function.
+	 */
 	@Override
 	public void execution() {
 		metric = new Metric<Long>(functionId, System.nanoTime());
 	}
 
 	/**
-     * Updates the captured metric with the total execution time and stores it in the metric collection.
-     */
+	 * Updates the captured metric with the total execution time and stores it in the metric collection.
+	 */
 	@Override
 	public void update() {
 		Long time = metric.getDataType();
@@ -39,21 +59,11 @@ public class TimerObserver extends Observer {
 	}
 
 	/**
-     * Creates a copy of the TimerObserver.
-     *
-     * @return A new TimerObserver instance.
-     */
-	@Override
-	public TimerObserver copy() {
-		return new TimerObserver();
-	}
-
-	/**
-     * Calculates the maximum execution time of the observed function.
-     *
-     * @param functionId The identifier of the observed function.
-     * @return The maximum execution time, or null if no metrics are available.
-     */
+	 * Calculates the maximum execution time of the observed function.
+	 *
+	 * @param functionId The identifier of the observed function.
+	 * @return The maximum execution time, or null if no metrics are available.
+	 */
 	public Long calculateMaxTime(String functionId) {
 		try {
 			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
@@ -65,11 +75,11 @@ public class TimerObserver extends Observer {
 	}
 
 	/**
-     * Calculates the minimum execution time of the observed function.
-     *
-     * @param functionId The identifier of the observed function.
-     * @return The minimum execution time, or null if no metrics are available.
-     */
+	 * Calculates the minimum execution time of the observed function.
+	 *
+	 * @param functionId The identifier of the observed function.
+	 * @return The minimum execution time, or null if no metrics are available.
+	 */
 	public Long calculateMinTime(String functionId) {
 		try {
 			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
@@ -81,11 +91,11 @@ public class TimerObserver extends Observer {
 	}
 
 	/**
-     * Calculates the average execution time of the observed function.
-     *
-     * @param functionId The identifier of the observed function.
-     * @return The average execution time, or null if no metrics are available.
-     */
+	 * Calculates the average execution time of the observed function.
+	 *
+	 * @param functionId The identifier of the observed function.
+	 * @return The average execution time, or null if no metrics are available.
+	 */
 	public Long calculateAverageTime(String functionId) {
 		try {
 			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);
@@ -97,11 +107,11 @@ public class TimerObserver extends Observer {
 	}
 
 	/**
-     * Calculates the total execution time of the observed function.
-     *
-     * @param functionId The identifier of the observed function.
-     * @return The total execution time, or null if no metrics are available.
-     */
+	 * Calculates the total execution time of the observed function.
+	 *
+	 * @param functionId The identifier of the observed function.
+	 * @return The total execution time, or null if no metrics are available.
+	 */
 	public Long calculateAllTime(String functionId) {
 		try {
 			List<Long> list = MetricCollection.instantiate().getList(metricId, functionId);

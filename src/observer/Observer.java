@@ -19,17 +19,20 @@ public abstract class Observer implements ObserverInterface {
 	protected InvokerInterface invoker;
 	protected String functionId;
 
+	protected Observer() {
+	}
+
+	protected Observer(String functionId, InvokerInterface invoker) {
+		this.invoker = invoker;
+		this.functionId = functionId;
+	}
+
 	/**
 	 * Initializes the observer with a function identifier of the function which invokation will observe
 	 * and the associated invoker.
 	 * Called when PolicyManger selects the invoker to invoke a function.
-	 *
-	 * @param functionId The function identifier of the function to be invoked by the Invoker.
-	 * @param invoker	 The Invoker to be observed.
 	 */
-	public void initialize(String functionId, InvokerInterface invoker)	{
-		this.invoker = invoker;
-		this.functionId = functionId;
+	public void initialize() {
 	}
 
 	/**

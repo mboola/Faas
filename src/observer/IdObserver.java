@@ -4,6 +4,7 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import core.exceptions.NoResultAvailable;
+import core.invoker.InvokerInterface;
 import core.metrics.Metric;
 import core.metrics.MetricCollection;
 
@@ -19,9 +20,28 @@ public class IdObserver extends Observer {
 	private final String metricId = "IdObserver";
 	private Metric<String> metric;
 
+	public IdObserver() {
+	}
+
+	private IdObserver(String id, InvokerInterface invoker) {
+		super(id, invoker);
+	}
+
 	/**
-     * Executes before the function is invoked. Initializes the metric with the function and invoker IDs.
-     */
+	 * Creates a copy of the IdObserver.
+	 *
+	 * @param functionId The unique identifier for the IdObserver.
+	 * @param invoker 	 The invoker to be observed.
+	 * @return A new IdObserver instance.
+	 */
+	@Override
+	public IdObserver copy(String id, InvokerInterface invoker) {
+		return new IdObserver(id, invoker);
+	}
+
+	/**
+	 * Executes before the function is invoked. Initializes the metric with the function and invoker IDs.
+	 */
 	@Override
 	public void execution()
 	{
@@ -34,8 +54,8 @@ public class IdObserver extends Observer {
 	}
 
 	/**
-     * Updates the metric collection with the recorded metric if available.
-     */
+	 * Updates the metric collection with the recorded metric if available.
+	 */
 	@Override
 	public void update() {
 		if (metric != null)
@@ -43,22 +63,12 @@ public class IdObserver extends Observer {
 	}
 
 	/**
-     * Creates a copy of the IdObserver.
-     *
-     * @return A new instance of IdObserver.
-     */
-	@Override
-	public IdObserver copy() {
-		return new IdObserver();
-	}
-
-	/**
-     * Calculates the total times a specific invoker ID has been selected to invoke.
-     *
-     * @param functionId The ID of the function.
-     * @param invokerID  The ID of the invoker.
-     * @return The total count of times the invoker ID has been selected to invoke the function with the ID.
-     */
+	 * Calculates the total times a specific invoker ID has been selected to invoke.
+	 *
+	 * @param functionId The ID of the function.
+	 * @param invokerID  The ID of the invoker.
+	 * @return The total count of times the invoker ID has been selected to invoke the function with the ID.
+	 */
 	public Long calculateAllTimesInvoked(String functionId, String invokerID) {
 		try {
 			List<String> list = MetricCollection.instantiate().getList(metricId, functionId);
