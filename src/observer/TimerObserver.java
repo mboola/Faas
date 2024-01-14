@@ -42,7 +42,7 @@ public class TimerObserver extends Observer {
 	 * Captures the start time before the execution of the observed function.
 	 */
 	@Override
-	public void execution() {
+	public void execute() {
 		metric = new Metric<Long>(functionId, System.nanoTime());
 	}
 

@@ -51,7 +51,7 @@ public class MetricRecollector {
 	public void executeObservers()
 	{
 		for (Observer observer : observers) {
-			observer.execution();
+			observer.execute();
 		}
 	}
 

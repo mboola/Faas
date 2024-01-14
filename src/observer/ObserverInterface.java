@@ -29,7 +29,7 @@ public interface ObserverInterface {
 	 * Method to be implemented by subclasses for any pre-execution actions.
 	 * This method is called before the associated function is executed by the invoker.
 	 */
-	public void execution();
+	public void execute();
 
 	/**
 	 * Method to be implemented by subclasses for any post-execution actions.

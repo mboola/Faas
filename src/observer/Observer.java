@@ -39,7 +39,7 @@ public abstract class Observer implements ObserverInterface {
 	 * Method to be overridden by subclasses for any pre-execution actions.
 	 * Called when the Invoker selects the invoker to invoke a function.
 	 */
-	public void execution() {
+	public void execute() {
 	}
 
 	/**

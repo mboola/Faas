@@ -41,7 +41,7 @@ public class MemoryObserver extends Observer {
 	 * and updating the MetricCollection with the observed memory metric.
 	 */
 	@Override
-	public void execution() {
+	public void execute() {
 		try {
 			metric = new Metric<Long>(functionId, invoker.getUsedRam());
 			MetricCollection.instantiate().addMetric(metricId, metric);

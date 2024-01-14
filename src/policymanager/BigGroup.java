@@ -207,6 +207,8 @@ public class BigGroup implements PolicyManager, Serializable {
 		InvokerInterface invoker;
 		boolean found;
 
+		if (invokers.isEmpty()) throw new NoInvokerAvailable("No Invokers in list.");
+
 		//if the first time we select an invoker the pointer is pointing to one that cannot invoke
 		if (invocationsDistributed == groupSize || invokers.get(lastInvokerAssigned).getMaxRam() < ram)
 		{

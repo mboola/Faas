@@ -43,7 +43,7 @@ public class IdObserver extends Observer {
 	 * Executes before the function is invoked. Initializes the metric with the function and invoker IDs.
 	 */
 	@Override
-	public void execution()
+	public void execute()
 	{
 		try {
 			metric = new Metric<String>(functionId, invoker.getId());

@@ -18,12 +18,12 @@ import core.exceptions.*;
 import core.invoker.CompositeInvoker;
 import core.metrics.MetricCollection;
 import observer.InvocationObserver;
-import policymanager.GreedyGroup;
+import policymanager.BigGroup;
 import services.otheractions.FactorialAction;
 import testing.InvocationTester;
 
 @SuppressWarnings("unused")
-public class TestGreedyGroupComposite extends InvocationTester {
+public class TestBigGroupComposite extends InvocationTester {
 
 	private Controller			controller;
 	private CompositeInvoker	invokerComposite;
@@ -65,7 +65,7 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		assertThrows(NoPolicyManagerRegistered.class, () -> controller.invoke("Add", Map.of("x", 2, "y", 1)));
 
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -81,7 +81,7 @@ public class TestGreedyGroupComposite extends InvocationTester {
 	public void testOneLayerInvokersSync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -93,17 +93,18 @@ public class TestGreedyGroupComposite extends InvocationTester {
 				Arrays.asList(Map.of("x", 2, "y", 1), Map.of("x", 4, "y", 2), Map.of("x", 7, "y", 3), Map.of("x", 7, "y", 3)));
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 			assertTrue(false);
 		}
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("0 0 0 0", str);
+		assertEquals("0 0 1 1", str);
 	}
 
 	@Test
 	public void testOneLayerInvokersAsync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -111,14 +112,19 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		createAndAddInvokers(Arrays.asList(1L), controller);
 
 		try {
-			List<String> stringsResult = invokeList("Sleep", 6, 1000, controller);
+			long currentTimeMillis = System.currentTimeMillis();
+			List<String> stringsResult = invokeList("Sleep", 3, 1000, controller);
+			long totalTime = System.currentTimeMillis() - currentTimeMillis;
+
+			if (totalTime > 2200 || totalTime < 1800) assertTrue(false);
+			else assertTrue(true);
 		}
 		catch (Exception e) {
 			assertTrue(false);
 		}
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("0 1 1 0 1 0", str);
+		assertEquals("0 0 1", str);
 	}
 
 
@@ -132,7 +138,7 @@ public class TestGreedyGroupComposite extends InvocationTester {
 	public void	testTwoLayersInvokersSameRamSync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -149,14 +155,14 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		}
 		
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Add");
-		assertEquals("2 2 2 2", str);
+		assertEquals("2 2 1 1", str);
 	}
 
 	@Test
 	public void	testTwoLayersInvokersDifferentRamSync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -180,7 +186,7 @@ public class TestGreedyGroupComposite extends InvocationTester {
 	public void testTwoLayersInvokersSameRamAsync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -198,14 +204,14 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		}
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("2 3 0 1 1 0", str);
+		assertEquals("2 0 3 1 1 1", str);
 	}
 
 	@Test
 	public void testTwoLayersInvokersDifferentRamAsync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -223,22 +229,24 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		}
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("1 3 1 2 3 0 1", str);
+		assertEquals("2 0 3 3 1 1 1", str);
 	}
 
 	//Controller has one CompositeInvoker (ID: 0) and one Invoker (ID: 1) with 2 RAM and
 	//This CompositeInvoker (ID: 0) has one Invoker (ID: 2) with 1 ram, another Invoker with 2 ram (ID: 3), and a CompositeInvoker (ID: 4).
 	//So 7 invocations should go in the order:
-	//the first invoker to fill: (ID: 2) inside 0
-	//the second should be (ID: 4)
-	//the third and fourth (ID: 3) (ID: 3)
-	//the fifth (ID: 0)
-	//the sixth and seventh (ID: 1) (ID: 1)
+	//We start selecting the second Invoker of Controller (ID:1). Next we will select the next, and because it is a CompositeInvoker we select
+	//an invoker inside of it. Because it also follows a RoundRobin, the second of the list will be selected (ID:3).
+	//next the (ID:1) gets selected again at the first level, becoming full
+	//then it selects another invoker from invoker composite (ID:4)
+	//because the invoker (ID:1) is full, it tries to search an invoker available at composite, and it gets (ID:2)
+	//it does the same, getting the invoker (ID:3)
+	//because all of them are full, now it gets the composite to invoke (ID:0)
 	@Test
 	public void testThreeLayersInvokersDifferentRamAsync()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -258,14 +266,14 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		}
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("2 4 3 3 0 1 1", str);
+		assertEquals("2 3 3 4 1 1 1", str);
 	}
 
 	@Test
 	public void testThreeLayersInvokersDifferentRamAsyncB()
 	{
 		try {
-			controller.setPolicyManager(new GreedyGroup());
+			controller.setPolicyManager(new BigGroup());
 		} catch (Exception e) {
 			assertTrue(false);
 		}
@@ -286,7 +294,7 @@ public class TestGreedyGroupComposite extends InvocationTester {
 		}
 
 		String str = MetricCollection.instantiate().getData("InvocationObserver", "Sleep");
-		assertEquals("2 5 6 6 4 3 3 0 1 1", str);
+		assertEquals("2 0 3 3 5 1 1 1 1 1", str);
 	}
 
 }
