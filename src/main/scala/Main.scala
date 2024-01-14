@@ -15,6 +15,7 @@ import scala.jdk.CollectionConverters._
 
 object Main {
 	
+	//example function for testing.
 	def expensiveComputation(x: Int): String = {
 		println(s"Performing expensive computation for $x")
 		(x * x).toString
@@ -40,8 +41,8 @@ object Main {
 
 	class WordCountAction extends Action[String, Map[String, Int]] {
 		override def apply(text: String): Map[String, Int] = {
-			val words = text.toLowerCase.split("\\W+").filter(_.nonEmpty)	//aqui el \\W+ místico lo que hace es separar por carácteres que NO sean palabras.
-			words.groupBy(identity).view.mapValues(_.length).toMap			//el filter se le pasa una funcion sin todos los parámetros, que básicamente serán todas las palabras y nos guaradará
+			val words = text.toLowerCase.split("\\W+").filter(_.nonEmpty)
+			words.groupBy(identity).view.mapValues(_.length).toMap
 		}
 	}
 
@@ -52,38 +53,41 @@ object Main {
 		}
 	}
 
-	def wordCount(text: String): Map[String, Int] = {
-		val words = text.toLowerCase.split("\\W+").filter(_.nonEmpty)	//aqui el \\W+ místico lo que hace es separar por carácteres que NO sean palabras.
-		words.groupBy(identity).view.mapValues(_.length).toMap			//el filter se le pasa una funcion sin todos los parámetros, que básicamente serán todas las palabras y nos guaradará
-	}																	//las que no esten vacias
+	class ReduceAction extends Action[List[Map[String, Int]], Map[String, Int]] {
+		override def apply(list: List[Map[String, Int]]): Map[String, Int] = {
+			list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
+				acc ++ map.map { case (word, count) => 
+					word -> (acc.getOrElse(word, 0) + count)
+				}
+			}
+		}
+	}
 
+	//unused but perfectly functional
+	def wordCount(text: String): Map[String, Int] = {
+		val words = text.toLowerCase.split("\\W+").filter(_.nonEmpty)
+		words.groupBy(identity).view.mapValues(_.length).toMap
+	}
+	
+	//unused but perfectly functional
 	def countWords(text: String): Map[String, Int] = {
 		val words = text.split("\\s+")
 		Map("total" -> words.length)
 	}
 
+	def reduce(list: List[Map[String, Int]]): Map[String, Int] = {
+		list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
+			acc ++ map.map { case (word, count) => 
+				word -> (acc.getOrElse(word, 0) + count)
+			}
+		}
+	}
+
 	def splitFileIntoParts(filePath: String, numParts: Int): List[String] = {
-    val fileContents = Source.fromFile(filePath).mkString
-    val partLength = Math.ceil(fileContents.length.toDouble / numParts).toInt
-    fileContents.grouped(partLength).toList
-  }
-
-	def reduceWordCounts(list: List[Map[String, Int]]): Map[String, Int] = {
-	list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
-		acc ++ map.map { case (word, count) => 
-			word -> (acc.getOrElse(word, 0) + count)
-			}
-		}
+		val fileContents = Source.fromFile(filePath).mkString
+		val partLength = Math.ceil(fileContents.length.toDouble / numParts).toInt
+		fileContents.grouped(partLength).toList
 	}
-
-	def reduceCountWords(list: List[Map[String, Int]]): Map[String, Int] = {
-	list.foldLeft(Map.empty[String, Int]) { (acc, map) =>
-		acc ++ map.map { case (key, value) =>
-			key -> (acc.getOrElse(key, 0) + value)
-			}
-		}
-	}
-
 
 	def main(args: Array[String]): Unit = {
 
@@ -101,7 +105,10 @@ object Main {
 		controller.setPolicyManager(policyManager)
 		val invoker = Invoker.createInvoker(1, 4);
 		controller.registerInvoker(invoker)
+		//end of initialization 
 
+		//start of automatic testing
+		System.out.println("\n======AUTOMATIC TEST START========")
 		controller.registerAction("computation", expensiveComputation, 1)
 
 		val timer1DecoratedFunction = new TimerDecorator(expensiveComputation)
@@ -115,18 +122,23 @@ object Main {
 		val both2DecoratedFunction = new CacheDecorator(timer2DecoratedFunction)
 		controller.registerAction("computationBoth2", both2DecoratedFunction, 1)
 
-		System.out.println("======AUTOMATIC TEST START========")
 		controller.invoke("computation", 5)
 		controller.invoke("computationTimer", 5)
+
 		controller.invoke("computationBoth1", 5)
 		controller.invoke("computationBoth1", 5)
+
 		controller.invoke("computationBoth2", 5)
 		controller.invoke("computationBoth2", 5)
+
 		System.out.println("REDUCE TESTS:")
+
 		val actionWordCounts = new WordCountAction()
 		val decorated1 = new CacheDecorator(actionWordCounts)
 		val decorated = new TimerDecorator(decorated1)
 		controller.registerAction("wordCountDecorated", decorated, 1)
+		controller.registerAction("wordCount", actionWordCounts, 1)
+
 		System.out.println("Sin Cachear:")
 		println(controller.invoke("wordCountDecorated", "hola que tal"))
 		System.out.println("Cacheada:")
@@ -135,21 +147,20 @@ object Main {
 		val actionCountWords = new CountWordsAction()
 		controller.registerAction("countWords", actionCountWords, 1)
 		println(controller.invoke("countWords", "hola que tal tal"))
+
+		val actionReduce = new ReduceAction()
+		controller.registerAction("reduce", actionReduce, 1)
 		System.out.println("======AUTOMATIC TEST END========")
+		//end of automatic testing
 
-
-		//val calculator : Function[T, R] = (cal: CalculatorProxy) => new Calculator()
-		//controller.registerAction("calculatorProxy", calculator, 1)
-		//val calculatorProxy : CalculatorProxy = DynamicProxy.getActionProxy("calculatorProxy", true)
-		//println(calculatorProxy.suma(Map(("x", 2), ("y", 1))))
-
+		//start of program
 		var endLoop = false
 
 		while (!endLoop) {
 			println("select an option:")
-			println("1 - execute wordCount")
-			println("2 - execute countWord")
-			println("3 - end program")
+			println("\t1 - execute wordCount on textfile")
+			println("\t2 - execute countWord on textfile")
+			println("\t3 - exit program")
 
 			var intValue = scala.io.StdIn.readInt()
 
@@ -157,12 +168,12 @@ object Main {
 				case 1 =>
 					var content = splitFileIntoParts("src/main/scala/input.txt",10)
 					val result: List[Map[String, Int]] = controller.invoke("wordCount", content.asJava).asScala.toList
-					val reduced = reduceWordCounts(result)
+					val reduced: Map[String, Int] = controller.invoke("reduce", result)
 					println(reduced)
 				case 2 => 
 					var content = splitFileIntoParts("src/main/scala/input.txt",10)
 					val result: List[Map[String, Int]] = controller.invoke("countWords", content.asJava).asScala.toList
-					val reduced = reduceCountWords(result)
+					val reduced: Map[String, Int] = controller.invoke("reduce", result)
 					println(reduced)
 				case 3 =>
 					println("Program ended")
