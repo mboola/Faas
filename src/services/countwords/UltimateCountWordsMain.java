@@ -9,12 +9,8 @@ import core.invoker.Invoker;
 import core.metrics.MetricCollection;
 import decorator.TimerDecorator;
 import observer.TimerObserver;
-//import policymanager.BigGroup;
-//import policymanager.GreedyGroup;
 import policymanager.RoundRobin;
-//import policymanager.UniformGroup;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
 public class UltimateCountWordsMain {
 
 	public static void main(String[] args) 
